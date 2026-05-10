@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Game Music Engine Demo</title>
+  <link rel="preconnect" href="https://api.fontshare.com" />
+  <link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&f[]=azeret-mono@400,500,700&display=swap" rel="stylesheet">
+  <style>
+    :root,[data-theme="light"]{--text-sm:clamp(.875rem,.8rem + .35vw,1rem);--text-base:clamp(1rem,.95rem + .25vw,1.125rem);--text-lg:clamp(1.125rem,1rem + .75vw,1.5rem);--text-xl:clamp(1.5rem,1.2rem + 1.25vw,2.25rem);--space-2:.5rem;--space-3:.75rem;--space-4:1rem;--space-6:1.5rem;--space-8:2rem;--radius-md:.5rem;--radius-lg:.75rem;--radius-xl:1rem;--color-bg:#f7f6f2;--color-surface:#f9f8f5;--color-surface-2:#fbfbf9;--color-border:#d4d1ca;--color-text:#28251d;--color-text-muted:#6b675f;--color-primary:#01696f;--color-primary-hover:#0c4e54;--color-accent:#a13544;--font-display:'Azeret Mono',monospace;--font-body:'General Sans',system-ui,sans-serif}
+    [data-theme="dark"]{--color-bg:#101111;--color-surface:#171816;--color-surface-2:#20221f;--color-border:#343833;--color-text:#dddcd7;--color-text-muted:#a09d94;--color-primary:#4f98a3;--color-primary-hover:#67aab3;--color-accent:#dd6974}
+    *{box-sizing:border-box} html,body{margin:0;min-height:100%}
+    body{font-family:var(--font-body);font-size:var(--text-base);line-height:1.55;color:var(--color-text);background:linear-gradient(180deg,var(--color-bg),color-mix(in oklab,var(--color-bg) 84%, black));padding:var(--space-6)}
+    .app{max-width:1380px;margin:0 auto;background:color-mix(in oklab, var(--color-surface) 92%, transparent);border:1px solid color-mix(in oklab, var(--color-border) 85%, transparent);border-radius:var(--radius-xl);overflow:hidden}
+    .hero{padding:clamp(1.5rem,3vw,2.75rem);border-bottom:1px solid color-mix(in oklab, var(--color-border) 80%, transparent)}
+    h1{margin:0 0 var(--space-3);font-family:var(--font-display);font-size:var(--text-xl);line-height:1.05} p{margin:0;color:var(--color-text-muted);max-width:90ch}
+    .layout{display:grid;grid-template-columns:420px 1fr;gap:var(--space-6);padding:var(--space-6)} .stack{display:grid;gap:var(--space-4)}
+    .panel{background:color-mix(in oklab, var(--color-surface-2) 92%, transparent);border:1px solid color-mix(in oklab, var(--color-border) 72%, transparent);border-radius:var(--radius-lg);padding:var(--space-4)}
+    .actions,.event-grid,.mini-grid{display:flex;flex-wrap:wrap;gap:var(--space-3)} button{min-height:44px;border-radius:var(--radius-md);padding:.85rem 1rem;font:inherit;border:1px solid transparent;cursor:pointer;transition:180ms ease}
+    .primary{background:var(--color-primary);color:#fff}.primary:hover{background:var(--color-primary-hover)}
+    .secondary,.event-btn{background:transparent;color:var(--color-text);border-color:color-mix(in oklab,var(--color-border) 90%, transparent)}
+    .secondary:hover,.event-btn:hover{background:color-mix(in oklab,var(--color-primary) 10%, var(--color-surface));border-color:color-mix(in oklab,var(--color-primary) 28%, var(--color-border))}
+    .status{font-family:var(--font-display);font-size:var(--text-sm);color:var(--color-primary);margin-bottom:var(--space-4)} pre{margin:0;white-space:pre-wrap;word-break:break-word;font-family:var(--font-display);font-size:.84rem;color:var(--color-text-muted)}
+    code{font-family:var(--font-display)} .viz{height:320px;border-radius:var(--radius-lg);overflow:hidden;border:1px solid color-mix(in oklab,var(--color-border) 72%, transparent)} canvas{display:block;width:100%;height:100%}
+    .notes{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4)} ul{margin:0;padding-left:1rem;color:var(--color-text-muted)} li+li{margin-top:.45rem}
+    @media (max-width:1080px){.layout,.notes{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="hero">
+      <h1>Game Music Engine Demo</h1>
+      <p>This packages the background generator as a reusable JavaScript function object that your HTML game can call when events happen. For web games, MDN recommends Web Audio for dynamic music that changes with game state, and event-driven audio managers are a standard way to keep music logic separate from gameplay code. [web:127][web:131][web:135]</p>
+    </section>
+    <section class="layout">
+      <aside class="stack">
+        <div class="panel">
+          <div class="status" id="status">locked · waiting for user gesture</div>
+          <div class="actions">
+            <button class="primary" id="startBtn">Start engine</button>
+            <button class="secondary" id="pauseBtn">Pause / resume</button>
+            <button class="secondary" id="themeBtn">Light mode</button>
+          </div>
+        </div>
+        <div class="panel stack">
+          <div class="status">Simulated game events</div>
+          <div class="event-grid">
+            <button class="event-btn" data-event="menu">Menu</button>
+            <button class="event-btn" data-event="explore">Explore</button>
+            <button class="event-btn" data-event="danger">Danger</button>
+            <button class="event-btn" data-event="boss">Boss</button>
+            <button class="event-btn" data-event="pause">Pause scene</button>
+            <button class="event-btn" data-event="victory">Victory</button>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="status">Integration example</div>
+<pre>const music = createGameMusicEngine();
+await music.init();
+music.start();
+
+player.onDamage(() =&gt; {
+  music.applyState('danger');
+});
+
+boss.onAppear(() =&gt; {
+  music.applyState('boss');
+});
+
+window.addEventListener('game:music', e =&gt; {
+  music.setParams(e.detail);
+});</pre>
+        </div>
+      </aside>
+      <section class="stack">
+        <div class="panel viz"><canvas id="viz" width="900" height="320"></canvas></div>
+        <div class="notes">
+          <div class="panel"><div class="status">Public API</div><ul><li><code>init()</code> creates the audio context after a user gesture. [web:127][web:135]</li><li><code>start()</code>, <code>pause()</code>, and <code>resume()</code> control playback. [file:1]</li><li><code>setParams({...})</code> fades toward new parameters such as voice, octave, layer toggles, and mix values. [file:1]</li><li><code>applyState(name)</code> loads preset states for common game situations. [file:1]</li></ul></div>
+          <div class="panel"><div class="status">Why this structure</div><ul><li>Separating music into a manager object keeps gameplay code cleaner. [web:132][web:136]</li><li>Web Audio works well for dynamic background music because parameters can change while the music keeps running. [web:127][web:139]</li><li>Game events can dispatch state changes instead of hardcoding audio logic all over the codebase. [file:1]</li></ul></div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    function createGameMusicEngine() {
+      const themes = {
+        title:{rootMidi:57, progression:[0,5,3,7], bass:[0,0,5,5,3,3,7,7], harmony:[[0,7],[5,10],[3,10],[7,12]], tension:[1,6,10], counter:[7,5,3,0,7,5,10,7]},
+        march:{rootMidi:59, progression:[0,3,5,3], bass:[0,0,3,3,5,5,3,3], harmony:[[0,7],[3,10],[5,12],[3,10]], tension:[1,8,10], counter:[7,5,3,0,5,7,10,7]},
+        resolve:{rootMidi:55, progression:[0,3,8,7], bass:[0,0,3,3,8,8,7,7], harmony:[[0,7],[3,10],[8,15],[7,14]], tension:[1,6,10], counter:[10,8,7,3,10,7,3,0]}
+      };
+      const variations = {
+        base:{seq:[0,0,3,7,0,3,5,7], lengths:[1,1,1,1,1,1,1,1], shift:0},
+        answer:{seq:[0,0,3,7,7,5,3,0], lengths:[1,1,1,1,1,1,1,1], shift:0},
+        rise:{seq:[0,0,3,7,3,7,10,12], lengths:[1,1,1,1,1,1,1,1], shift:0},
+        sync:{seq:[0,0,3,7,0,3,5,7], lengths:[0.75,1.25,0.75,1.25,0.75,1.25,0.75,1.25], shift:0.12},
+        arc:{seq:[0,3,7,3,0,3,7,10], lengths:[1,1,1,1,1,1,1,1], shift:0},
+        shadow:{seq:[0,10,7,3,0,10,7,3], lengths:[1,1,1,1,1,1,1,1], shift:0}
+      };
+      const voices = {
+        hybrid:{type:'custom', detune:0, overlay:'triangle', cutoff:1.0},
+        square:{type:'square', detune:0, overlay:'triangle', cutoff:1.1},
+        triangle:{type:'triangle', detune:0, overlay:'sine', cutoff:0.8},
+        soft:{type:'sine', detune:0, overlay:'sine', cutoff:0.7},
+        pulse:{type:'square', detune:-8, overlay:'square', cutoff:1.0},
+        reed:{type:'custom2', detune:2, overlay:'sine', cutoff:0.95},
+        string:{type:'triangle', detune:3, overlay:'triangle', cutoff:0.75}
+      };
+      const presets = {
+        menu:{theme:'title', variation:'arc', voice:'hybrid', leadOct:0, counterOct:12, arpOct:12, tempo:90, brightness:1700, layers:{counter:true, arp:true, drone:true, pulse:false, tension:false, doubleLead:false}, mix:{lead:0.64,bass:0.34,harmony:0.26,counter:0.2,arp:0.16,drone:0.15,pulse:0.0}},
+        explore:{theme:'march', variation:'base', voice:'hybrid', leadOct:0, counterOct:12, arpOct:12, tempo:102, brightness:1900, layers:{counter:true, arp:true, drone:true, pulse:true, tension:false, doubleLead:false}, mix:{lead:0.66,bass:0.42,harmony:0.28,counter:0.22,arp:0.2,drone:0.14,pulse:0.14}},
+        danger:{theme:'march', variation:'sync', voice:'pulse', leadOct:12, counterOct:0, arpOct:12, tempo:118, brightness:2400, layers:{counter:false, arp:true, drone:true, pulse:true, tension:true, doubleLead:true}, mix:{lead:0.72,bass:0.48,harmony:0.22,counter:0.0,arp:0.22,drone:0.12,pulse:0.18}},
+        boss:{theme:'resolve', variation:'rise', voice:'square', leadOct:12, counterOct:12, arpOct:24, tempo:126, brightness:2600, layers:{counter:true, arp:true, drone:true, pulse:true, tension:true, doubleLead:true}, mix:{lead:0.74,bass:0.5,harmony:0.32,counter:0.24,arp:0.24,drone:0.12,pulse:0.2}},
+        pause:{theme:'title', variation:'shadow', voice:'soft', leadOct:-12, counterOct:0, arpOct:12, tempo:74, brightness:1200, layers:{counter:false, arp:false, drone:true, pulse:false, tension:false, doubleLead:false}, mix:{lead:0.38,bass:0.18,harmony:0.12,counter:0.0,arp:0.0,drone:0.18,pulse:0.0}},
+        victory:{theme:'resolve', variation:'answer', voice:'string', leadOct:12, counterOct:12, arpOct:24, tempo:112, brightness:2200, layers:{counter:true, arp:true, drone:false, pulse:true, tension:false, doubleLead:true}, mix:{lead:0.72,bass:0.36,harmony:0.3,counter:0.26,arp:0.26,drone:0.0,pulse:0.14}}
+      };
+
+      const state = { current:{...presets.explore}, ctx:null, master:null, analyser:null, filter:null, buses:{}, running:false, started:false, timers:{main:null,arp:null,drone:null,pulse:null,mod:null}, step:0, hybridWave:null, reedWave:null };
+
+      const midiToFreq = m => 440 * Math.pow(2,(m-69)/12);
+      const currentTheme = () => themes[state.current.theme];
+      const currentVariation = () => variations[state.current.variation];
+      const currentVoice = () => voices[state.current.voice];
+
+      function noiseBuffer(ctx){ const b=ctx.createBuffer(1,ctx.sampleRate,ctx.sampleRate); const d=b.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*0.4; return b; }
+      function makeOsc(freq, kind, time){ const osc=state.ctx.createOscillator(); if(kind==='custom') osc.setPeriodicWave(state.hybridWave); else if(kind==='custom2') osc.setPeriodicWave(state.reedWave); else osc.type=kind; osc.frequency.setValueAtTime(freq,time); return osc; }
+      function playVoice(freq,time,len,kind,bus,gainAmt,detune=0,attack=0.012){ const osc=makeOsc(freq,kind,time), gain=state.ctx.createGain(); osc.detune.setValueAtTime(detune,time); gain.gain.setValueAtTime(.0001,time); gain.gain.linearRampToValueAtTime(gainAmt,time+attack); gain.gain.exponentialRampToValueAtTime(.0001,time+len); osc.connect(gain).connect(state.buses[bus]); osc.start(time); osc.stop(time+len+.05); }
+      function playHarmony(chord,time,beatLen,root){ chord.forEach((semi,i)=>{ const freq=midiToFreq(root+semi+(i===0?0:12)); playVoice(freq,time,beatLen*1.8,i===0?'triangle':'sine','harmony',0.022+i*0.007,0,0.03); }); }
+      function playNoiseAccent(time,len,amount){ const src=state.ctx.createBufferSource(), hp=state.ctx.createBiquadFilter(), gain=state.ctx.createGain(); src.buffer=noiseBuffer(state.ctx); hp.type='highpass'; hp.frequency.setValueAtTime(1200 + amount * 1600, time); gain.gain.setValueAtTime(.0001,time); gain.gain.linearRampToValueAtTime(.008 + amount * .03,time+.02); gain.gain.exponentialRampToValueAtTime(.0001,time+len); src.connect(hp).connect(gain).connect(state.buses.tension); src.start(time); src.stop(time+len+.03); }
+
+      function syncMix(){
+        if(!state.ctx) return;
+        const now = state.ctx.currentTime;
+        state.master.gain.setTargetAtTime(0.84, now, .2);
+        state.filter.frequency.setTargetAtTime(state.current.brightness * currentVoice().cutoff, now, .25);
+        state.buses.lead.gain.setTargetAtTime(state.current.mix.lead, now, .25);
+        state.buses.bass.gain.setTargetAtTime(state.current.mix.bass, now, .25);
+        state.buses.harmony.gain.setTargetAtTime(state.current.mix.harmony, now, .25);
+        state.buses.counter.gain.setTargetAtTime(state.current.layers.counter ? state.current.mix.counter : .0001, now, .25);
+        state.buses.arp.gain.setTargetAtTime(state.current.layers.arp ? state.current.mix.arp : .0001, now, .25);
+        state.buses.drone.gain.setTargetAtTime(state.current.layers.drone ? state.current.mix.drone : .0001, now, .25);
+        state.buses.pulse.gain.setTargetAtTime(state.current.layers.pulse ? state.current.mix.pulse : .0001, now, .25);
+        state.buses.tension.gain.setTargetAtTime(state.current.layers.tension ? .22 : .0001, now, .25);
+      }
+
+      function mainLoop(){
+        if(!state.running || !state.ctx) return;
+        const theme=currentTheme(), variation=currentVariation(), voice=currentVoice();
+        const beat=60/state.current.tempo, idx=state.step%8, phrase=Math.floor(state.step/8)%4, root=theme.rootMidi+theme.progression[phrase], now=state.ctx.currentTime;
+        const bassSemi=theme.bass[idx];
+        playVoice(midiToFreq(theme.rootMidi-12+bassSemi), now, beat*0.74, 'triangle', 'bass', 0.055, 0, 0.01);
+        if(idx%2===0) playVoice(midiToFreq(theme.rootMidi-24+bassSemi), now, beat*0.44, 'triangle', 'bass', 0.028, 0, 0.01);
+        const motifSemi=variation.seq[idx], motifLen=beat*(0.58*variation.lengths[idx]);
+        playVoice(midiToFreq(root+motifSemi+state.current.leadOct), now+beat*variation.shift, motifLen, voice.type, 'lead', 0.09, voice.detune, voice.id==='string'?0.05:0.012);
+        playVoice(midiToFreq(root+motifSemi+12+state.current.leadOct), now+beat*variation.shift+0.02, motifLen*0.5, voice.overlay, 'lead', 0.028, 3, 0.02);
+        if(state.current.layers.doubleLead) playVoice(midiToFreq(root+motifSemi+12+state.current.leadOct), now+beat*variation.shift, motifLen*0.92, voice.type, 'lead', 0.032, voice.detune, 0.02);
+        if(idx===0||idx===4) playHarmony(theme.harmony[phrase], now, beat, root);
+        if(state.current.layers.counter && (idx===2||idx===6)){ const csemi=theme.counter[idx]; playVoice(midiToFreq(root+csemi+state.current.counterOct), now+beat*0.18, beat*0.62, voice.id==='soft'?'triangle':'sine', 'counter', 0.04, 0, 0.03); }
+        if(state.current.layers.tension && (idx===3||idx===7)){ const semi=theme.tension[Math.floor(Math.random()*theme.tension.length)]; playVoice(midiToFreq(theme.rootMidi+semi), now+beat*0.12, beat*0.46, 'square', 'tension', 0.026, 0, 0.01); playNoiseAccent(now+beat*0.1, beat*0.42, 0.3); }
+        state.step += 1;
+        state.timers.main = setTimeout(mainLoop, beat * 1000);
+      }
+      function arpLoop(){ if(!state.running || !state.ctx) return; const theme=currentTheme(), beat=60/state.current.tempo, phrase=Math.floor(state.step/8)%4, root=theme.rootMidi+theme.progression[phrase]; if(state.current.layers.arp){ const notes=theme.harmony[phrase]; const pick=notes[(state.step+1)%notes.length]; playVoice(midiToFreq(root+pick+state.current.arpOct), state.ctx.currentTime, beat*0.32, 'triangle', 'arp', 0.03, 0, 0.005);} state.timers.arp=setTimeout(arpLoop,(beat/2)*1000); }
+      function droneLoop(){ if(!state.running || !state.ctx) return; const theme=currentTheme(), beat=60/state.current.tempo, phrase=Math.floor(state.step/8)%4, root=theme.rootMidi+theme.progression[phrase]; if(state.current.layers.drone){ playVoice(midiToFreq(root-12), state.ctx.currentTime, beat*3.7, 'sine', 'drone', 0.026, 0, 0.04); playVoice(midiToFreq(root-5), state.ctx.currentTime, beat*3.7, 'triangle', 'drone', 0.014, 0, 0.04);} state.timers.drone=setTimeout(droneLoop, beat*4000); }
+      function pulseLoop(){ if(!state.running || !state.ctx) return; const beat=60/state.current.tempo; if(state.current.layers.pulse){ playVoice(midiToFreq(currentTheme().rootMidi-24), state.ctx.currentTime, beat*0.12, 'square', 'pulse', 0.024, 0, 0.002);} state.timers.pulse=setTimeout(pulseLoop, beat*500); }
+      function modLoop(){ if(!state.running || !state.ctx) return; const now=state.ctx.currentTime; state.filter.frequency.linearRampToValueAtTime(state.current.brightness * currentVoice().cutoff, now+.25); state.timers.mod=setTimeout(modLoop,220); }
+
+      async function init(){
+        if(state.started) return api;
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const master = ctx.createGain(), analyser = ctx.createAnalyser(), filter = ctx.createBiquadFilter();
+        filter.type='lowpass'; filter.frequency.value=state.current.brightness; filter.Q.value=.8; analyser.fftSize=1024; master.gain.value=.84;
+        const real1=new Float32Array([0,1,0.6,0.35,0.18]), imag1=new Float32Array(real1.length), hybridWave=ctx.createPeriodicWave(real1, imag1);
+        const real2=new Float32Array([0,1,0.25,0.5,0.08,0.12]), imag2=new Float32Array(real2.length), reedWave=ctx.createPeriodicWave(real2, imag2);
+        const buses={}; ['lead','bass','harmony','counter','arp','drone','pulse','tension'].forEach(id=>{ const bus=ctx.createGain(); bus.gain.value=.1; bus.connect(filter); buses[id]=bus; });
+        filter.connect(master); master.connect(analyser); analyser.connect(ctx.destination);
+        Object.assign(state,{ctx,master,analyser,filter,buses,hybridWave,reedWave,started:true});
+        syncMix();
+        return api;
+      }
+      async function start(){ if(!state.started) await init(); await state.ctx.resume(); state.running=true; Object.keys(state.timers).forEach(k=>clearTimeout(state.timers[k])); mainLoop(); arpLoop(); droneLoop(); pulseLoop(); modLoop(); return api; }
+      function pause(){ state.running=false; Object.keys(state.timers).forEach(k=>clearTimeout(state.timers[k])); if(state.ctx?.state==='running') state.ctx.suspend(); return api; }
+      async function resume(){ if(!state.started) await init(); await state.ctx.resume(); if(!state.running){ state.running=true; mainLoop(); arpLoop(); droneLoop(); pulseLoop(); modLoop(); } return api; }
+      function setParams(partial={}){
+        state.current = {
+          ...state.current,
+          ...partial,
+          mix:{...state.current.mix, ...(partial.mix||{})},
+          layers:{...state.current.layers, ...(partial.layers||{})}
+        };
+        syncMix();
+        return api;
+      }
+      function applyState(name){ if(presets[name]) setParams(presets[name]); return api; }
+      function getState(){ return structuredClone ? structuredClone(state.current) : JSON.parse(JSON.stringify(state.current)); }
+      const api = { init, start, pause, resume, setParams, applyState, getState, getAnalyser:()=>state.analyser };
+      return api;
+    }
+
+    const music = createGameMusicEngine();
+    const status = document.getElementById('status');
+    const canvas = document.getElementById('viz');
+    const g = canvas.getContext('2d');
+    let visualFrame = null;
+
+    function drawViz(){
+      const analyser = music.getAnalyser();
+      if(!analyser){ visualFrame = requestAnimationFrame(drawViz); return; }
+      const data = new Uint8Array(analyser.frequencyBinCount);
+      const draw = () => {
+        visualFrame = requestAnimationFrame(draw);
+        analyser.getByteFrequencyData(data);
+        const style = getComputedStyle(document.documentElement);
+        const bg = style.getPropertyValue('--color-surface').trim();
+        const line = style.getPropertyValue('--color-primary').trim();
+        const accent = style.getPropertyValue('--color-accent').trim();
+        g.fillStyle = bg; g.fillRect(0,0,canvas.width,canvas.height);
+        const bars = 88, step = Math.floor(data.length / bars);
+        for(let i=0;i<bars;i++){
+          const val = data[i*step] / 255; const h = Math.max(4, val * canvas.height * .92); const x = i * (canvas.width / bars); const w = (canvas.width / bars) - 2;
+          g.fillStyle = i % 9 === 0 ? accent : line; g.fillRect(x, canvas.height - h, w, h);
+        }
+      };
+      draw();
+    }
+
+    function setUiStatus(label){ const s = music.getState(); status.textContent = `${label} · ${s.theme} · ${s.variation} · ${s.voice}`; }
+    document.getElementById('startBtn').addEventListener('click', async () => { await music.init(); await music.start(); setUiStatus('running'); if(!visualFrame) drawViz(); });
+    let paused = false;
+    document.getElementById('pauseBtn').addEventListener('click', async () => { if(!paused){ music.pause(); paused = true; setUiStatus('paused'); } else { await music.resume(); paused = false; setUiStatus('running'); } });
+    document.getElementById('themeBtn').addEventListener('click', () => { document.documentElement.setAttribute('data-theme', document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); document.getElementById('themeBtn').textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? 'Light mode' : 'Dark mode'; });
+    document.querySelectorAll('[data-event]').forEach(btn => btn.addEventListener('click', () => { const evt = btn.dataset.event; music.applyState(evt); setUiStatus(evt); }));
+    window.addEventListener('game:music', e => { music.setParams(e.detail || {}); setUiStatus('custom'); });
+
+    window.musicEngine = music;
+  </script>
+</body>
+</html>
