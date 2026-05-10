@@ -31,6 +31,13 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* Pixelated image scaling throughout the game */
+img, .map-bg, [style*="background-image"] {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  -ms-interpolation-mode: nearest-neighbor;
+}
+
 html, body {
   width: 100vw; height: 100vh; overflow: hidden;
   background: var(--bg); color: var(--txt);
@@ -42,16 +49,15 @@ html, body {
    RETRO CRT EFFECTS
    ═══════════════════════════════════════════════════════════════════ */
 
-/* Scanlines with color separation */
+/* Tight scanlines - 2px spacing for classic CRT look */
 body::after {
   content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 200;
   background: repeating-linear-gradient(
     to bottom,
-    transparent 0 2px,
-    rgba(0,0,0,.12) 2px 3px,
-    rgba(0,0,0,.05) 3px 4px
+    transparent 0 1px,
+    rgba(0,0,0,.15) 1px 2px
   );
-  animation: flicker 0.15s infinite;
+  animation: flicker 0.4s infinite;
 }
 
 /* Chromatic aberration / color fringing */
@@ -61,42 +67,113 @@ body::before {
     linear-gradient(90deg, rgba(255,0,0,.03) 0%, transparent 3%, transparent 97%, rgba(0,255,255,.03) 100%);
 }
 
-/* Subtle screen flicker */
+/* Slow subtle screen flicker */
 @keyframes flicker {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.98; }
+  50% { opacity: 0.97; }
   25%, 75% { opacity: 0.99; }
 }
 
-/* Random noise overlay */
-.noise-overlay {
-  position: fixed; inset: 0; pointer-events: none; z-index: 198;
-  opacity: 0.04;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-  animation: noise 0.5s steps(5) infinite;
-}
-@keyframes noise {
-  0%, 100% { transform: translate(0, 0); }
-  20% { transform: translate(-2px, 1px); }
-  40% { transform: translate(1px, -1px); }
-  60% { transform: translate(-1px, 2px); }
-  80% { transform: translate(2px, -2px); }
+/* CRT scan wave with displacement - brightness + warp moving together */
+.crt-scanband {
+  position: fixed;
+  left: -50px;
+  right: -50px;
+  height: 5px;
+  pointer-events: none;
+  z-index: 201;
+  /* Very subtle brightness band */
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(180,255,210,.008) 15%,
+    rgba(255,255,255,.012) 40%,
+    rgba(255,255,255,.015) 50%,
+    rgba(255,255,255,.012) 60%,
+    rgba(180,255,210,.008) 85%,
+    transparent 100%
+  );
+  /* Subtle blur for displacement effect */
+  backdrop-filter: blur(0.25px) brightness(1.005);
+  -webkit-backdrop-filter: blur(0.5px) brightness(1.005);
+  animation: scanBandMove 5s linear infinite;
+  transform-origin: center;
 }
 
-/* Occasional tracking distortion - applied to inner wrapper */
-@keyframes tracking {
-  0%, 95%, 100% { transform: translateX(0) skewX(0); }
-  96% { transform: translateX(-3px) skewX(-0.5deg); }
-  97% { transform: translateX(2px) skewX(0.3deg); }
-  98% { transform: translateX(-1px) skewX(-0.2deg); }
-  99% { transform: translateX(1px) skewX(0.1deg); }
+@keyframes scanBandMove {
+  0% { 
+    top: -20px;
+    transform: translateX(0) scaleX(1);
+  }
+  25% {
+    transform: translateX(0.5px) scaleX(1.001);
+  }
+  50% { 
+    transform: translateX(0) scaleX(1);
+  }
+  75% {
+    transform: translateX(-0.5px) scaleX(1.001);
+  }
+  100% { 
+    top: 100%;
+    transform: translateX(0) scaleX(1);
+  }
 }
+
+/* Secondary subtle wave for more authentic CRT feel */
+.crt-wave {
+  position: fixed;
+  left: 0;
+  right: 0;
+  height: 120px;
+  pointer-events: none;
+  z-index: 200;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(82,255,143,.008) 40%,
+    rgba(82,255,143,.015) 50%,
+    rgba(82,255,143,.008) 60%,
+    transparent 100%
+  );
+  animation: waveMove 10s linear infinite;
+  opacity: 0.7;
+}
+@keyframes waveMove {
+  0% { top: -120px; }
+  100% { top: 100%; }
+}
+
+/* Tracking wrapper with subtle sync'd displacement */
 .tracking-wrapper {
   width: 100%; height: 100%;
   flex: 1;
   position: relative;
   display: flex; flex-direction: column;
-  animation: tracking 8s ease-in-out infinite;
+  animation: tracking 12s ease-in-out infinite;
+}
+
+/* Random noise overlay - slower */
+.noise-overlay {
+  position: fixed; inset: 0; pointer-events: none; z-index: 198;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  animation: noise 1.5s steps(5) infinite;
+}
+@keyframes noise {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-1px, 1px); }
+  40% { transform: translate(1px, -1px); }
+  60% { transform: translate(-1px, 1px); }
+  80% { transform: translate(1px, -1px); }
+}
+
+/* Occasional tracking distortion - slower, more subtle */
+@keyframes tracking {
+  0%, 92%, 100% { transform: translateX(0) skewX(0); }
+  94% { transform: translateX(-2px) skewX(-0.3deg); }
+  96% { transform: translateX(1px) skewX(0.2deg); }
+  98% { transform: translateX(-1px) skewX(-0.1deg); }
 }
 
 /* Screen wipe transition */
@@ -226,6 +303,18 @@ body::before {
   color: var(--red);
   text-transform: uppercase;
   letter-spacing: .05em;
+  display: inline-block;
+  animation: warningTextPulse 1.2s ease-in-out infinite;
+}
+@keyframes warningTextPulse {
+  0%, 100% { 
+    opacity: 0.6;
+    text-shadow: 0 0 5px rgba(255,90,103,.3);
+  }
+  50% { 
+    opacity: 1;
+    text-shadow: 0 0 20px rgba(255,90,103,.8), 0 0 40px rgba(255,90,103,.4);
+  }
 }
 .btn {
   font-family: var(--px); font-size: 13px; letter-spacing: .1em;
@@ -253,35 +342,42 @@ body::before {
 /* Global language toggle - fixed at bottom right, always LTR */
 .lang-toggle-global {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
+  bottom: 4px;
+  right: 8px;
   display: flex;
   flex-direction: row;
-  gap: 8px;
-  z-index: 9999;
-  background: rgba(6,8,12,0.85);
-  padding: 8px 16px;
+  gap: 6px;
+  z-index: 150;
+  background: rgba(6,8,12,0.9);
+  padding: 4px 10px;
   border: 1px solid var(--bdr);
-  border-radius: 4px;
+  border-radius: 3px;
   direction: ltr;
+  opacity: 0.6;
+  transition: opacity .2s;
+}
+.lang-toggle-global:hover {
+  opacity: 1;
 }
 
-/* Center language toggle on title screen */
+/* Center language toggle on title screen - make it more prominent */
 .lang-toggle-global.centered {
   right: auto;
   left: 50%;
   transform: translateX(-50%);
+  bottom: 20px;
+  opacity: 1;
 }
 .lang-btn {
   font-family: var(--px);
-  font-size: 11px;
-  padding: 10px 20px;
+  font-size: 8px;
+  padding: 5px 10px;
   background: transparent;
-  border: 2px solid var(--bdr);
+  border: 1px solid var(--bdr);
   color: var(--dim);
   cursor: pointer;
   transition: all .2s;
-  letter-spacing: .1em;
+  letter-spacing: .08em;
 }
 .lang-btn:hover {
   border-color: var(--gold);
@@ -291,11 +387,11 @@ body::before {
   border-color: var(--grn);
   color: var(--grn);
   background: rgba(82,255,143,.15);
-  box-shadow: 0 0 10px rgba(82,255,143,.3);
+  box-shadow: 0 0 6px rgba(82,255,143,.3);
 }
 .lang-btn[data-lang="fa"] {
   font-family: var(--fa);
-  font-size: 14px;
+  font-size: 11px;
   letter-spacing: 0;
 }
 
@@ -306,15 +402,15 @@ body::before {
 /* Global mini audio toggles - positioned with language toggle */
 .audio-toggles-global {
   display: flex;
-  gap: 4px;
-  margin-right: 10px;
-  padding-right: 10px;
+  gap: 3px;
+  margin-right: 6px;
+  padding-right: 6px;
   border-right: 1px solid var(--bdr);
 }
 .audio-mini {
   font-family: var(--px);
-  font-size: 8px;
-  padding: 6px 10px;
+  font-size: 6px;
+  padding: 4px 6px;
   background: transparent;
   border: 1px solid var(--bdr);
   color: var(--dim);
@@ -345,28 +441,28 @@ body::before {
 /* Volume controls */
 .volume-controls {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   align-items: center;
-  margin-right: 10px;
-  padding-right: 10px;
+  margin-right: 6px;
+  padding-right: 6px;
   border-right: 1px solid var(--bdr);
 }
 .volume-group {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
 }
 .volume-label {
   font-family: var(--px);
-  font-size: 7px;
+  font-size: 5px;
   color: var(--dim);
   letter-spacing: .05em;
 }
 .volume-slider {
   -webkit-appearance: none;
   appearance: none;
-  width: 50px;
-  height: 4px;
+  width: 35px;
+  height: 3px;
   background: var(--bdr);
   border-radius: 0;
   outline: none;
@@ -375,15 +471,15 @@ body::before {
 .volume-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 8px;
-  height: 12px;
+  width: 6px;
+  height: 10px;
   background: var(--grn);
   border: none;
   cursor: pointer;
 }
 .volume-slider::-moz-range-thumb {
-  width: 8px;
-  height: 12px;
+  width: 6px;
+  height: 10px;
   background: var(--grn);
   border: none;
   border-radius: 0;
@@ -424,6 +520,52 @@ body::before {
 .select-card.irgc:hover { box-shadow: 0 0 30px rgba(255,90,103,.3); }
 .select-card h2 { font-family: var(--px); font-size: 14px; margin-bottom: 12px; }
 .select-card p { font-family: var(--vt); font-size: 18px; color: var(--txt); line-height: 1.4; }
+
+/* Briefing button on select/ending screens */
+.briefing-btn {
+  margin-top: 30px;
+  background: rgba(255,210,74,.08);
+  border-color: var(--gold);
+  color: var(--gold);
+  box-shadow: 0 0 10px rgba(255,210,74,.3), inset 0 0 20px rgba(255,210,74,.05);
+  text-shadow: 0 0 8px rgba(255,210,74,.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.briefing-btn:hover {
+  filter: brightness(1.4);
+  box-shadow: 0 0 20px rgba(255,210,74,.5), inset 0 0 30px rgba(255,210,74,.1);
+}
+.briefing-btn .btn-fa {
+  font-family: var(--fa);
+  font-size: 14px;
+  direction: rtl;
+  display: none; /* Hidden in English mode */
+}
+.briefing-btn .btn-en {
+  display: block;
+}
+/* Show Farsi, hide English in Farsi mode */
+#game.lang-fa .briefing-btn .btn-fa {
+  display: block;
+}
+#game.lang-fa .briefing-btn .btn-en {
+  display: none;
+}
+
+/* Ending screen button stack */
+.ending-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-top: 10px;
+}
+.ending-buttons .briefing-btn {
+  margin-top: 0;
+}
 
 /* ════════════════════════════════════════════════════════════════════════════
    MAIN GAME SCREEN
@@ -599,6 +741,79 @@ body::before {
 .meter .val {
   font-family: var(--px); font-size: 10px; color: var(--txt);
   min-width: 20px; text-align: right;
+  position: relative;
+}
+
+/* Bar change delta indicators */
+.bar-delta {
+  position: absolute;
+  font-family: var(--px);
+  font-size: 14px;
+  font-weight: bold;
+  pointer-events: none;
+  animation: deltaFloat 1.2s ease-out forwards;
+  text-shadow: 0 0 8px currentColor, 0 0 16px currentColor;
+  z-index: 50;
+  white-space: nowrap;
+}
+.bar-delta.positive { color: var(--grn); }
+.bar-delta.negative { color: var(--red); }
+
+@keyframes deltaFloat {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-15px) scale(1.2);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.8);
+  }
+}
+
+/* Bar flash effects */
+.meter .fill.flash-positive {
+  animation: barFlashPositive 0.6s ease-out;
+}
+.meter .fill.flash-negative {
+  animation: barFlashNegative 0.6s ease-out;
+}
+
+@keyframes barFlashPositive {
+  0% { filter: brightness(1); }
+  25% { filter: brightness(2.5); box-shadow: 0 0 20px var(--grn), 0 0 40px var(--grn); }
+  50% { filter: brightness(1.8); }
+  100% { filter: brightness(1); }
+}
+
+@keyframes barFlashNegative {
+  0% { filter: brightness(1); }
+  25% { filter: brightness(2); box-shadow: 0 0 20px var(--red), 0 0 40px var(--red); }
+  50% { filter: brightness(1.5); }
+  100% { filter: brightness(1); }
+}
+
+/* Value pulse effect */
+.meter .val.pulse-positive {
+  animation: valPulsePositive 0.6s ease-out;
+}
+.meter .val.pulse-negative {
+  animation: valPulseNegative 0.6s ease-out;
+}
+
+@keyframes valPulsePositive {
+  0% { color: var(--txt); transform: scale(1); }
+  30% { color: var(--grn); transform: scale(1.4); text-shadow: 0 0 10px var(--grn); }
+  100% { color: var(--txt); transform: scale(1); }
+}
+
+@keyframes valPulseNegative {
+  0% { color: var(--txt); transform: scale(1); }
+  30% { color: var(--red); transform: scale(1.4); text-shadow: 0 0 10px var(--red); }
+  100% { color: var(--txt); transform: scale(1); }
 }
 
 /* Meter tooltips */
@@ -721,9 +936,24 @@ body::before {
 .mini-card.playable {
   cursor: pointer;
 }
+.mini-card.trump.playable {
+  animation: pulseGlowGreen 2s ease-in-out infinite;
+}
+.mini-card.irgc.playable {
+  animation: pulseGlowRed 2s ease-in-out infinite;
+}
+@keyframes pulseGlowGreen {
+  0%, 100% { box-shadow: 0 0 8px rgba(82,255,143,.3); }
+  50% { box-shadow: 0 0 20px rgba(82,255,143,.6), 0 0 30px rgba(82,255,143,.3); }
+}
+@keyframes pulseGlowRed {
+  0%, 100% { box-shadow: 0 0 8px rgba(255,90,103,.3); }
+  50% { box-shadow: 0 0 20px rgba(255,90,103,.6), 0 0 30px rgba(255,90,103,.3); }
+}
 .mini-card.playable:hover {
   border-color: var(--gold); color: var(--gold);
   box-shadow: 0 0 12px rgba(255,210,74,.4);
+  animation: none;
 }
 /* Trump cards shift towards center (right in LTR, left in RTL) */
 .mini-card.trump.playable:hover {
@@ -824,13 +1054,14 @@ body::before {
 /* Center board */
 .board {
   width: 700px;
+  height: 100%; /* Fill available height from main-area */
   position: relative;
   display: flex; flex-direction: column;
   background: rgba(6,8,12,.4);
   overflow: hidden;
 }
 
-/* Status flags on the board */
+/* Status flags on the map canvas */
 .flags-container {
   position: absolute; inset: 0;
   pointer-events: none;
@@ -838,21 +1069,96 @@ body::before {
 .flag {
   position: absolute;
   display: flex; flex-direction: column; align-items: center; gap: 2px;
-  padding: 6px 10px;
-  border: 1px solid var(--bdr); border-radius: 4px;
-  font-family: var(--px); font-size: 8px;
-  color: var(--dim); background: rgba(6,8,12,.7);
-  opacity: .3; transition: opacity .3s, border-color .3s, color .3s, transform .3s;
+  padding: 8px 12px;
+  border: 2px solid var(--bdr);
+  font-family: var(--px); font-size: 9px;
+  color: var(--dim); background: rgba(6,8,12,.8);
+  opacity: .35;
   pointer-events: auto;
   cursor: help;
+  transform: translate(-50%, -50%);
+  transition: opacity .3s, border-color .3s, color .3s, box-shadow .3s;
 }
 .flag.active {
   opacity: 1; border-color: var(--gold); color: var(--gold);
-  background: rgba(6,8,12,.9);
-  transform: scale(1.05);
+  background: rgba(6,8,12,.95);
+  box-shadow: 0 0 12px rgba(255,210,74,.3);
 }
-.flag .icon { font-size: 18px; line-height: 1; }
+.flag .icon { font-size: 20px; line-height: 1; }
 .flag .flag-label { text-align: center; line-height: 1.2; }
+
+/* Flag flash animations for state changes */
+@keyframes flagActivate {
+  0% { 
+    opacity: 0.35;
+    border-color: var(--bdr);
+    box-shadow: none;
+  }
+  15% { 
+    opacity: 1; 
+    border-color: var(--gold);
+    box-shadow: 0 0 30px rgba(255,210,74,.8);
+  }
+  30% { 
+    opacity: 0.5;
+    box-shadow: 0 0 10px rgba(255,210,74,.3);
+  }
+  45% { 
+    opacity: 1;
+    box-shadow: 0 0 25px rgba(255,210,74,.7);
+  }
+  60% { 
+    opacity: 0.6;
+    box-shadow: 0 0 8px rgba(255,210,74,.2);
+  }
+  75% { 
+    opacity: 1;
+    box-shadow: 0 0 20px rgba(255,210,74,.5);
+  }
+  100% { 
+    opacity: 1;
+    border-color: var(--gold);
+    box-shadow: 0 0 12px rgba(255,210,74,.3);
+  }
+}
+
+@keyframes flagDeactivate {
+  0% { 
+    opacity: 1;
+    border-color: var(--gold);
+    box-shadow: 0 0 12px rgba(255,210,74,.3);
+  }
+  20% { 
+    opacity: 1;
+    border-color: var(--red);
+    box-shadow: 0 0 25px rgba(255,90,103,.6);
+  }
+  40% { 
+    opacity: 0.4;
+    box-shadow: 0 0 10px rgba(255,90,103,.3);
+  }
+  60% { 
+    opacity: 0.8;
+    border-color: var(--red);
+    box-shadow: 0 0 15px rgba(255,90,103,.4);
+  }
+  80% { 
+    opacity: 0.3;
+    box-shadow: none;
+  }
+  100% { 
+    opacity: 0.35;
+    border-color: var(--bdr);
+    box-shadow: none;
+  }
+}
+
+.flag.activating {
+  animation: flagActivate 1.4s ease-out forwards;
+}
+.flag.deactivating {
+  animation: flagDeactivate 1s ease-out forwards;
+}
 
 /* Flag tooltips */
 .flag-tooltip {
@@ -914,45 +1220,184 @@ body::before {
   margin-top: 8px;
 }
 
-/* Flag positions on the board */
-.flag[data-flag="CARRIER_GROUP"] { top: 50%; left: 15%; transform: translateY(-50%); }
-.flag[data-flag="BLOCKADE"] { top: 60%; left: 30%; }
-.flag[data-flag="INTERNET_SHUTDOWN"] { top: 25%; left: 50%; transform: translateX(-50%); }
-.flag[data-flag="STARLINK"] { top: 25%; right: 20%; }
-.flag[data-flag="IRAQI_PMF"] { top: 45%; right: 15%; }
-.flag[data-flag="FATEMIYOUN"] { top: 60%; right: 20%; }
-.flag[data-flag="PROTESTS"] { bottom: 25%; left: 50%; transform: translateX(-50%); }
-.flag[data-flag="STRIKE"] { bottom: 20%; left: 25%; }
-.flag[data-flag="BASIJ_DEFECT"] { bottom: 20%; right: 25%; }
-.flag.active[data-flag="CARRIER_GROUP"] { transform: translateY(-50%) scale(1.05); }
-.flag.active[data-flag="INTERNET_SHUTDOWN"] { transform: translateX(-50%) scale(1.05); }
-.flag.active[data-flag="PROTESTS"] { transform: translateX(-50%) scale(1.05); }
+/* Flag positions are now set via JavaScript with absolute pixel coords on the 1400x800 map canvas */
 
-/* Map area */
+/* Map viewport - clips the larger map canvas */
 .map-area {
   flex: 1; position: relative;
-  display: flex; align-items: center; justify-content: center;
   overflow: hidden;
 }
-.map-bg {
-  position: absolute; inset: 0;
-  background: 
-    /* Grid lines suggesting a situation map */
-    linear-gradient(rgba(82,255,143,.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(82,255,143,.03) 1px, transparent 1px),
-    /* Regional glows */
-    radial-gradient(ellipse at 30% 50%, rgba(82,255,143,.08) 0%, transparent 40%),
-    radial-gradient(ellipse at 70% 50%, rgba(255,90,103,.08) 0%, transparent 40%),
-    radial-gradient(ellipse at 50% 70%, rgba(255,210,74,.05) 0%, transparent 30%);
-  background-size: 40px 40px, 40px 40px, 100% 100%, 100% 100%, 100% 100%;
+
+/* Map canvas - larger than viewport, pannable and zoomable */
+.map-canvas {
+  position: absolute;
+  width: 2800px;
+  height: 1800px;
+  top: 0;
+  left: 0;
+  cursor: grab;
+  transform-origin: top left;
+  /* Smooth transitions for position changes */
+  transition: transform 1.4s cubic-bezier(0.45, 0, 0.15, 1);
 }
 
-/* Board header with date and story */
+.map-canvas.no-transition {
+  transition: none;
+}
+
+/* Drift wrapper - only the map drifts, not UI overlays */
+/* overflow:hidden stays on .map-area so clipping border is fixed */
+.map-drift-wrapper {
+  position: absolute;
+  inset: -30px;  /* Slightly larger to prevent edge gaps during drift */
+  animation: viewDrift 25s ease-in-out infinite;
+}
+
+@keyframes viewDrift {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  20% { transform: translate(16px, 10px) rotate(0.8deg); }
+  40% { transform: translate(-10px, 24px) rotate(-0.6deg); }
+  60% { transform: translate(-24px, -6px) rotate(1.2deg); }
+  80% { transform: translate(12px, -16px) rotate(-0.8deg); }
+}
+.map-canvas.dragging {
+  cursor: grabbing;
+  transition: none;
+}
+.map-canvas.sweeping {
+  cursor: default;
+}
+
+/* Map background - now on the larger canvas */
+.map-bg {
+  position: absolute; inset: 0;
+  background: url('image/map_background/satellitemap.png');
+  background-size: cover;
+  background-position: center;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  filter: brightness(0.9) contrast(0.85);
+}
+
+/* Coordinate markers on map */
+.map-coords {
+  position: absolute; inset: 0;
+  pointer-events: none;
+}
+.map-coord {
+  position: absolute;
+  font-family: var(--px);
+  font-size: 7px;
+  color: rgba(82,255,143,.25);
+  letter-spacing: .1em;
+}
+.map-coord.top { top: 8px; }
+.map-coord.bottom { bottom: 8px; }
+.map-coord.left { left: 8px; }
+.map-coord.right { right: 8px; }
+
+/* Tracking indicator during sweep */
+.tracking-indicator {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-family: var(--px);
+  font-size: 9px;
+  color: var(--gold);
+  letter-spacing: .15em;
+  padding: 6px 12px;
+  border: 1px solid var(--gold);
+  background: rgba(6,8,12,.9);
+  opacity: 0;
+  transition: opacity 0.3s;
+  z-index: 15;
+}
+.tracking-indicator.active {
+  opacity: 1;
+  animation: trackingBlink 1s steps(2) infinite;
+}
+@keyframes trackingBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Scan line effect sweeping across map */
+.map-scanline {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(to bottom, 
+    transparent,
+    rgba(82,255,143,.3),
+    rgba(82,255,143,.1),
+    transparent
+  );
+  pointer-events: none;
+  opacity: 0;
+  z-index: 10;
+}
+.map-scanline.active {
+  opacity: 1;
+  animation: scanSweep 3s ease-in-out;
+}
+@keyframes scanSweep {
+  0% { top: 0; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+/* Board header with date and story - stays above map */
 .board-header {
   position: absolute; top: 0; left: 0; right: 0;
-  padding: 16px 20px;
-  background: linear-gradient(to bottom, rgba(6,8,12,.9) 0%, rgba(6,8,12,.7) 70%, transparent 100%);
-  z-index: 5;
+  padding: 20px 24px 40px 24px;
+  background: linear-gradient(to bottom, 
+    rgba(6,8,12,.98) 0%, 
+    rgba(6,8,12,.95) 40%, 
+    rgba(6,8,12,.8) 70%,
+    rgba(6,8,12,.4) 90%,
+    transparent 100%);
+  z-index: 15;
+}
+
+/* Mini briefing button in game header */
+.briefing-mini {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 6px 12px;
+  font-family: var(--px);
+  font-size: 10px;
+  letter-spacing: .08em;
+  background: rgba(255,210,74,.15);
+  border: 2px solid var(--gold);
+  border-radius: 4px;
+  color: var(--gold);
+  cursor: pointer;
+  transition: all .2s;
+  z-index: 25;
+  text-shadow: 0 0 8px rgba(255,210,74,.5);
+}
+.briefing-mini:hover {
+  background: rgba(255,210,74,.3);
+  box-shadow: 0 0 12px rgba(255,210,74,.4);
+  transform: scale(1.05);
+}
+/* Language toggle for mini briefing button */
+.briefing-mini .btn-fa {
+  font-family: var(--fa);
+  display: none;
+}
+.briefing-mini .btn-en {
+  display: inline;
+}
+#game.lang-fa .briefing-mini .btn-fa {
+  display: inline;
+}
+#game.lang-fa .briefing-mini .btn-en {
+  display: none;
 }
 .board-day {
   font-family: var(--px); font-size: 20px; color: var(--gold);
@@ -969,12 +1414,14 @@ body::before {
   letter-spacing: .15em; margin-bottom: 12px;
 }
 .board-story {
-  font-family: var(--vt); font-size: 18px; color: var(--txt);
-  line-height: 1.4; max-width: 600px;
+  font-family: var(--vt); font-size: 24px; color: var(--txt);
+  line-height: 1.5; max-width: 600px;
+  margin-top: 8px;
 }
 .board-story .headline {
-  color: var(--gold); font-family: var(--px); font-size: 12px;
-  letter-spacing: .1em; margin-bottom: 6px;
+  color: var(--gold); font-family: var(--px); font-size: 14px;
+  letter-spacing: .12em; margin-bottom: 10px;
+  text-shadow: 0 0 10px rgba(255,210,74,.4);
 }
 
 /* Card reveal area */
@@ -1108,11 +1555,15 @@ body::before {
 .vs-badge {
   font-family: var(--px); font-size: 16px; color: var(--gold);
   text-shadow: 0 0 20px rgba(255,210,74,.5);
+  transition: opacity 0.3s ease;
+}
+.vs-badge.hidden {
+  opacity: 0;
 }
 
 /* Wildcard overlay - full center display */
 .wildcard {
-  position: absolute; top: 50%; left: 50%; 
+  position: absolute; top: 72%; left: 50%; 
   transform: translate(-50%, -50%) scale(0.9);
   display: flex; flex-direction: column; align-items: center; gap: 16px;
   padding: 24px;
@@ -1131,6 +1582,13 @@ body::before {
   transform: translate(-50%, -50%) scale(1);
 }
 .wildcard.show { display: flex; }
+.wildcard .wc-title {
+  font-family: var(--px);
+  font-size: 9px;
+  color: var(--gold);
+  letter-spacing: .15em;
+  text-shadow: 0 0 10px rgba(255,210,74,.5);
+}
 .wildcard .wc-content {
   display: flex; align-items: flex-start; gap: 16px;
 }
@@ -1186,7 +1644,7 @@ body::before {
 
 /* Consequences overlay - two columns with button */
 .consequences {
-  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  position: absolute; top: 72%; left: 50%; transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1222,10 +1680,27 @@ body::before {
 .consequences .column.irgc .column-label { color: var(--red); }
 .consequences .effect {
   color: var(--dim);
+  opacity: 0;
+  transform: translateY(-10px) scale(0.8);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.consequences .effect.revealed {
+  opacity: 1;
+  transform: translateY(0) scale(1);
 }
 .consequences .effect.positive { color: var(--grn); }
 .consequences .effect.negative { color: var(--red); }
 .consequences .effect.blocked { color: var(--gold); font-style: italic; }
+
+/* Effect pop animation when revealed */
+.consequences .effect.pop {
+  animation: effectPop 0.5s ease-out;
+}
+@keyframes effectPop {
+  0% { transform: scale(0.5); opacity: 0; }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); opacity: 1; }
+}
 
 /* Ongoing flag effects in consequences */
 .consequences .flag-effects-row {
@@ -1248,6 +1723,8 @@ body::before {
 }
 .consequences .effect.flag-effect {
   font-size: 8px;
+}
+.consequences .effect.flag-effect.revealed {
   opacity: 0.8;
 }
 
@@ -1316,6 +1793,314 @@ body::before {
 .ending-stats {
   font-family: var(--px); font-size: 11px;
   color: var(--dim); letter-spacing: .08em;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   FREE IRAN BRIEFING (CODEX) SCREEN
+   ════════════════════════════════════════════════════════════════════════════ */
+#screen-codex {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Codex header */
+.codex-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 30px;
+  background: linear-gradient(to bottom, rgba(6,8,12,.98) 0%, rgba(6,8,12,.9) 100%);
+  border-bottom: 2px solid var(--gold);
+  flex-shrink: 0;
+}
+.codex-header h1 {
+  font-family: var(--px);
+  font-size: 16px;
+  letter-spacing: .15em;
+  color: var(--gold);
+  text-shadow: 0 0 20px rgba(255,210,74,.4);
+}
+.codex-header h1 .btn-fa {
+  font-family: var(--fa);
+  font-size: 16px;
+  direction: rtl;
+  display: none; /* Hidden in English mode */
+}
+.codex-header h1 .btn-en {
+  display: inline;
+}
+/* Show Farsi, hide English in Farsi mode */
+#game.lang-fa .codex-header h1 .btn-fa {
+  display: inline;
+}
+#game.lang-fa .codex-header h1 .btn-en {
+  display: none;
+}
+.codex-back {
+  font-family: var(--px);
+  font-size: 11px;
+  padding: 10px 20px;
+  background: rgba(255,210,74,.1);
+  border: 2px solid var(--gold);
+  color: var(--gold);
+  cursor: pointer;
+  transition: all .2s;
+  letter-spacing: .1em;
+}
+.codex-back:hover {
+  background: rgba(255,210,74,.2);
+  box-shadow: 0 0 15px rgba(255,210,74,.3);
+}
+/* Language toggle for codex buttons */
+.codex-back .btn-fa,
+.codex-detail-back .btn-fa {
+  font-family: var(--fa);
+  direction: rtl;
+  display: none;
+}
+.codex-back .btn-en,
+.codex-detail-back .btn-en {
+  display: inline;
+}
+#game.lang-fa .codex-back .btn-fa,
+#game.lang-fa .codex-detail-back .btn-fa {
+  display: inline;
+}
+#game.lang-fa .codex-back .btn-en,
+#game.lang-fa .codex-detail-back .btn-en {
+  display: none;
+}
+
+/* Codex grid container */
+.codex-grid {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+  align-content: start;
+}
+.codex-grid::-webkit-scrollbar {
+  width: 8px;
+}
+.codex-grid::-webkit-scrollbar-track {
+  background: rgba(6,8,12,.5);
+}
+.codex-grid::-webkit-scrollbar-thumb {
+  background: var(--gold);
+  border-radius: 2px;
+}
+
+/* Codex card */
+.codex-card {
+  background: rgba(6,8,12,.8);
+  border: 2px solid var(--bdr);
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all .25s;
+}
+.codex-card:hover {
+  border-color: var(--gold);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(255,210,74,.2);
+}
+.codex-card-img {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: rgba(0,0,0,.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--px);
+  font-size: 7px;
+  color: var(--dim);
+  letter-spacing: .08em;
+  text-align: center;
+  padding: 8px;
+  position: relative;
+  overflow: hidden;
+}
+.codex-card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  inset: 0;
+}
+.codex-card-img[data-label]::before {
+  content: attr(data-label);
+  position: absolute;
+  z-index: 1;
+}
+.codex-card-img.has-image::before {
+  display: none;
+}
+.codex-card-body {
+  padding: 12px;
+}
+.codex-card-title {
+  font-family: var(--px);
+  font-size: 10px;
+  color: var(--gold);
+  letter-spacing: .08em;
+  line-height: 1.4;
+  margin-bottom: 4px;
+}
+.codex-card-title-fa {
+  font-family: var(--fa);
+  font-size: 12px;
+  color: rgba(255,210,74,.5);
+  direction: rtl;
+  text-align: right;
+}
+
+/* Codex detail overlay */
+.codex-detail {
+  position: absolute;
+  inset: 0;
+  background: rgba(6,8,12,.98);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px;
+  overflow-y: auto;
+  transform: translateX(100%);
+  transition: transform .35s ease-out;
+  z-index: 10;
+}
+.codex-detail.active {
+  transform: translateX(0);
+}
+.codex-detail-inner {
+  max-width: 760px;
+  width: 100%;
+}
+.codex-detail-back {
+  font-family: var(--px);
+  font-size: 10px;
+  padding: 8px 16px;
+  background: transparent;
+  border: 2px solid var(--gold);
+  color: var(--gold);
+  cursor: pointer;
+  transition: all .2s;
+  letter-spacing: .1em;
+  margin-bottom: 24px;
+}
+.codex-detail-back:hover {
+  background: rgba(255,210,74,.15);
+}
+.codex-detail-img {
+  width: 100%;
+  max-width: 760px;
+  aspect-ratio: 16/9;
+  background: rgba(0,0,0,.5);
+  border: 3px solid var(--gold);
+  border-radius: 6px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--px);
+  font-size: 8px;
+  color: var(--dim);
+  overflow: hidden;
+  box-shadow: 0 0 40px rgba(255,210,74,.2);
+  position: relative;
+}
+.codex-detail-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  inset: 0;
+}
+.codex-detail-title {
+  font-family: var(--px);
+  font-size: 18px;
+  color: var(--gold);
+  text-align: center;
+  letter-spacing: .12em;
+  margin-bottom: 6px;
+  text-shadow: 0 0 20px rgba(255,210,74,.4);
+}
+.codex-detail-title-fa {
+  font-family: var(--fa);
+  font-size: 20px;
+  color: rgba(255,210,74,.6);
+  text-align: center;
+  direction: rtl;
+  margin-bottom: 24px;
+}
+.codex-detail-body {
+  font-family: var(--vt);
+  font-size: 20px;
+  color: var(--txt);
+  line-height: 1.5;
+  margin-bottom: 16px;
+  text-align: justify;
+}
+.codex-detail-body-fa {
+  font-family: var(--fa);
+  font-size: 18px;
+  color: rgba(250,255,247,.7);
+  line-height: 1.6;
+  direction: rtl;
+  text-align: right;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: rgba(255,210,74,.05);
+  border-left: 3px solid rgba(255,210,74,.3);
+}
+
+/* Language-based visibility for codex detail - default English */
+.codex-detail-title-fa,
+.codex-detail-body-fa {
+  display: none;
+}
+/* Show Farsi, hide English when in Farsi mode */
+#game.lang-fa .codex-detail-title-fa,
+#game.lang-fa .codex-detail-body-fa {
+  display: block;
+}
+#game.lang-fa .codex-detail-title,
+#game.lang-fa .codex-detail-body {
+  display: none;
+}
+/* Farsi mode: adjust styling for primary position */
+#game.lang-fa .codex-detail-title-fa {
+  color: var(--gold);
+  text-shadow: 0 0 20px rgba(255,210,74,.4);
+  font-size: 22px;
+  margin-bottom: 24px;
+}
+#game.lang-fa .codex-detail-body-fa {
+  color: var(--txt);
+  background: none;
+  border-left: none;
+  padding: 0;
+}
+.codex-detail-bullets {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+.codex-detail-bullet {
+  font-family: var(--vt);
+  font-size: 18px;
+  color: var(--txt);
+  padding: 12px 16px;
+  background: rgba(6,8,12,.6);
+  border: 1px solid rgba(255,210,74,.25);
+  border-radius: 4px;
+  line-height: 1.4;
+}
+.codex-detail-bullet::before {
+  content: '▸ ';
+  color: var(--gold);
 }
 
 /* ════════════════════════════════════════════════════════════════════════════
@@ -1715,7 +2500,7 @@ body::before {
   font-size: 14px;
 }
 #game.lang-fa .board-story {
-  font-size: 18px;
+  font-size: 22px;
   line-height: 1.7;
 }
 #game.lang-fa .side-quote {
@@ -1792,6 +2577,8 @@ body::before {
 
 <!-- Retro effect overlays -->
 <div class="noise-overlay"></div>
+<div class="crt-scanband"></div>
+<div class="crt-wave"></div>
 <div class="screen-wipe" id="screen-wipe"></div>
 
 <div id="game">
@@ -1865,6 +2652,27 @@ body::before {
         <p id="select-irgc-desc"></p>
       </div>
     </div>
+    <button class="btn briefing-btn glow-gold" id="btn-codex-select"><span class="btn-en">▶ FREE IRAN BRIEFING</span><span class="btn-fa">▶ آزادی ایران</span></button>
+  </div>
+
+  <!-- FREE IRAN BRIEFING (CODEX) SCREEN -->
+  <div id="screen-codex" class="screen">
+    <div class="codex-header">
+      <h1><span class="btn-en">▶ FREE IRAN BRIEFING</span><span class="btn-fa">▶ آزادی ایران</span></h1>
+      <button class="codex-back" id="btn-codex-back"><span class="btn-en">◀ BACK</span><span class="btn-fa">◀ بازگشت</span></button>
+    </div>
+    <div class="codex-grid" id="codex-grid"></div>
+    <div class="codex-detail" id="codex-detail">
+      <div class="codex-detail-inner">
+        <button class="codex-detail-back" id="btn-codex-detail-back"><span class="btn-en">◀ BACK TO GRID</span><span class="btn-fa">◀ بازگشت</span></button>
+        <div class="codex-detail-img" id="codex-detail-img"></div>
+        <div class="codex-detail-title" id="codex-detail-title"></div>
+        <div class="codex-detail-title-fa" id="codex-detail-title-fa"></div>
+        <div class="codex-detail-body" id="codex-detail-body"></div>
+        <div class="codex-detail-body-fa" id="codex-detail-body-fa"></div>
+        <div class="codex-detail-bullets" id="codex-detail-bullets"></div>
+      </div>
+    </div>
   </div>
 
   <!-- MAIN GAME SCREEN -->
@@ -1926,12 +2734,38 @@ body::before {
 
       <!-- Center board -->
       <div class="board">
-        <!-- Map area with flags -->
-        <div class="map-area">
-          <div class="map-bg"></div>
+        <!-- Map viewport - clips the larger scrollable map -->
+        <div class="map-area" id="map-viewport">
           
-          <!-- Board header with date and story -->
+          <!-- Drift wrapper - only the map drifts, not UI overlays -->
+          <div class="map-drift-wrapper">
+            <!-- Scrollable map canvas -->
+            <div class="map-canvas" id="map-canvas">
+              <div class="map-bg"></div>
+              
+              <!-- Coordinate markers -->
+              <div class="map-coords">
+                <div class="map-coord top left">34°N 48°E</div>
+                <div class="map-coord top right">34°N 56°E</div>
+                <div class="map-coord bottom left">26°N 48°E</div>
+                <div class="map-coord bottom right">26°N 56°E</div>
+              </div>
+              
+              <!-- Scan line effect -->
+              <div class="map-scanline" id="map-scanline"></div>
+              
+              <!-- Status flags positioned on the larger canvas -->
+              <div class="flags-container" id="flags-container"></div>
+            </div>
+          </div>
+          
+          <!-- UI elements stay fixed (outside drift wrapper) -->
+          <!-- Tracking indicator for intel sweep -->
+          <div class="tracking-indicator" id="tracking-indicator">▶ TRACKING</div>
+          
+          <!-- Board header with date and story - stays fixed above map -->
           <div class="board-header">
+            <button class="briefing-mini" id="btn-codex-game" title="Free Iran Briefing"><span class="btn-en">FREE IRAN</span><span class="btn-fa">آزادی ایران</span></button>
             <div class="board-day glow-gold" id="board-day"></div>
             <div class="board-date" id="board-date"></div>
             <div class="board-story">
@@ -1939,9 +2773,6 @@ body::before {
               <div id="board-story-text" class="typewriter"></div>
             </div>
           </div>
-          
-          <!-- Status flags positioned on the board -->
-          <div class="flags-container" id="flags-container"></div>
           
           <div class="phase-indicator" id="phase-indicator"></div>
           
@@ -1960,6 +2791,7 @@ body::before {
 
           <!-- Wildcard -->
           <div class="wildcard" id="wildcard">
+            <div class="wc-title">WILDCARD</div>
             <div class="wc-content">
               <div class="wc-portrait" id="wc-portrait">[CHAR]</div>
               <div class="wc-message">
@@ -2038,7 +2870,10 @@ body::before {
     <div class="ending-title" id="ending-title"></div>
     <div class="ending-desc" id="ending-desc"></div>
     <div class="ending-stats" id="ending-stats"></div>
-    <button class="btn blink-prompt" id="btn-restart"></button>
+    <div class="ending-buttons">
+      <button class="btn blink-prompt" id="btn-restart"></button>
+      <button class="btn briefing-btn glow-gold" id="btn-codex-ending"><span class="btn-en">▶ FREE IRAN BRIEFING</span><span class="btn-fa">▶ آزادی ایران</span></button>
+    </div>
   </div>
   </div><!-- end tracking-wrapper -->
   
@@ -2334,6 +3169,11 @@ function createChiptuneSFX(audioCtx, destNode) {
     storyAdvance() {
       // Soft page turn sound
       playTone(700, 0.06, 'sine', 0.04, 0, 0.01, 0.03);
+    },
+    
+    typewriterTick() {
+      // Morse code beep - short sharp sine tone at half volume
+      playTone(800 + Math.random() * 50, 0.06, 'sine', 0.04, 0, 0.005, 0.03);
     }
   };
 }
@@ -2595,6 +3435,7 @@ const UI = {
   skip: { en: '▶ SKIP', fa: '▶ رد کردن' },
   continue: { en: '▶ CONTINUE', fa: '▶ ادامه' },
   continueRight: { en: 'CONTINUE ▶', fa: 'ادامه ▶' },
+  tracking: { en: '▶ TRACKING', fa: '▶ ردیابی' },
   selectYourSide: { en: '▶ SELECT YOUR SIDE', fa: '▶ طرف خود را انتخاب کنید' },
   
   // PDB screen
@@ -2688,38 +3529,45 @@ const UI = {
 const INTRO_STORY = [
   {
     type: 'story',
-    img: 'images/story/01-the-call.png',
+    img: 'image/story/01-the-call.png',
     en: 'When Prince Reza Pahlavi asked us to stand — we did not just stand. We surged.',
     fa: 'وقتی شاهزاده رضا پهلوی خواست بایستیم — فقط نایستادیم، خروشیدیم.',
     label: '[ STORY 01 — THE CALL — PAHLAVI ADDRESS ]'
   },
   {
     type: 'story',
-    img: 'images/story/02-the-surge.png',
+    img: 'image/story/02-the-surge.png',
     en: 'For 48 hours in early January, millions of us flooded the streets. The fear evaporated.',
     fa: 'در ۴۸ ساعت ابتدای ژانویه، میلیون‌ها نفر در خیابان بودیم. ترس بخار شد.',
     label: '[ STORY 02 — THE SURGE — MILLIONS IN STREETS ]'
   },
   {
     type: 'story',
-    img: 'images/story/03-the-massacre.png',
-    en: 'Then the internet went dark. The machine guns opened fire. Body bags ran out. 40,000 souls.',
+    img: 'image/story/03-the-massacre.png',
+    en: 'Then the internet went dark. The machine guns opened fire. Body bags ran out. 40,000 of our bravest children had been lost.',
     fa: 'اینترنت قطع شد. مسلسل‌ها به آتش گشودند. کیسه‌های جنازه تمام شد. ۴۰هزار جان.',
     label: '[ STORY 03 — THE MASSACRE — BLOODY JANUARY ]'
   },
   {
     type: 'story',
-    img: 'images/story/04-the-impossible.png',
-    en: 'Then the impossible: Khamenei assassinated. Mojtaba lies in a coma. The regime is propping up a cardboard cutout for state functions.',
+    img: 'image/story/04-the-impossible.png',
+    en: 'Then the impossible happened: The architect of our misery was assassinated. His succesor lies in a coma. The regime has a cardboard cutout for a leader.',
     fa: 'آنگاه ناممکن: خامنه‌ای ترور شد. مجتبی در کما است. رژیم مقوای تبلیغاتی به جای او گذاشته است.',
     label: '[ STORY 04 — THE IMPOSSIBLE — KHAMENEI DEAD + CARDBOARD ]'
   },
   {
     type: 'story',
-    img: 'images/story/05-the-stakes.png',
-    en: 'We are no longer waiting to be saved. We are forcing the world to react. Choose your side.',
-    fa: 'دیگر منتظر نجات نیستیم. جهان را وادار به واکنش می‌کنیم. طرف خود را برگزین.',
-    label: '[ STORY 05 — THE STAKES — TRUMP / IRGC / HORMUZ ]'
+    img: 'image/story/05-the-stakes.png',
+    en: 'With American and Israeli intervention, for the first time in 47 years the actual Iranian people are being heard.',
+    fa: 'با مداخله آمریکا و اسرائیل، برای اولین بار در ۴۷ سال صدای واقعی مردم ایران شنیده می‌شود.',
+    label: '[ STORY 05 — THE STAKES — INTERVENTION ]'
+  },
+  {
+    type: 'story',
+    img: 'image/story/06-the-release.png',
+    en: 'We are no longer waiting.',
+    fa: 'دیگر منتظر نیستیم.',
+    label: '[ STORY 06 — THE RELEASE — NO LONGER WAITING ]'
   }
 ];
 
@@ -2727,8 +3575,9 @@ const INTRO_STORY = [
 // INTERLUDE STORIES - PDB-style briefings shown between game days
 // ────────────────────────────────────────────────────────────────────────────
 
-const INTERLUDE_STORIES = {
-  2: {
+const INTERLUDE_STORIES = [
+  {
+    id: 'people',
     type: 'pdb',
     date: { en: 'THE PEOPLE', fa: 'مردم' },
     headline: { en: 'WHO ARE THE IRANIANS?', fa: 'ایرانیان کیستند؟' },
@@ -2742,7 +3591,8 @@ const INTERLUDE_STORIES = {
     },
     speaker: { en: '— Iranian-American activist', fa: '— فعال ایرانی-آمریکایی' }
   },
-  4: {
+  {
+    id: 'women',
     type: 'pdb',
     date: { en: 'THE WOMEN', fa: 'زنان' },
     headline: { en: 'WOMAN, LIFE, FREEDOM', fa: 'زن، زندگی، آزادی' },
@@ -2756,7 +3606,8 @@ const INTERLUDE_STORIES = {
     },
     speaker: { en: '— Mother of slain protester', fa: '— مادر معترض کشته‌شده' }
   },
-  6: {
+  {
+    id: 'diaspora',
     type: 'pdb',
     date: { en: 'THE DIASPORA', fa: 'مهاجران' },
     headline: { en: 'THOSE WHO ESCAPED', fa: 'آنها که گریختند' },
@@ -2770,7 +3621,8 @@ const INTERLUDE_STORIES = {
     },
     speaker: { en: '— Reza Pahlavi', fa: '— رضا پهلوی' }
   },
-  8: {
+  {
+    id: 'resistance',
     type: 'pdb',
     date: { en: 'THE RESISTANCE', fa: 'مقاومت' },
     headline: { en: 'THE LION AWAKENS', fa: 'شیر بیدار می‌شود' },
@@ -2783,6 +3635,66 @@ const INTERLUDE_STORIES = {
       fa: 'آنها اسلحه دارند. ما تعداد داریم. و چیزی برای از دست دادن نداریم.'
     },
     speaker: { en: '— Javidan commander, Kermanshah', fa: '— فرمانده جاویدان، کرمانشاه' }
+  }
+];
+
+// ────────────────────────────────────────────────────────────────────────────
+// INTERLUDE SELECTION - Tracks seen interludes across games, picks randomly
+// ────────────────────────────────────────────────────────────────────────────
+
+const interludeManager = {
+  seenThisGame: [],
+  
+  getSeenFromStorage() {
+    const saved = localStorage.getItem('seen_interludes');
+    return saved ? JSON.parse(saved) : [];
+  },
+  
+  saveSeenToStorage(seen) {
+    localStorage.setItem('seen_interludes', JSON.stringify(seen));
+  },
+  
+  resetForNewGame() {
+    this.seenThisGame = [];
+  },
+  
+  getNextInterlude() {
+    const seenAcrossGames = this.getSeenFromStorage();
+    
+    // Find interludes not yet seen across all games
+    let available = INTERLUDE_STORIES.filter(s => !seenAcrossGames.includes(s.id));
+    
+    // If all have been seen, reset the global seen list and start fresh
+    if (available.length === 0) {
+      this.saveSeenToStorage([]);
+      available = INTERLUDE_STORIES.slice();
+    }
+    
+    // From available, exclude ones already shown this game
+    let candidates = available.filter(s => !this.seenThisGame.includes(s.id));
+    
+    // If all available ones were shown this game, just pick from available
+    if (candidates.length === 0) {
+      candidates = available;
+    }
+    
+    // Pick a random one
+    const selected = candidates[Math.floor(Math.random() * candidates.length)];
+    
+    // Mark as seen
+    this.seenThisGame.push(selected.id);
+    const newSeenAcrossGames = this.getSeenFromStorage();
+    if (!newSeenAcrossGames.includes(selected.id)) {
+      newSeenAcrossGames.push(selected.id);
+      this.saveSeenToStorage(newSeenAcrossGames);
+    }
+    
+    return selected;
+  },
+  
+  shouldShowInterlude(day) {
+    // Show interlude every 2 days (after day 2, 4, 6, 8, etc.)
+    return day >= 2 && day % 2 === 0;
   }
 };
 
@@ -2851,7 +3763,7 @@ const TRUMP_CARDS = [
       en: 'Offer negotiations to test regime willingness to deal. Could lead to ceasefire or expose their bad faith to the world.',
       fa: 'پیشنهاد مذاکره برای آزمایش تمایل رژیم. می‌تواند به آتش‌بس منجر شود یا بدعهدی آنها را افشا کند.'
     },
-    effects: { lev: +2, pol: +4, all: +5, grip: +3, chest: +2, proxy: -4 },
+    effects: { lev: +4, pol: +4, all: -5, grip: -10, chest: +4, proxy: -2 },
     voice: { en: "Big beautiful deal coming. Trust me, folks.", fa: "معامله بزرگ و زیبا در راه است. به من اعتماد کنید." }
   },
   { id: 'selloil', 
@@ -2861,7 +3773,7 @@ const TRUMP_CARDS = [
       en: "Release US strategic petroleum reserves to crash oil prices. Lower prices devastate the regime's only major revenue source.",
       fa: 'آزادسازی ذخایر استراتژیک نفت آمریکا برای سقوط قیمت‌ها. قیمت پایین تنها منبع درآمد رژیم را نابود می‌کند.'
     },
-    effects: { lev: +5, pol: -2, all: +2, grip: -2, chest: -8, proxy: -3 },
+    effects: { lev: +1, pol: +2, all: +2, grip: -4, chest: -1, proxy: -3 },
     voice: { en: "Texas oil, Texas prices. Ayatollahs feel it tomorrow.", fa: "نفت تگزاس، قیمت تگزاس. آیت‌الله‌ها فردا حس می‌کنند." }
   },
   { id: 'armjavidan', 
@@ -2871,7 +3783,7 @@ const TRUMP_CARDS = [
       en: 'Supply weapons to the Javidan resistance fighters inside Iran. The Lion and Sun flag rises as Iranians arm themselves for liberation.',
       fa: 'تأمین سلاح برای جنگجویان مقاومت جاویدان در ایران. پرچم شیر و خورشید برمی‌خیزد و ایرانیان برای آزادی مسلح می‌شوند.'
     },
-    effects: { lev: +6, pol: -4, all: +3, grip: -6, chest: -2, proxy: -3 },
+    effects: { lev: +6, pol: -4, all: +3, grip: -10, chest: +2, proxy: -6 },
     voice: { en: "Crates landing tonight. The Lion stirs.", fa: "جعبه‌ها امشب فرود می‌آیند. شیر بیدار می‌شود." }
   },
   { id: 'invade', 
@@ -2985,6 +3897,440 @@ const IRGC_CARDS = [
   }
 ];
 
+// ════════════════════════════════════════════════════════════════════════════
+// FREE IRAN BRIEFING (CODEX) — Educational entries about the Iranian situation
+// Structure: id, title{en,fa}, body{en,fa}, bullets[], img, label_data
+// ════════════════════════════════════════════════════════════════════════════
+
+const CODEX_DATA = [
+  {
+    id: 'c1-1979',
+    title: { en: '1979 — THE HIJACK', fa: '۱۳۵۷ — ربودن انقلاب' },
+    body: {
+      en: "The 1979 revolution toppled the Shah, but it was hijacked within months by Khomeini's Islamists. The non-religious factions that brought millions into the streets were purged, executed, or driven into exile. The Iranian people have been resisting an occupying force from within ever since.",
+      fa: 'انقلاب ۱۳۵۷ شاه را برانداخت، اما در عرض چند ماه توسط اسلام‌گرایانِ پیرو خمینی ربوده شد. ملت ایران از همان روز تاکنون با اشغالگری از درون می‌جنگد.'
+    },
+    bullets: [
+      'Original 1979 coalition: leftists, nationalists, liberals, clerics',
+      'Khomeini consolidated by purging non-Islamist allies within 12 months',
+      'Islamic Republic constitution ratified December 1979',
+      '46 years of continuous internal resistance and external pressure'
+    ],
+    img: 'image/codex/1979-hijack.png',
+    label_data: '[ CODEX — 1979 HIJACK ]'
+  },
+  {
+    id: 'c2-pahlavi',
+    title: { en: 'REZA PAHLAVI — 40 YEARS OF SOLITUDE', fa: 'رضا پهلوی — چهل سال تنهایی' },
+    body: {
+      en: "For four decades, the Crown Prince walked alone. Mocked by the regime. Ignored by Western politicians who preferred appeasing terrorists to supporting freedom. He carried the weight of an exiled crown without any guarantee his nation would call him back. Then, in January 2026, it did.",
+      fa: 'چهل سال — شاهزاده در تنهایی محض راه رفت. رژیم مسخره‌اش کرد. غرب نادیده‌اش گرفت. اما او وزن تاجی در تبعید را بر دوش کشید — تا ژانویه ۲۰۲۵، وقتی ملت او را خواند.'
+    },
+    bullets: [
+      'Living in exile since 1979',
+      'Calls for democracy and a secular Iran chosen by referendum',
+      'Endorsed Woman, Life, Freedom (Zan, Zendegi, Azadi) movement',
+      'The January 2026 surge moved on his explicit call to action'
+    ],
+    img: 'image/portrait/iranian_people/pahlavi.png',
+    label_data: '[ CODEX — REZA PAHLAVI ]'
+  },
+  {
+    id: 'c3-lion-sun',
+    title: { en: 'THE LION & SUN', fa: 'شیر و خورشید' },
+    body: {
+      en: "Iran's flag before 1979. A lion holding a sword, a sun rising behind. Banned by the regime, criminalized inside Iran, but worn proudly by every protester from Tehran to Westwood. It predates the Islamic Republic by more than 800 years.",
+      fa: 'پرچم ایران پیش از ۱۳۵۷. شیری که شمشیر دارد و خورشیدی که از پشتش طلوع می‌کند. ممنوع. جرم. اما با افتخار از تهران تا وست‌وود برافراشته می‌شود — و تاریخش از جمهوری اسلامی هشت قرن قدیمی‌تر است.'
+    },
+    bullets: [
+      'Used as a Persian state emblem since the 12th century',
+      'Banned by the Islamic Republic in 1980',
+      "Carrying it inside Iran can be prosecuted as moharebeh",
+      "Reza Pahlavi: post-regime flag is a question for the people's referendum"
+    ],
+    img: 'image/codex/lion-and-sun.png',
+    label_data: '[ CODEX — LION & SUN FLAG ]'
+  },
+  {
+    id: 'c4-mahsa',
+    title: { en: 'ZHINA "MAHSA" AMINI — 2022', fa: 'ژینا «مهسا» امینی — ۲۰۲۲' },
+    body: {
+      en: "A 22-year-old Iranian-Kurdish woman beaten to death by the morality police for showing too much hair. Her death set off the largest protest movement in the regime's 40-year history. The chant: Woman, Life, Freedom (Zan, Zendegi, Azadi).",
+      fa: 'دختر ۲۲ ساله کرد که گشت ارشاد او را به‌خاطر چند تار مو کشت. مرگش بزرگ‌ترین جنبش اعتراضی ۴۰ سال اخیر را برپا کرد. شعار: زن، زندگی، آزادی.'
+    },
+    bullets: [
+      '"Zhina" was her real (Kurdish) name; "Mahsa" was a regime-approved alias',
+      'Arrested by the morality police (Gasht-e Ershad) in Tehran, Sept 13 2022',
+      'Died in custody Sept 16 2022',
+      'The 2022-23 protests reached every Iranian province and ~120 cities'
+    ],
+    img: 'image/portrait/dissident/portait_mahsa_v2.png',
+    label_data: '[ CODEX — MAHSA AMINI ]'
+  },
+  {
+    id: 'c5-january-surge',
+    title: { en: 'JANUARY 2026 — THE SURGE', fa: 'ژانویه ۲۰۲۵ — خروش' },
+    body: {
+      en: '48 hours of joy in early January. Millions flooded the streets after Reza Pahlavi\'s call. The chant "Javid Shah" — Long Live the King — filled neighborhoods. The fear evaporated. People looked to their left and right and saw a nation reborn.',
+      fa: '۴۸ ساعت شادی در ابتدای ژانویه. به دعوت رضا پهلوی، میلیون‌ها نفر به خیابان‌ها ریختند. شعار «جاوید شاه» محله‌ها را پر کرد. ترس بخار شد.'
+    },
+    bullets: [
+      "Following the Prince's explicit January call to action",
+      'Estimated millions of demonstrators in 48 hours',
+      '"Javid Shah" chants in Tehran, Mashhad, Esfahan, Shiraz, Tabriz',
+      "Preceded the regime's blackout-and-massacre response"
+    ],
+    img: 'image/codex/january-surge.png',
+    label_data: '[ CODEX — JANUARY SURGE ]'
+  },
+  {
+    id: 'c6-massacre',
+    title: { en: 'THE MASSACRE — 40,000 SOULS', fa: 'کشتار — ۴۰هزار جان' },
+    body: {
+      en: "When the streets surged after the Prince's call, the regime's answer was slaughter. Body bags ran out. Eighteen-wheelers carried away the bravest children. They tried to drown the revolution in blood.",
+      fa: 'وقتی خیابان‌ها به صدای شاهزاده پاسخ دادند، پاسخ رژیم کشتار بود. کیسه‌های جنازه تمام شد. کامیون‌های هجده‌چرخ، جوانان بی‌باک ما را با خود بردند. خواستند انقلاب را در خون غرق کنند.'
+    },
+    bullets: [
+      'Estimated 40,000+ killed during the January 2026 wave',
+      'IRGC trucks mounted with machine guns opened fire on civilians',
+      'Body bags ran out; 18-wheelers used to clear bodies',
+      'The internet went dark to hide casualty counts from the world'
+    ],
+    img: 'image/story/massacre.png',
+    label_data: '[ CODEX — JANUARY MASSACRE ]'
+  },
+  {
+    id: 'c7-internet-blackout',
+    title: { en: 'WHEN THE INTERNET GOES DARK', fa: 'وقتی اینترنت قطع می‌شود' },
+    body: {
+      en: "The regime cuts the cable when bullets fly. A blackout is not a glitch — it is the prelude to a massacre. Diaspora groups have built mesh networks, smuggled Starlink terminals, and trained citizen reporters to keep the truth coming out.",
+      fa: 'وقتی گلوله می‌بارد، رژیم اینترنت را قطع می‌کند. خاموشی یک نقص فنی نیست — مقدمه کشتار است.'
+    },
+    bullets: [
+      'Iran has the highest rate of internet shutdowns of any country',
+      'Starlink terminals smuggled in by diaspora and resistance networks',
+      'VPN use is functionally universal in urban Iran',
+      'Blackout = world should assume the worst is happening'
+    ],
+    img: 'image/story/internet-blackout.png',
+    label_data: '[ CODEX — INTERNET BLACKOUT ]'
+  },
+  {
+    id: 'c8-khamenei',
+    title: { en: 'ALI KHAMENEI — THE ARCHITECT OF MISERY', fa: 'علی خامنه‌ای — معمار رنج' },
+    body: {
+      en: "Supreme Leader from 1989. He ordered the executions, the proxy wars, the suppression of every protest movement for 36 years. The dictator who designed the apparatus that killed the bravest of an entire generation. In this game-world: assassinated. The euphoria swept Iran like a hurricane.",
+      fa: 'رهبر جمهوری اسلامی از ۱۳۶۸. کسی که فرمان اعدام، جنگ‌های نیابتی و سرکوب هر جنبش اعتراضی را در ۳۶ سال صادر کرد. در این بازی: ترور شده.'
+    },
+    bullets: [
+      'Born 1939; Supreme Leader of Iran from 1989',
+      'Ordered the response to every major protest wave: 1999, 2009, 2017, 2019, 2022, 2026',
+      'Held final authority over IRGC, judiciary, foreign policy, nuclear program',
+      'In this game scenario, has been assassinated, leaving a vacuum'
+    ],
+    img: 'image/codex/khamenei.png',
+    label_data: '[ CODEX — ALI KHAMENEI ]'
+  },
+  {
+    id: 'c9-mojtaba-cardboard',
+    title: { en: 'MOJTABA + THE CARDBOARD', fa: 'مجتبی و مقوای تبلیغاتی' },
+    body: {
+      en: "Khamenei's son and presumed heir lies in a coma. The regime, desperate for continuity, props up an actual cardboard cutout of Mojtaba to issue official statements \"from his bedside.\" A leaked photo of the cutout's edge is the meme that broke the regime's spell.",
+      fa: 'پسر خامنه‌ای و جانشین فرضی او در کما است. رژیم، در ناامیدی برای حفظ تداوم، یک مقوای تبلیغاتیِ واقعی از مجتبی ساخته است تا «از بستر بیماری» بیانیه صادر کند.'
+    },
+    bullets: [
+      "Mojtaba Khamenei was the regime's succession plan",
+      'Coma announcement coincided with the post-Khamenei vacuum',
+      'The cardboard cutout is real in the game-world; based on regime tradition of staged photo-ops',
+      'Cardboard Mojtaba fires as a one-shot the first turn Regime Grip drops below 35%'
+    ],
+    img: 'image/codex/cardboard-mojtaba.png',
+    label_data: '[ CODEX — MOJTABA CARDBOARD ]'
+  },
+  {
+    id: 'c10-irgc',
+    title: { en: 'IRGC — THE GUARD CORPS', fa: 'سپاه پاسداران انقلاب اسلامی' },
+    body: {
+      en: "A parallel army founded in 1979 by Khomeini, loyal not to the nation but to the regime. They control major sectors of the Iranian economy through front companies. They are the iron skeleton holding the Islamic Republic upright. They are the obstacle waiting to be removed.",
+      fa: 'ارتشی موازی که خمینی در ۱۳۵۷ بنیان نهاد — وفادار نه به ملت، که به نظام. ستون آهنیِ نگه‌دارنده جمهوری اسلامی. مانعی که باید برداشته شود.'
+    },
+    bullets: [
+      'Designated terrorist organization by the US (2019), Canada (2024), and others',
+      'Estimated to control 20-40% of the Iranian economy through front companies',
+      'Operates Quds Force (foreign ops) and the Basij (internal repression)',
+      'Their commanders are in line for personal sanctions, indictments, and prosecution'
+    ],
+    img: 'image/portrait/irgc/irgc.png',
+    label_data: '[ CODEX — IRGC ]'
+  },
+  {
+    id: 'c11-basij',
+    title: { en: 'BASIJ — THE VOLUNTEER ENFORCERS', fa: 'بسیج — مأموران داوطلب' },
+    body: {
+      en: "The IRGC's paramilitary auxiliary. Mosque-recruited, ideologically primed, often unpaid in money but rewarded in privilege — university quotas, jobs, exemption from rules. They are who is on the corner when the protest starts. They are what the protest fears most.",
+      fa: 'نیروی شبه‌نظامیِ سپاه. در مساجد جذب می‌شوند. اغلب بی‌حقوق، اما با امتیاز.'
+    },
+    bullets: [
+      'Membership estimates: from several hundred thousand to several million',
+      'First-line crowd-control against demonstrations',
+      '"Lebas-Shakhsi" plain-clothes motorcycle squads beat and kidnap protesters',
+      'Recruitment incentives: university quotas, government jobs, special permits'
+    ],
+    img: 'image/story/basij.png',
+    label_data: '[ CODEX — BASIJ MILITIA ]'
+  },
+  {
+    id: 'c12-proxies',
+    title: { en: 'THE OCTOPUS — IRGC PROXIES', fa: 'هشت‌پا — نیروهای نیابتی سپاه' },
+    body: {
+      en: "Hezbollah in Lebanon. The Houthis in Yemen. Kataib Hezbollah in Iraq. Liwa Fatemiyoun in Syria. Hamas in Gaza. The IRGC's tentacles. Funded, trained, armed, and given missions from Tehran. Cripple the tentacles, and the head can be cut.",
+      fa: 'حزب‌الله. حوثی‌ها. کتائب حزب‌الله. لشکر فاطمیون. حماس. بازوهای هشت‌پای سپاه — همگی از تهران تأمین، تربیت و مأموریت می‌گیرند.'
+    },
+    bullets: [
+      'Estimated annual proxy spending in the multiple billions of USD',
+      'Hezbollah substantially degraded since 2024 Israeli operations',
+      'Houthis continue Red Sea / Bab-el-Mandeb attacks',
+      'Iraqi Shia militias control border crossings and skim oil revenue'
+    ],
+    img: 'image/story/proxy-octopus.png',
+    label_data: '[ CODEX — PROXY OCTOPUS ]'
+  },
+  {
+    id: 'c13-hormuz',
+    title: { en: 'STRAIT OF HORMUZ — THE CHOKEPOINT', fa: 'تنگه هرمز — گلوگاه جهان' },
+    body: {
+      en: "A narrow passage between Iran and Oman. Roughly 20% of all the world's petroleum passes through it every day. Whoever controls Hormuz holds the world's gas pump. Iran's southern coast lines its entire northern shore.",
+      fa: 'گذرگاهی باریک میان ایران و عمان. حدود ۲۰٪ نفت جهان روزانه از آن می‌گذرد. هرکس هرمز را در دست دارد، پمپ بنزین جهان را در دست دارد.'
+    },
+    bullets: [
+      'About 21 million barrels of oil per day pass through (~20% of global supply)',
+      'Width at narrowest point: ~21 nautical miles',
+      'Bandar-e Abbas (Iran) and Khasab (Oman) are the dominant ports',
+      'IRGC speedboats from Bandar-e Abbas are how the strait is harassed'
+    ],
+    img: 'image/codex/hormuz.png',
+    label_data: '[ CODEX — STRAIT OF HORMUZ ]'
+  },
+  {
+    id: 'c14-bibi-ally',
+    title: { en: 'STRIKING THE HEAD OF THE OCTOPUS', fa: 'ضربه به سر هشت‌پا' },
+    body: {
+      en: "The Israeli people have stood as a genuine ally to the Iranian people. The IDF strikes the head of the octopus while the Iranian people dismantle its tentacles from within. This is one fight, on two fronts. A free Iran will normalize relations with Israel. The Crown Prince has said so explicitly.",
+      fa: 'مردم اسرائیل متحد واقعی مردم ایران بوده‌اند. ارتش اسرائیل سر هشت‌پا را می‌زند، در حالی‌که مردم ایران از درون بازوهایش را قطع می‌کنند. ایران آزاد، روابط با اسرائیل را عادی خواهد کرد.'
+    },
+    bullets: [
+      "Israeli ops since 2024 have severely degraded Hezbollah's leadership",
+      "Iranian regime is the only state that calls publicly for Israel's destruction",
+      'Reza Pahlavi has visited Israel and called for normalization',
+      'Iranian protesters have publicly thanked the IDF in 2024-25 demonstrations'
+    ],
+    img: 'image/portrait/outsider/bibi.png',
+    label_data: '[ CODEX — IDF AS ALLY ]'
+  },
+  {
+    id: 'c15-diaspora',
+    title: { en: 'WESTWOOD. TRAFALGAR. DUNDAS.', fa: 'وست‌وود. ترافالگار. داندس.' },
+    body: {
+      en: "The Iranian diaspora — Los Angeles, London, Toronto, Berlin, Stockholm — is louder than the regime. Lion & Sun flags fill streets in cities the state media cannot reach. Every rally is a megaphone the regime cannot silence.",
+      fa: 'دیاسپورای ایرانی — لس‌آنجلس، لندن، تورنتو، برلین، استکهلم — از رژیم بلندتر است. بلندگویی که رژیم نمی‌تواند خاموشش کند.'
+    },
+    bullets: [
+      'Largest diaspora hubs: USA (especially LA), Canada (Toronto), UK, Germany, Sweden',
+      'Diaspora-funded media (Manoto, Iran International) reach inside Iran via satellite',
+      'Many diaspora professionals build circumvention/encryption tools used inside Iran',
+      'Overwhelmingly anti-regime; predominantly Pahlavi-aligned'
+    ],
+    img: 'image/portrait/iranian_people/diaspora.png',
+    label_data: '[ CODEX — DIASPORA ]'
+  },
+  {
+    id: 'c16-free-iran',
+    title: { en: 'FREE IRAN — THE FINAL BATTLE', fa: 'ایران آزاد — نبرد نهایی' },
+    body: {
+      en: 'The board is set. The pieces are finally in our favor. The issue is no longer whether the Islamic Republic will fall — only the timing of its collapse. The Iranian people and their King are moving to the absolute top of the battlefield. We will see each other in Free Iran.',
+      fa: 'صفحه چیده شده. مهره‌ها به نفع ماست. دیگر سؤال این نیست که جمهوری اسلامی سقوط می‌کند یا نه — تنها سؤال، زمان آن است. یکدیگر را در ایران آزاد خواهیم دید.'
+    },
+    bullets: [
+      'Succession crisis post-Khamenei has fractured the clerical establishment',
+      'War chest hemorrhaging: sanctions + sabotage + worker strikes',
+      'Proxy network significantly degraded',
+      'Coordinated diaspora and inside-Iran movement is operationally aligned'
+    ],
+    img: 'image/codex/free-iran.png',
+    label_data: '[ CODEX — FREE IRAN ]'
+  },
+  {
+    id: 'c17-hyperinflation',
+    title: { en: 'HYPERINFLATION — A DAILY GAMBLE', fa: 'تورم لجام‌گسیخته — قمار روزانه' },
+    body: {
+      en: "Inside Iran, ordinary acts — buying boots, paying rent, taking a bus — have become daily gambles. The rial has lost over 99% of its value since 1979. Inflation devours wages faster than workers can earn them. The regime's response is to print more money, accelerating the spiral, and to claw the same worthless currency back out of the pockets of the people they pretend to govern.",
+      fa: 'در ایران، کارهای ساده روزمره — خریدن چکمه، اجاره، اتوبوس — قمار مالی شده‌اند. ریال از ۱۳۵۷ تاکنون بیش از ۹۹٪ ارزشش را از دست داده. تورم، حقوق را سریع‌تر از کسب می‌خورد. واکنش رژیم: چاپ پول بیشتر، تشدید بحران، و کشیدن همان پول بی‌ارزش از جیب مردم.'
+    },
+    bullets: [
+      'Rial has lost >99% of its value vs. USD since 1979',
+      'Annual inflation has run 30-50% for several consecutive years',
+      'Real wages have been negative for most of the last decade',
+      'The regime prints money to pay the IRGC and military first; the rest of the country last'
+    ],
+    img: 'image/codex/hyperinflation.png',
+    label_data: '[ CODEX — HYPERINFLATION ]'
+  },
+  {
+    id: 'c18-strikes',
+    title: { en: 'GENERAL STRIKES — THE LIFEBLOOD', fa: 'اعتصاب عمومی — رگ حیاتِ رژیم' },
+    body: {
+      en: "When oil workers walk off, the regime stops bleeding hard currency. Petrochemical, steel, and refinery strikes have hit Iran in waves since 2018. In 2025 the pattern is sharper — wages can no longer buy bread, and the workers in the modern industries the regime feeds on are at the breaking point. The general strike is no longer a question of \"if\". It is invisible until it isn't.",
+      fa: 'وقتی کارگران نفت از کار می‌کشند، رژیم خون‌ریزی ارز سخت را متوقف می‌بیند. اعتصابات پتروشیمی، فولاد و پالایش از ۱۳۹۷ به این سو موج‌وار به ایران رسیده.'
+    },
+    bullets: [
+      'Asaluyeh / South Pars: largest petrochemical strike waves 2018, 2021, 2025',
+      'Mahshahr, Abadan: prolonged refinery worker stoppages',
+      'Esfahan, Ahvaz: steel-mill worker actions',
+      'Pensioner protests in 30+ cities now monthly'
+    ],
+    img: 'image/story/general-strikes.png',
+    label_data: '[ CODEX — GENERAL STRIKES ]'
+  },
+  {
+    id: 'c19-sanctions',
+    title: { en: 'SANCTIONS — STRANGLING THE FUEL', fa: 'تحریم — خفه‌کردن سوخت' },
+    body: {
+      en: "Crushing financial sanctions from the United States are strangling the regime's revenue streams. The machinery of oppression is literally running out of fuel. Every last resource is being poured into keeping the IRGC and Basij alive — while the rest of the country is left to collapse.",
+      fa: 'تحریم‌های مالی سنگین آمریکا، رگ‌های درآمدی رژیم را خفه می‌کنند. ماشین سرکوب در حال بی‌سوخت شدن است.'
+    },
+    bullets: [
+      'SWIFT exclusion since 2012, tightened 2018 and 2024-25',
+      'OFAC sanctions target IRGC commanders, oil sales, shadow-banking networks',
+      'Secondary sanctions deter European and Asian firms from any regime exposure',
+      'Chinese / Russian workarounds exist but at heavy discounts and crippling delays'
+    ],
+    img: 'image/codex/sanctions.png',
+    label_data: '[ CODEX — SANCTIONS ]'
+  },
+  {
+    id: 'c20-defections',
+    title: { en: 'THE SILENT UNDERGROUND', fa: 'زیرزمینِ خاموش' },
+    body: {
+      en: "Defections are already happening. A silent underground network is forming between ordinary citizens and the conscripts, soldiers, and clerics breaking away from the system. After decades of total security control, the regime has suffered an irreversible fracture. Cracks become tunnels. Tunnels become highways out.",
+      fa: 'ریزش‌ها آغاز شده‌اند. شبکه‌ای زیرزمینی و خاموش، میان شهروندان عادی و سربازان، سربازوظیفه‌ها و روحانیانی که از نظام می‌گریزند، در حال شکل‌گیری است.'
+    },
+    bullets: [
+      'Conscripts increasingly refuse orders to fire on civilians',
+      'Mid-rank IRGC officers leak documents to diaspora media',
+      "Clerics outside Khamenei's inner circle quietly distance from the regime",
+      'Defection-protection networks run through the diaspora'
+    ],
+    img: 'image/codex/defections.png',
+    label_data: '[ CODEX — SILENT UNDERGROUND ]'
+  }
+];
+
+// Track which screen to return to from codex
+let codexReturnScreen = 'screen-select';
+
+// Render the codex grid
+function renderCodexGrid() {
+  const grid = document.getElementById('codex-grid');
+  grid.innerHTML = '';
+  
+  CODEX_DATA.forEach((entry, index) => {
+    const card = document.createElement('div');
+    card.className = 'codex-card';
+    card.dataset.index = index;
+    
+    const imgArea = document.createElement('div');
+    imgArea.className = 'codex-card-img';
+    imgArea.setAttribute('data-label', entry.label_data);
+    
+    if (entry.img) {
+      const img = document.createElement('img');
+      img.src = entry.img;
+      img.alt = t(entry.title);
+      img.onload = function() { imgArea.classList.add('has-image'); };
+      img.onerror = function() { this.style.display = 'none'; };
+      imgArea.appendChild(img);
+    }
+    
+    const body = document.createElement('div');
+    body.className = 'codex-card-body';
+    
+    const titleEn = document.createElement('div');
+    titleEn.className = 'codex-card-title';
+    titleEn.textContent = entry.title.en;
+    
+    const titleFa = document.createElement('div');
+    titleFa.className = 'codex-card-title-fa';
+    titleFa.textContent = entry.title.fa;
+    
+    body.appendChild(titleEn);
+    body.appendChild(titleFa);
+    card.appendChild(imgArea);
+    card.appendChild(body);
+    
+    card.addEventListener('click', () => showCodexDetail(index));
+    card.addEventListener('mouseenter', () => audioManager.playSFX('hover'));
+    
+    grid.appendChild(card);
+  });
+}
+
+// Show codex detail for an entry
+function showCodexDetail(index) {
+  const entry = CODEX_DATA[index];
+  const detail = document.getElementById('codex-detail');
+  
+  audioManager.playSFX('cardSelect');
+  
+  // Populate detail view
+  const imgEl = document.getElementById('codex-detail-img');
+  imgEl.innerHTML = '';
+  if (entry.img) {
+    const img = document.createElement('img');
+    img.src = entry.img;
+    img.alt = t(entry.title);
+    img.onerror = function() { this.style.display = 'none'; };
+    imgEl.appendChild(img);
+  } else {
+    imgEl.textContent = entry.label_data;
+  }
+  
+  document.getElementById('codex-detail-title').textContent = entry.title.en;
+  document.getElementById('codex-detail-title-fa').textContent = entry.title.fa;
+  document.getElementById('codex-detail-body').textContent = entry.body.en;
+  document.getElementById('codex-detail-body-fa').textContent = entry.body.fa;
+  
+  const bulletsEl = document.getElementById('codex-detail-bullets');
+  bulletsEl.innerHTML = '';
+  entry.bullets.forEach(bullet => {
+    const bulletEl = document.createElement('div');
+    bulletEl.className = 'codex-detail-bullet';
+    bulletEl.textContent = bullet;
+    bulletsEl.appendChild(bulletEl);
+  });
+  
+  // Slide in detail
+  detail.classList.add('active');
+}
+
+// Hide codex detail, return to grid
+function hideCodexDetail() {
+  audioManager.playSFX('click');
+  document.getElementById('codex-detail').classList.remove('active');
+}
+
+// Show the codex screen
+function showCodex(returnTo) {
+  codexReturnScreen = returnTo || 'screen-select';
+  renderCodexGrid();
+  showScreen('screen-codex', true);
+}
+
+// Return from codex to previous screen
+function hideCodex() {
+  audioManager.playSFX('click');
+  showScreen(codexReturnScreen, true);
+}
+
 // ────────────────────────────────────────────────────────────────────────────
 // WILDCARDS - Random events with characters that appear between turns
 // To add a new wildcard: add an object with character, name, quote, effect, apply()
@@ -3047,6 +4393,11 @@ const WILDCARDS = [
 // FLAGS - Board state indicators (ongoing effects)
 // ────────────────────────────────────────────────────────────────────────────
 
+// Map canvas dimensions (the larger pannable surface)
+// Extra large with generous borders so flags can be centered when sweeping
+const MAP_CANVAS_WIDTH = 2800;
+const MAP_CANVAS_HEIGHT = 1800;
+
 const FLAG_DATA = {
   CARRIER_GROUP: {
     title: { en: 'CARRIER GROUP', fa: 'ناوگان هواپیمابر' },
@@ -3054,7 +4405,8 @@ const FLAG_DATA = {
     effects: [
       { side: 'irgc', text: { en: 'PROXY -2/turn', fa: 'نیابتی -۲/نوبت' } }
     ],
-    perTurn: { proxy: -2 }
+    perTurn: { proxy: -2 },
+    position: { x: 600, y: 1350 }  // Persian Gulf (southwest)
   },
   BLOCKADE: {
     title: { en: 'NAVAL BLOCKADE', fa: 'محاصره دریایی' },
@@ -3063,7 +4415,8 @@ const FLAG_DATA = {
       { side: 'irgc', text: { en: 'CHEST -4/turn', fa: 'خزانه -۴/نوبت' } },
       { side: 'irgc', text: { en: 'Blocks SELL OIL card', fa: 'کارت فروش نفت را مسدود می‌کند' } }
     ],
-    perTurn: { chest: -4 }
+    perTurn: { chest: -4 },
+    position: { x: 1100, y: 1400 }  // Strait of Hormuz (south)
   },
   INTERNET_SHUTDOWN: {
     title: { en: 'INTERNET BLACKOUT', fa: 'قطعی اینترنت' },
@@ -3072,7 +4425,8 @@ const FLAG_DATA = {
       { side: 'irgc', text: { en: 'Halves PROTEST/BASIJ drain', fa: 'تخلیه اعتراض/بسیج را نصف می‌کند' } },
       { side: 'neutral', text: { en: 'Negated by STARLINK', fa: 'توسط استارلینک خنثی می‌شود' } }
     ],
-    perTurn: {}
+    perTurn: {},
+    position: { x: 1400, y: 550 }  // Tehran (north)
   },
   STARLINK: {
     title: { en: 'STARLINK ACTIVE', fa: 'استارلینک فعال' },
@@ -3081,7 +4435,8 @@ const FLAG_DATA = {
       { side: 'irgc', text: { en: 'GRIP -2/turn', fa: 'کنترل -۲/نوبت' } },
       { side: 'trump', text: { en: 'Negates BLACKOUT', fa: 'قطعی را خنثی می‌کند' } }
     ],
-    perTurn: { grip: -2 }
+    perTurn: { grip: -2 },
+    position: { x: 2200, y: 500 }  // Northeast (satellite coverage)
   },
   IRAQI_PMF: {
     title: { en: 'IRAQI PMF DEPLOYED', fa: 'حشد الشعبی مستقر' },
@@ -3090,7 +4445,8 @@ const FLAG_DATA = {
       { side: 'irgc', text: { en: 'GRIP +3/turn', fa: 'کنترل +۳/نوبت' } },
       { side: 'irgc', text: { en: 'ALLY -1/turn', fa: 'متحدان -۱/نوبت' } }
     ],
-    perTurn: { grip: +3, all: -1 }
+    perTurn: { grip: +3, all: -1 },
+    position: { x: 550, y: 700 }  // Iraq border (west)
   },
   FATEMIYOUN: {
     title: { en: 'FATEMIYOUN DEPLOYED', fa: 'فاطمیون مستقر' },
@@ -3098,7 +4454,8 @@ const FLAG_DATA = {
     effects: [
       { side: 'irgc', text: { en: 'GRIP +2/turn', fa: 'کنترل +۲/نوبت' } }
     ],
-    perTurn: { grip: +2 }
+    perTurn: { grip: +2 },
+    position: { x: 2250, y: 950 }  // Afghanistan border (east)
   },
   PROTESTS: {
     title: { en: 'MASS PROTESTS', fa: 'اعتراضات گسترده' },
@@ -3106,7 +4463,8 @@ const FLAG_DATA = {
     effects: [
       { side: 'irgc', text: { en: 'GRIP -3/turn', fa: 'کنترل -۳/نوبت' } }
     ],
-    perTurn: { grip: -3 }
+    perTurn: { grip: -3 },
+    position: { x: 1400, y: 900 }  // Tehran/Major cities (center)
   },
   STRIKE: {
     title: { en: 'GENERAL STRIKE', fa: 'اعتصاب عمومی' },
@@ -3114,7 +4472,8 @@ const FLAG_DATA = {
     effects: [
       { side: 'irgc', text: { en: 'CHEST -5/turn', fa: 'خزانه -۵/نوبت' } }
     ],
-    perTurn: { chest: -5 }
+    perTurn: { chest: -5 },
+    position: { x: 700, y: 1050 }  // Khuzestan oil fields (southwest)
   },
   BASIJ_DEFECT: {
     title: { en: 'BASIJ DEFECTIONS', fa: 'انشعاب بسیج' },
@@ -3122,7 +4481,8 @@ const FLAG_DATA = {
     effects: [
       { side: 'irgc', text: { en: 'GRIP -4/turn', fa: 'کنترل -۴/نوبت' } }
     ],
-    perTurn: { grip: -4 }
+    perTurn: { grip: -4 },
+    position: { x: 1800, y: 1150 }  // Isfahan/Southeast
   }
 };
 
@@ -3131,61 +4491,123 @@ const FLAG_DATA = {
 // ────────────────────────────────────────────────────────────────────────────
 
 const ENDINGS = {
+  // === TRUMP VICTORIES (bar-based) ===
   trump_grip: { 
+    id: 'lion_rises',
     title: { en: 'THE LION RISES', fa: 'شیر برمی‌خیزد' }, 
-    winner: 'trump', 
-    desc: { 
-      en: 'The regime lost its grip. The Iranian people rise, chanting "Javid Shah" as the mullahs flee. We will see each other in Free Iran.',
-      fa: 'رژیم کنترل را از دست داد. مردم ایران برمی‌خیزند و «جاوید شاه» فریاد می‌زنند. همدیگر را در ایران آزاد می‌بینیم.'
-    }
+    winner: 'trump',
+    trigger: 'GRIP bar hits 0',
+    body: [
+      "After Khamenei died, they had no head. They brought in Iraqi and Afghan enforcers because their own forces had stopped being reliable. The streets stopped being theirs city by city. That is how it ended — not with a single blow, but with a country that simply stopped consenting."
+    ],
+    signoff: "We will see each other in Free Iran."
   },
   trump_chest: { 
-    title: { en: 'ECONOMIC RUIN', fa: 'ویرانی اقتصادی' }, 
-    winner: 'trump', 
-    desc: { 
-      en: 'The war chest is empty. The IRGC cannot pay its enforcers. The regime collapses in bankruptcy.',
-      fa: 'خزانه جنگی خالی است. سپاه نمی‌تواند به مزدورانش پول بدهد. رژیم در ورشکستگی فرو می‌پاشد.'
-    }
+    id: 'bankrupt',
+    title: { en: 'BANKRUPT', fa: 'ورشکسته' }, 
+    winner: 'trump',
+    trigger: 'WAR CHEST hits 0',
+    body: [
+      "They built missile cities underground. Above ground, the paychecks stopped coming. Every rial they printed to hold things together made the next paycheck worth less. Guards checked their phones. The numbers didn't work anymore. That was the end."
+    ],
+    signoff: "We will see each other in Free Iran."
   },
   trump_proxy: { 
-    title: { en: 'AXIS SEVERED', fa: 'محور قطع شد' }, 
-    winner: 'trump', 
-    desc: { 
-      en: 'The proxy network is destroyed. Hezbollah, the Houthis — all cut off. Iran stands alone and falls.',
-      fa: 'شبکه نیابتی نابود شد. حزب‌الله، حوثی‌ها — همه قطع شدند. ایران تنها می‌ماند و سقوط می‌کند.'
-    }
+    id: 'proxy_broken',
+    title: { en: 'PROXY NETWORK BROKEN', fa: 'شبکه نیابتی شکسته' }, 
+    winner: 'trump',
+    trigger: 'PROXIES hits 0',
+    body: [
+      "They funded Hezbollah, the Houthis, Iraqi militias, Afghan fighters — a network across five countries. They built missile cities aimed outward. They built no air raid sirens. No bomb shelters for their own people. When the network collapsed, there was nothing left to fall back on, because they had spent everything facing the wrong direction."
+    ],
+    signoff: "We will see each other in Free Iran."
   },
+
+  // === IRGC VICTORIES (bar-based) ===
   irgc_lev: { 
-    title: { en: 'LEVERAGE LOST', fa: 'اهرم از دست رفت' }, 
-    winner: 'irgc', 
-    desc: { 
-      en: 'Trump overplayed his hand. With no leverage remaining, the IRGC consolidates and the regime endures.',
-      fa: 'ترامپ بیش از حد بازی کرد. بدون اهرم باقی‌مانده، سپاه تحکیم می‌شود و رژیم دوام می‌آورد.'
-    }
+    id: 'strategic_surrender',
+    title: { en: 'STRATEGIC SURRENDER', fa: 'تسلیم استراتژیک' }, 
+    winner: 'irgc',
+    trigger: 'LEVERAGE hits 0',
+    body: [
+      "A deal was reached. The press called it the Tehran Accords. The sanctions eased, the regime stabilized, and the next American president inherited the same problem with a stronger adversary. The people of Iran watched the announcement on VPN feeds. Their internet was still off."
+    ],
+    signoff: "Stay with us. Amplify our voice. We are writing the final chapter of this dictatorship."
   },
   irgc_pol: { 
-    title: { en: 'POLITICAL DISASTER', fa: 'فاجعه سیاسی' }, 
-    winner: 'irgc', 
-    desc: { 
-      en: 'Trump\'s political capital evaporated. Congress pulls authorization. The IRGC survives another day.',
-      fa: 'سرمایه سیاسی ترامپ تبخیر شد. کنگره مجوز را پس می‌گیرد. سپاه یک روز دیگر زنده می‌ماند.'
-    }
+    id: 'impeachment',
+    title: { en: 'IMPEACHMENT', fa: 'استیضاح' }, 
+    winner: 'irgc',
+    trigger: 'POL CAP hits 0',
+    body: [
+      "The operation ended in a congressional hearing, not on a battlefield. The regime didn't outlast the strategy — it outlasted the majority. In Iran, people read the news and went back to figuring out how to get through the week. That is what surviving a dictatorship looks like."
+    ],
+    signoff: "Stay with us. Amplify our voice. We are writing the final chapter of this dictatorship."
   },
   irgc_all: { 
-    title: { en: 'COALITION FRACTURES', fa: 'ائتلاف فرو می‌پاشد' }, 
-    winner: 'irgc', 
-    desc: { 
-      en: 'The allies abandoned the coalition. Without international support, the pressure campaign collapses.',
-      fa: 'متحدان ائتلاف را ترک کردند. بدون حمایت بین‌المللی، کمپین فشار فرو می‌پاشد.'
-    }
+    id: 'coalition_collapsed',
+    title: { en: 'COALITION COLLAPSED', fa: 'ائتلاف فروپاشید' }, 
+    winner: 'irgc',
+    trigger: 'ALLIES hits 0',
+    body: [
+      "Europe reopened trade negotiations within the month. The Gulf states went back to hedging. Israel was left holding the line alone — the one party that never had the option of disengaging. The regime didn't win. It just waited while everyone else found reasons to leave. It has always known how to wait."
+    ],
+    signoff: "Stay with us. Amplify our voice. We are writing the final chapter of this dictatorship."
   },
+
+  // === DRAW ===
   stalemate: { 
-    title: { en: 'STALEMATE', fa: 'بن‌بست' }, 
-    winner: 'none', 
-    desc: { 
-      en: 'Two weeks since the Strike. No victor. The war grinds on, the people suffer, and the world watches.',
-      fa: 'دو هفته از اعتصاب گذشته. بدون پیروز. جنگ ادامه دارد، مردم رنج می‌برند و جهان تماشا می‌کند.'
-    }
+    id: 'marathon',
+    title: { en: 'MARATHON', fa: 'ماراتن' }, 
+    winner: 'draw',
+    trigger: 'Day 60 reached, no bar at 0',
+    body: [
+      "Sixty days. No bar broke. The regime is still headless, still paying foreign enforcers, still propping up the cardboard on state TV. The revolution didn't win today. Neither did they. A regime that has to import fighters to hold its own streets has already given you the answer — it just hasn't arrived yet."
+    ],
+    signoff: "Iran is waking up. The board is set, and the pieces are finally in our favor. The only question left is the timing of its collapse."
+  },
+
+  // === STORY ENDINGS (special triggers) ===
+  cardboard_mojtaba: {
+    id: 'cardboard_mojtaba',
+    title: { en: 'CARDBOARD MOJTABA REVEALED', fa: 'مجتبی مقوایی آشکار شد' },
+    winner: 'trump',
+    trigger: 'MESSAGE exposure fires while GRIP < 35 — flows into THE LION RISES',
+    body: [
+      "Someone got the side angle. You could see the duct tape. The clip was on every VPN feed and every diaspora group chat within the hour. Forty years of mandatory reverence. It ended with a prop from a state TV set. The regime made the cardboard. What happened next was ours."
+    ],
+    signoff: "We will see each other in Free Iran."
+  },
+  grand_bargain: {
+    id: 'grand_bargain',
+    title: { en: 'THE GRAND BARGAIN', fa: 'معامله بزرگ' },
+    winner: 'irgc',
+    trigger: 'Trump plays DIPLOMACY with ALLIES > 80 and IRGC GRIP > 60',
+    body: [
+      "A deal was reached. Both sides called it historic. The Iranian people were not at the table — they were what was being negotiated over. A woman who posted a video of herself without a hijab in 2022 is still in Evin. This agreement does not affect her case."
+    ],
+    signoff: "Stay with us. Amplify our voice. We are writing the final chapter of this dictatorship."
+  },
+  ground_zero: {
+    id: 'ground_zero',
+    title: { en: 'GROUND ZERO', fa: 'نقطه صفر' },
+    winner: 'trump',
+    trigger: 'Trump plays INVADE and wins the round',
+    body: [
+      "The surface forces collapsed in seventy-two hours. The missile cities kept firing until the last command node went dark. The regime built no shelters for its people — the budget always faced outward. What comes next is not decided by the force that got here. It is decided by the people who were already here."
+    ],
+    signoff: "We will see each other in Free Iran."
+  },
+  restoration: {
+    id: 'restoration',
+    title: { en: 'RESTORATION', fa: 'بازسازی' },
+    winner: 'trump',
+    trigger: 'ARM JAVIDAN played + three consecutive Trump wins',
+    body: [
+      "\"I do not seek a throne. I seek a free Iran.\"",
+      "The Javidan didn't need an invasion. External pressure, internal resistance, forty years of work that the world kept saying was futile. The Iran Prosperity Project convenes its first session. A referendum is scheduled. The Iranian people decide what comes next."
+    ],
+    signoff: "We will see each other in Free Iran."
   }
 };
 
@@ -3209,36 +4631,127 @@ const MONTHS = [
 ];
 
 // ────────────────────────────────────────────────────────────────────────────
-// DAILY STORY UPDATES - Narrative text shown each day on the board
+// DAILY BRIEFINGS - Theme, theatre, narrative, and voice line refs per day
 // ────────────────────────────────────────────────────────────────────────────
 
-const STORY_UPDATES = [
-  { en: "The Supreme Leader is dead. Tehran is in chaos. The regime scrambles to maintain control as the world watches.", 
-    fa: "رهبر معظم مرده است. تهران در هرج‌ومرج است. رژیم تلاش می‌کند کنترل را حفظ کند." },
-  { en: "Mojtaba Khamenei named Supreme Leader by emergency Assembly vote. He has not appeared in public.", 
-    fa: "مجتبی خامنه‌ای با رأی اضطراری مجلس رهبر شد. در ملأعام ظاهر نشده است." },
-  { en: "Vahidi assumes IRGC command. Hardliners consolidate. The streets are quiet — too quiet.", 
-    fa: "وحیدی فرماندهی سپاه را بر عهده می‌گیرد. خیابان‌ها ساکت است — بیش از حد ساکت." },
-  { en: "First reports of Basij refusing orders in Isfahan. The internet blackout tightens.", 
-    fa: "اولین گزارش‌ها از سرپیچی بسیج در اصفهان. قطعی اینترنت سخت‌تر می‌شود." },
-  { en: "US carrier group enters the Gulf. Tehran's state media calls it 'provocative aggression.'", 
-    fa: "ناوگان هواپیمابر آمریکا وارد خلیج می‌شود. رسانه‌های رژیم آن را «تجاوز تحریک‌آمیز» می‌نامند." },
-  { en: "Smuggled videos show protests in Shiraz. The regime denies everything.", 
-    fa: "ویدیوهای قاچاق اعتراضات در شیراز را نشان می‌دهند. رژیم همه چیز را انکار می‌کند." },
-  { en: "Sanctions bite deeper. The rial collapses to historic lows. Bread lines grow.", 
-    fa: "تحریم‌ها سخت‌تر می‌شوند. ریال به پایین‌ترین حد تاریخی سقوط می‌کند. صف‌های نان بلندتر می‌شوند." },
-  { en: "Oil workers in Khuzestan begin a slowdown. The regime sends Basij to 'encourage' them.", 
-    fa: "کارگران نفت در خوزستان کُند کاری می‌کنند. رژیم بسیج را برای «تشویق» آنها می‌فرستد." },
-  { en: "Iraqi PMF fighters spotted at Tehran checkpoints. The regime is importing its own army.", 
-    fa: "نیروهای حشد الشعبی در ایست‌های بازرسی تهران دیده شدند. رژیم ارتش خود را وارد می‌کند." },
-  { en: "Rumors spread that Mojtaba is incapacitated. State TV airs only pre-recorded messages.", 
-    fa: "شایعات پخش می‌شود که مجتبی از کار افتاده است. تلویزیون دولتی فقط پیام‌های از پیش ضبط‌شده پخش می‌کند." },
-  { en: "Pahlavi addresses the nation from exile. Millions watch despite the blackout.", 
-    fa: "پهلوی از تبعید به ملت خطاب می‌کند. میلیون‌ها نفر علی‌رغم قطعی تماشا می‌کنند." },
-  { en: "Mass protests erupt in multiple cities. The regime responds with force.", 
-    fa: "اعتراضات گسترده در چندین شهر. رژیم با زور پاسخ می‌دهد." },
-  { en: "The endgame approaches. Both sides prepare for the final confrontation.", 
-    fa: "پایان بازی نزدیک است. هر دو طرف برای رویارویی نهایی آماده می‌شوند." }
+const DAILY_BRIEFINGS = [
+  {
+    day: 1,
+    theme: "Day 1 — Strait Under Threat",
+    theatre: "SEA",
+    brief: "U.S. issues Hormuz ultimatum; IRGC surface units visible in the strait; drone footage confirms escort operations underway.",
+    potus: "potus_01",
+    state: "state_01",
+    intel: "intel_01"
+  },
+  {
+    day: 2,
+    theme: "Day 2 — First Strikes Land",
+    theatre: "AIR",
+    brief: "Natanz struck overnight; regime state media claims glorious defense while satellite confirms crater at enrichment hall.",
+    potus: "potus_02",
+    state: "state_07",
+    intel: "intel_03"
+  },
+  {
+    day: 3,
+    theme: "Day 3 — Grid Goes Dark",
+    theatre: "AIR",
+    brief: "Power plants and key bridges targeted; IRIB broadcasts uninterrupted 'victory' footage as blackouts roll across twelve provinces.",
+    potus: "potus_03",
+    state: "state_06",
+    intel: "intel_04"
+  },
+  {
+    day: 4,
+    theme: "Day 4 — Red Lines Crossed",
+    theatre: "WORLD",
+    brief: "Nuclear red line invoked; IRGC chain of command showing first fractures; fuel prices spike as Qaani threatens regional retaliation.",
+    potus: "potus_04",
+    state: "state_04",
+    intel: "intel_09"
+  },
+  {
+    day: 5,
+    theme: "Day 5 — Economy in Freefall",
+    theatre: "STREET",
+    brief: "Rial collapses further; paychecks stopped in three provinces; smuggled audio captures a woman broadcasting from a Tehran rooftop.",
+    potus: "potus_05",
+    state: "state_05",
+    intel: "intel_05"
+  },
+  {
+    day: 6,
+    theme: "Day 6 — South Pars Silent",
+    theatre: "SEA",
+    brief: "South Pars refinery workers confirm full strike; drone footage shows no flare stacks burning; oil output effectively zero.",
+    potus: "potus_09",
+    state: "state_17",
+    intel: "intel_06"
+  },
+  {
+    day: 7,
+    theme: "Day 7 — The Blackout Falls",
+    theatre: "STREET",
+    brief: "Internet cut nationwide as street protests surge; Basij conscripts recorded refusing orders in intercepted call.",
+    potus: "potus_07",
+    state: "state_09",
+    intel: "intel_07"
+  },
+  {
+    day: 8,
+    theme: "Day 8 — Swarm Destroyed",
+    theatre: "SEA",
+    brief: "IRGC speedboat swarm engaged and destroyed in the Gulf; Bandar Abbas naval base burning visible on satellite imagery.",
+    potus: "potus_20",
+    state: "state_15",
+    intel: "intel_21"
+  },
+  {
+    day: 9,
+    theme: "Day 9 — Proxies at the Gate",
+    theatre: "STREET",
+    brief: "Iraqi PMF convoy crosses Iran border at Mehran; foreign enforcer deployment confirms regime cannot rely on domestic conscripts.",
+    potus: "potus_11",
+    state: "state_23",
+    intel: "intel_11"
+  },
+  {
+    day: 10,
+    theme: "Day 10 — Rooftops at Dawn",
+    theatre: "STREET",
+    brief: "Smuggled rooftop video from central Tehran shows empty streets held by Afghan militias, not IRGC; regime narrative collapsing.",
+    potus: "potus_13",
+    state: "state_08",
+    intel: "intel_10"
+  },
+  {
+    day: 11,
+    theme: "Day 11 — F-22s Over Tehran",
+    theatre: "AIR",
+    brief: "U.S. fighter sweep over Tehran airspace unopposed; senior IRGC general detected crossing to Turkish border under false papers.",
+    potus: "potus_23",
+    state: "state_16",
+    intel: "intel_22"
+  },
+  {
+    day: 12,
+    theme: "Day 12 — The Lion Rises",
+    theatre: "WORLD",
+    brief: "Pahlavi addresses diaspora; Westwood rally confirmed at 40,000; central bank panic intercept suggests regime has days, not weeks.",
+    potus: "potus_14",
+    state: "state_10",
+    intel: "intel_19"
+  },
+  {
+    day: 60,
+    theme: "Day 60 — Surrender or Stand",
+    theatre: "STREET",
+    brief: "Evin Prison gates breached; white rose footage smuggled out; SIGINT confirms regime officials drafting surrender language.",
+    potus: "potus_25",
+    state: "state_25",
+    intel: "intel_25"
+  }
 ];
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -3264,8 +4777,16 @@ function getGameDate(dayNumber) {
 }
 
 function getStoryUpdate(dayNumber) {
-  const index = Math.min(dayNumber - 1, STORY_UPDATES.length - 1);
-  return t(STORY_UPDATES[index]);
+  const briefing = DAILY_BRIEFINGS.find(b => b.day === dayNumber);
+  if (briefing) {
+    return briefing.brief;
+  }
+  // Fallback to last briefing if day exceeds array
+  return DAILY_BRIEFINGS[DAILY_BRIEFINGS.length - 1].brief;
+}
+
+function getDailyBriefing(dayNumber) {
+  return DAILY_BRIEFINGS.find(b => b.day === dayNumber) || DAILY_BRIEFINGS[DAILY_BRIEFINGS.length - 1];
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -3277,6 +4798,323 @@ const storyState = {
   pages: [],
   currentPage: 0,
   afterCallback: null
+};
+
+// ────────────────────────────────────────────────────────────────────────────
+// MAP CONTROLLER - Handles satellite view panning and intel sweeps
+// ────────────────────────────────────────────────────────────────────────────
+
+const mapController = {
+  canvas: null,
+  viewport: null,
+  viewportWidth: 700,
+  viewportHeight: 450,
+  position: { x: 0, y: 0 },
+  zoom: 1.0,
+  targetZoom: 1.0,
+  previousFlags: {},
+  isDragging: false,
+  dragStart: { x: 0, y: 0 },
+  sweepActive: false,
+  sweepAborted: false,
+  
+  focusFlag: null,     // Current flag being viewed
+  
+  init() {
+    this.canvas = document.getElementById('map-canvas');
+    this.viewport = document.getElementById('map-viewport');
+    
+    if (!this.canvas || !this.viewport) {
+      console.error('[MapController] Missing elements!');
+      return;
+    }
+    
+    // Get actual viewport dimensions
+    const rect = this.viewport.getBoundingClientRect();
+    this.viewportWidth = rect.width || 700;
+    this.viewportHeight = rect.height || 450;
+    
+    console.log('[MapController] init - viewport:', this.viewportWidth, 'x', this.viewportHeight);
+    
+    // Start zoomed in
+    this.zoom = 1.4;
+    this.targetZoom = 1.0;
+    
+    // Center the map initially (at zoom level)
+    this.centerMap();
+    
+    // Set up drag handlers
+    this.setupDragHandlers();
+  },
+  
+  centerMap() {
+    // Center the larger canvas within the viewport, accounting for zoom
+    const effectiveWidth = MAP_CANVAS_WIDTH * this.zoom;
+    const effectiveHeight = MAP_CANVAS_HEIGHT * this.zoom;
+    const centerX = (effectiveWidth - this.viewportWidth) / 2;
+    const centerY = (effectiveHeight - this.viewportHeight) / 2;
+    this.position = { x: -centerX, y: -centerY };
+    this.applyTransform();
+    console.log('[MapController] centerMap at zoom', this.zoom, ':', this.position.x, this.position.y);
+  },
+  
+  setupDragHandlers() {
+    if (!this.canvas) return;
+    
+    // Mouse events
+    this.canvas.addEventListener('mousedown', (e) => this.startDrag(e));
+    document.addEventListener('mousemove', (e) => this.onDrag(e));
+    document.addEventListener('mouseup', () => this.endDrag());
+    
+    // Touch events
+    this.canvas.addEventListener('touchstart', (e) => this.startDrag(e), { passive: false });
+    document.addEventListener('touchmove', (e) => this.onDrag(e), { passive: false });
+    document.addEventListener('touchend', () => this.endDrag());
+  },
+  
+  startDrag(e) {
+    if (this.sweepActive) {
+      this.sweepAborted = true;
+    }
+    this.isDragging = true;
+    this.canvas.classList.add('dragging');
+    
+    const point = e.touches ? e.touches[0] : e;
+    this.dragStart = {
+      x: point.clientX - this.position.x,
+      y: point.clientY - this.position.y
+    };
+    
+    if (e.touches) e.preventDefault();
+  },
+  
+  onDrag(e) {
+    if (!this.isDragging) return;
+    
+    const point = e.touches ? e.touches[0] : e;
+    let newX = point.clientX - this.dragStart.x;
+    let newY = point.clientY - this.dragStart.y;
+    
+    // Bound to canvas limits (accounting for zoom)
+    const effectiveWidth = MAP_CANVAS_WIDTH * this.zoom;
+    const effectiveHeight = MAP_CANVAS_HEIGHT * this.zoom;
+    const maxX = 0;
+    const minX = -(effectiveWidth - this.viewportWidth);
+    const maxY = 0;
+    const minY = -(effectiveHeight - this.viewportHeight);
+    
+    this.position.x = Math.min(maxX, Math.max(minX, newX));
+    this.position.y = Math.min(maxY, Math.max(minY, newY));
+    
+    this.applyTransform(false); // No transition during drag
+    
+    if (e.touches) e.preventDefault();
+  },
+  
+  endDrag() {
+    if (!this.isDragging) return;
+    this.isDragging = false;
+    if (this.canvas) this.canvas.classList.remove('dragging');
+  },
+  
+  applyTransform(withTransition = true, duration = 600, easing = null) {
+    if (!this.canvas) return;
+    // Default easing: smooth ease-in-out for fluid flyover motion
+    const curve = easing || 'cubic-bezier(0.45, 0, 0.15, 1)';
+    if (!withTransition) {
+      this.canvas.style.transition = 'none';
+    } else {
+      this.canvas.style.transition = `transform ${duration}ms ${curve}`;
+    }
+    // Scale first, then translate (transform-origin is center)
+    this.canvas.style.transform = `translate(${this.position.x}px, ${this.position.y}px) scale(${this.zoom})`;
+    console.log('[MapController] applyTransform:', this.position.x, this.position.y, 'zoom:', this.zoom);
+    
+    // Re-enable transition after a tick
+    if (!withTransition) {
+      requestAnimationFrame(() => {
+        this.canvas.style.transition = `transform ${duration}ms ${curve}`;
+      });
+    }
+  },
+  
+  // Smoothly zoom to target level while keeping center point
+  async zoomTo(targetZoom, duration = 800) {
+    this.zoom = targetZoom;
+    // Recalculate center position for new zoom
+    const effectiveWidth = MAP_CANVAS_WIDTH * this.zoom;
+    const effectiveHeight = MAP_CANVAS_HEIGHT * this.zoom;
+    const centerX = (effectiveWidth - this.viewportWidth) / 2;
+    const centerY = (effectiveHeight - this.viewportHeight) / 2;
+    this.position = { x: -centerX, y: -centerY };
+    this.applyTransform(true, duration);
+    await this.pause(duration);
+  },
+  
+  // Pan to center a specific point on the map (accounting for zoom)
+  panTo(targetX, targetY, duration = 400) {
+    return new Promise((resolve) => {
+      // Scale target coordinates by zoom
+      const scaledTargetX = targetX * this.zoom;
+      const scaledTargetY = targetY * this.zoom;
+      
+      // Get actual header height to calculate visual center
+      const header = document.querySelector('.board-header');
+      const headerHeight = header ? header.offsetHeight : 0;
+      
+      // Center of the visible area below the header overlay
+      // Add extra offset to clear the gradient fade
+      const visualCenterY = headerHeight + (this.viewportHeight - headerHeight) / 2 + 70;
+      
+      // Calculate position to center the target in visible viewport area
+      const newX = -(scaledTargetX - this.viewportWidth / 2);
+      const newY = -(scaledTargetY - visualCenterY);
+      
+      // Bound to canvas limits (accounting for zoom)
+      const effectiveWidth = MAP_CANVAS_WIDTH * this.zoom;
+      const effectiveHeight = MAP_CANVAS_HEIGHT * this.zoom;
+      const maxX = 0;
+      const minX = -(effectiveWidth - this.viewportWidth);
+      const maxY = 0;
+      const minY = -(effectiveHeight - this.viewportHeight);
+      
+      this.position.x = Math.min(maxX, Math.max(minX, newX));
+      this.position.y = Math.min(maxY, Math.max(minY, newY));
+      
+      console.log('[MapController] panTo:', targetX, targetY, 'at zoom', this.zoom, '-> translate:', this.position.x, this.position.y);
+      
+      // Use smooth ease-in-out for fluid flyover motion
+      // Accelerates smoothly, cruises, then decelerates gently
+      this.applyTransform(true, duration, 'cubic-bezier(0.45, 0, 0.15, 1)');
+      
+      setTimeout(resolve, duration);
+    });
+  },
+  
+  // Helper for async delays
+  pause(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  },
+  
+  // Detect which flags changed since last snapshot
+  getChangedFlags(currentFlags) {
+    const changes = [];
+    for (const key in currentFlags) {
+      if (key === 'airstrikeUsed') continue; // Not a visual flag
+      if (currentFlags[key] !== this.previousFlags[key]) {
+        changes.push({
+          key,
+          activated: currentFlags[key]
+        });
+      }
+    }
+    return changes;
+  },
+  
+  // Snapshot current flags for next comparison
+  snapshotFlags(flags) {
+    this.previousFlags = { ...flags };
+  },
+  
+  // Update tracking indicator text for current language
+  updateTrackingText() {
+    const indicator = document.getElementById('tracking-indicator');
+    if (indicator && typeof t === 'function' && typeof UI !== 'undefined') {
+      indicator.textContent = t(UI.tracking);
+    }
+  },
+  
+  // Main day-start intel sweep sequence
+  async startDaySweep(changedFlags, startZoomedIn = true) {
+    if (changedFlags.length === 0) return;
+    
+    console.log('[MapController] Starting intel sweep for', changedFlags.length, 'flags:', changedFlags.map(f => f.key));
+    
+    this.sweepActive = true;
+    this.sweepAborted = false;
+    this.canvas.classList.add('sweeping');
+    
+    // Show tracking indicator with localized text
+    const indicator = document.getElementById('tracking-indicator');
+    if (indicator) {
+      this.updateTrackingText();
+      indicator.classList.add('active');
+    }
+    
+    // Show scan line effect
+    const scanline = document.getElementById('map-scanline');
+    if (scanline) {
+      scanline.classList.add('active');
+      setTimeout(() => scanline.classList.remove('active'), 3500);
+    }
+    
+    // Play a subtle audio cue if available
+    if (typeof audioManager !== 'undefined' && audioManager.playSFX) {
+      audioManager.playSFX('click');
+    }
+    
+    // If starting zoomed in, zoom out first for dramatic effect
+    if (startZoomedIn && this.zoom > 1.0) {
+      console.log('[MapController] Zooming out from', this.zoom, 'to 1.0');
+      await this.zoomTo(1.0, 1400);
+      if (this.sweepAborted) {
+        this.zoom = 1.0;
+        this.centerMap();
+      }
+    }
+    
+    for (const change of changedFlags) {
+      if (this.sweepAborted) break;
+      
+      const flagData = FLAG_DATA[change.key];
+      if (!flagData || !flagData.position) continue;
+      
+      // Pan to flag location - CSS drift continues on top
+      await this.panToFlag(change.key, 1400);
+      if (this.sweepAborted) break;
+      
+      // Trigger flag flash animation after landing
+      const flagEl = document.querySelector(`.flag[data-flag="${change.key}"]`);
+      if (flagEl) {
+        flagEl.classList.remove('activating', 'deactivating');
+        void flagEl.offsetWidth; // Force reflow
+        flagEl.classList.add(change.activated ? 'activating' : 'deactivating');
+        
+        // Update active state
+        flagEl.classList.toggle('active', change.activated);
+      }
+      
+      // Hold on centered flag - stay here to appreciate the intel
+      await this.pause(2000);
+      if (this.sweepAborted) break;
+    }
+    
+    // Stay on the last flag - don't return to center
+    // Keep the view locked on the final flag position
+    if (!this.sweepAborted) {
+      await this.pause(500);
+    }
+    
+    // Hide tracking indicator (map stays in position)
+    if (indicator) indicator.classList.remove('active');
+    
+    this.canvas.classList.remove('sweeping');
+    this.sweepActive = false;
+  },
+  
+  // Set zoom level for next sweep (called before story screens)
+  setZoomedIn() {
+    this.zoom = 1.4;
+    this.centerMap();
+  },
+  
+  // Pan to a flag by key
+  panToFlag(flagKey, duration = 1400) {
+    const flagData = FLAG_DATA[flagKey];
+    if (!flagData || !flagData.position) return Promise.resolve();
+    this.focusFlag = flagKey;
+    return this.panTo(flagData.position.x, flagData.position.y, duration);
+  }
 };
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -3329,6 +5167,8 @@ const game = {
     this.trumpCard = null;
     this.irgcCard = null;
     this.currentWildcard = null;
+    // Reset per-game interlude tracking (global seen list persists across games)
+    interludeManager.resetForNewGame();
   },
 
   getPlayerCards() { return this.playerSide === 'trump' ? TRUMP_CARDS : IRGC_CARDS; },
@@ -3413,7 +5253,7 @@ const game = {
     if (trump.lev <= 0) return 'irgc_lev';
     if (trump.pol <= 0) return 'irgc_pol';
     if (trump.all <= 0) return 'irgc_all';
-    if (this.day >= 13) return 'stalemate';
+    if (this.day >= 60) return 'stalemate';
     return null;
   }
 };
@@ -3470,7 +5310,12 @@ function typewriterEffect(element, text, speed = 8, callback) {
   
   function type() {
     if (i < text.length) {
-      element.textContent += text.charAt(i);
+      const char = text.charAt(i);
+      // Play morse beep every 6 characters (not on spaces/punctuation)
+      if (char !== ' ' && char !== '.' && char !== ',' && i % 6 === 0) {
+        audioManager.playSFX('typewriterTick');
+      }
+      element.textContent += char;
       i++;
       typewriterTimeout = setTimeout(type, speed);
     } else {
@@ -3500,8 +5345,8 @@ function startIntroStory(callback) {
   showScreen('screen-story', true);
 }
 
-function startInterlude(day, callback) {
-  const interlude = INTERLUDE_STORIES[day];
+function startInterlude(callback) {
+  const interlude = interludeManager.getNextInterlude();
   if (!interlude) {
     if (callback) callback();
     return;
@@ -3651,28 +5496,115 @@ function advanceStory() {
   }
 }
 
-function checkForInterlude() {
-  // Check if we need to show an interlude before this day
-  if (INTERLUDE_STORIES[game.day]) {
-    return true;
-  }
-  return false;
+function checkForInterlude(day) {
+  // Check if we need to show an interlude after this day
+  return interludeManager.shouldShowInterlude(day);
 }
 
-function updateBars() {
+// Track previous bar values for delta display
+let previousBars = null;
+
+function updateBars(animate = true) {
   const { trump, irgc } = game.bars;
-  document.getElementById('bar-lev').style.width = trump.lev + '%';
-  document.getElementById('val-lev').textContent = trump.lev;
-  document.getElementById('bar-pol').style.width = trump.pol + '%';
-  document.getElementById('val-pol').textContent = trump.pol;
-  document.getElementById('bar-all').style.width = trump.all + '%';
-  document.getElementById('val-all').textContent = trump.all;
-  document.getElementById('bar-grip').style.width = irgc.grip + '%';
-  document.getElementById('val-grip').textContent = irgc.grip;
-  document.getElementById('bar-chest').style.width = irgc.chest + '%';
-  document.getElementById('val-chest').textContent = irgc.chest;
-  document.getElementById('bar-proxy').style.width = irgc.proxy + '%';
-  document.getElementById('val-proxy').textContent = irgc.proxy;
+  
+  // Bar IDs mapped to their values
+  const barData = [
+    { id: 'lev', val: trump.lev },
+    { id: 'pol', val: trump.pol },
+    { id: 'all', val: trump.all },
+    { id: 'grip', val: irgc.grip },
+    { id: 'chest', val: irgc.chest },
+    { id: 'proxy', val: irgc.proxy }
+  ];
+  
+  // Get previous values for comparison
+  const prevVals = previousBars || {
+    lev: trump.lev, pol: trump.pol, all: trump.all,
+    grip: irgc.grip, chest: irgc.chest, proxy: irgc.proxy
+  };
+  
+  // Track if we have any positive or negative changes for sounds
+  let hasPositive = false;
+  let hasNegative = false;
+  
+  barData.forEach((bar, index) => {
+    const fillEl = document.getElementById(`bar-${bar.id}`);
+    const valEl = document.getElementById(`val-${bar.id}`);
+    const prevVal = prevVals[bar.id];
+    const delta = bar.val - prevVal;
+    
+    // Update the bar width and value
+    fillEl.style.width = bar.val + '%';
+    valEl.textContent = bar.val;
+    
+    if (animate && delta !== 0) {
+      // Stagger animations for dramatic effect
+      const delay = index * 100;
+      
+      setTimeout(() => {
+        // Add flash effect to bar fill
+        fillEl.classList.remove('flash-positive', 'flash-negative');
+        void fillEl.offsetWidth; // Force reflow to restart animation
+        fillEl.classList.add(delta > 0 ? 'flash-positive' : 'flash-negative');
+        
+        // Add pulse effect to value
+        valEl.classList.remove('pulse-positive', 'pulse-negative');
+        void valEl.offsetWidth;
+        valEl.classList.add(delta > 0 ? 'pulse-positive' : 'pulse-negative');
+        
+        // Show delta indicator popup
+        showDeltaIndicator(valEl, delta);
+        
+        // Clean up classes after animation
+        setTimeout(() => {
+          fillEl.classList.remove('flash-positive', 'flash-negative');
+          valEl.classList.remove('pulse-positive', 'pulse-negative');
+        }, 700);
+      }, delay);
+      
+      if (delta > 0) hasPositive = true;
+      if (delta < 0) hasNegative = true;
+    }
+  });
+  
+  // Play sound effects based on changes (after a short delay to sync with visuals)
+  if (animate && (hasPositive || hasNegative)) {
+    setTimeout(() => {
+      if (hasPositive && hasNegative) {
+        // Play both sounds slightly offset
+        audioManager.playSFX('meterUp');
+        setTimeout(() => audioManager.playSFX('meterDown'), 150);
+      } else if (hasPositive) {
+        audioManager.playSFX('meterUp');
+      } else if (hasNegative) {
+        audioManager.playSFX('meterDown');
+      }
+    }, 50);
+  }
+  
+  // Store current values for next comparison
+  previousBars = {
+    lev: trump.lev, pol: trump.pol, all: trump.all,
+    grip: irgc.grip, chest: irgc.chest, proxy: irgc.proxy
+  };
+}
+
+function showDeltaIndicator(valEl, delta) {
+  const indicator = document.createElement('div');
+  indicator.className = `bar-delta ${delta > 0 ? 'positive' : 'negative'}`;
+  indicator.textContent = delta > 0 ? `+${delta}` : `${delta}`;
+  
+  // Position relative to the value element
+  indicator.style.position = 'absolute';
+  indicator.style.right = '0';
+  indicator.style.top = '-5px';
+  
+  valEl.appendChild(indicator);
+  
+  // Remove after animation completes
+  setTimeout(() => {
+    indicator.remove();
+  }, 1300);
 }
 
 const FLAG_ICONS = {
@@ -3709,6 +5641,12 @@ function renderFlags() {
     el.className = 'flag';
     el.dataset.flag = flagKey;
     if (game.flags[flagKey]) el.classList.add('active');
+    
+    // Position flag using absolute pixel coordinates on the larger map canvas
+    if (data.position) {
+      el.style.left = data.position.x + 'px';
+      el.style.top = data.position.y + 'px';
+    }
     
     // Build effects HTML using t() for bilingual text
     let effectsHtml = data.effects.map(e => 
@@ -3834,6 +5772,7 @@ function clearRevealSlots() {
 
 function showRevealArea() {
   document.getElementById('reveal-area').classList.add('show');
+  document.getElementById('vs-badge').classList.remove('hidden');
 }
 
 function showConsequences(trumpCard, irgcCard) {
@@ -3892,38 +5831,39 @@ function showConsequences(trumpCard, irgcCard) {
     }
   }
   
-  // Split into Trump bars (lev, pol, all) and IRGC bars (grip, chest, proxy)
+  // Build effects arrays with bar IDs for animation linking
   const trumpEffects = ['lev', 'pol', 'all']
     .filter(bar => totals[bar] !== 0)
-    .map(bar => ({ bar: barNames[bar], val: totals[bar] }));
+    .map(bar => ({ barId: bar, barName: barNames[bar], val: totals[bar] }));
   const irgcEffects = ['grip', 'chest', 'proxy']
     .filter(bar => totals[bar] !== 0 || (bar === 'chest' && blocked.chest))
-    .map(bar => ({ bar: barNames[bar], val: totals[bar], blocked: bar === 'chest' && blocked.chest }));
+    .map(bar => ({ barId: bar, barName: barNames[bar], val: totals[bar], blocked: bar === 'chest' && blocked.chest }));
 
   // Flag effects for display
   const trumpFlagEffects = ['lev', 'pol', 'all']
     .filter(bar => flagTotals[bar] !== 0)
-    .map(bar => ({ bar: barNames[bar], val: flagTotals[bar] }));
+    .map(bar => ({ barId: bar, barName: barNames[bar], val: flagTotals[bar] }));
   const irgcFlagEffects = ['grip', 'chest', 'proxy']
     .filter(bar => flagTotals[bar] !== 0)
-    .map(bar => ({ bar: barNames[bar], val: flagTotals[bar] }));
+    .map(bar => ({ barId: bar, barName: barNames[bar], val: flagTotals[bar] }));
 
+  // Build HTML with data attributes for animation
   let html = '<div class="column trump"><div class="column-label">TRUMP</div>';
   trumpEffects.forEach(e => {
-    html += `<div class="effect ${e.val > 0 ? 'positive' : 'negative'}">${e.bar} ${e.val > 0 ? '+' : ''}${e.val}</div>`;
+    html += `<div class="effect ${e.val > 0 ? 'positive' : 'negative'}" data-bar="${e.barId}" data-delta="${e.val}">${e.barName} ${e.val > 0 ? '+' : ''}${e.val}</div>`;
   });
-  if (trumpEffects.length === 0) html += '<div class="effect">—</div>';
+  if (trumpEffects.length === 0) html += '<div class="effect revealed">—</div>';
   html += '</div>';
   
   html += '<div class="column irgc"><div class="column-label">IRGC</div>';
   irgcEffects.forEach(e => {
     if (e.blocked && e.val === 0) {
-      html += `<div class="effect blocked">${e.bar} BLOCKED</div>`;
+      html += `<div class="effect blocked" data-bar="${e.barId}" data-delta="0">${e.barName} BLOCKED</div>`;
     } else {
-      html += `<div class="effect ${e.val > 0 ? 'positive' : 'negative'}">${e.bar} ${e.val > 0 ? '+' : ''}${e.val}</div>`;
+      html += `<div class="effect ${e.val > 0 ? 'positive' : 'negative'}" data-bar="${e.barId}" data-delta="${e.val}">${e.barName} ${e.val > 0 ? '+' : ''}${e.val}</div>`;
     }
   });
-  if (irgcEffects.length === 0) html += '<div class="effect">—</div>';
+  if (irgcEffects.length === 0) html += '<div class="effect revealed">—</div>';
   html += '</div>';
   
   // Add ongoing flag effects section if any are active
@@ -3934,16 +5874,16 @@ function showConsequences(trumpCard, irgcCard) {
     
     html += '<div class="column trump">';
     trumpFlagEffects.forEach(e => {
-      html += `<div class="effect flag-effect ${e.val > 0 ? 'positive' : 'negative'}">${e.bar} ${e.val > 0 ? '+' : ''}${e.val}/turn</div>`;
+      html += `<div class="effect flag-effect ${e.val > 0 ? 'positive' : 'negative'}" data-bar="${e.barId}">${e.barName} ${e.val > 0 ? '+' : ''}${e.val}/turn</div>`;
     });
-    if (trumpFlagEffects.length === 0) html += '<div class="effect flag-effect">—</div>';
+    if (trumpFlagEffects.length === 0) html += '<div class="effect flag-effect revealed">—</div>';
     html += '</div>';
     
     html += '<div class="column irgc">';
     irgcFlagEffects.forEach(e => {
-      html += `<div class="effect flag-effect ${e.val > 0 ? 'positive' : 'negative'}">${e.bar} ${e.val > 0 ? '+' : ''}${e.val}/turn</div>`;
+      html += `<div class="effect flag-effect ${e.val > 0 ? 'positive' : 'negative'}" data-bar="${e.barId}">${e.barName} ${e.val > 0 ? '+' : ''}${e.val}/turn</div>`;
     });
-    if (irgcFlagEffects.length === 0) html += '<div class="effect flag-effect">—</div>';
+    if (irgcFlagEffects.length === 0) html += '<div class="effect flag-effect revealed">—</div>';
     html += '</div>';
     
     html += '</div></div>';
@@ -3951,6 +5891,74 @@ function showConsequences(trumpCard, irgcCard) {
   
   contentEl.innerHTML = html;
   document.getElementById('consequences').classList.add('show');
+  
+  // Animate the consequence reveal cascade
+  animateConsequencesCascade(totals);
+}
+
+function animateConsequencesCascade(totals) {
+  const consequencesEl = document.getElementById('consequences-content');
+  const effects = consequencesEl.querySelectorAll('.effect[data-bar]');
+  const flagEffects = consequencesEl.querySelectorAll('.effect.flag-effect[data-bar]');
+  
+  let delay = 200; // Initial delay before cascade starts
+  const stagger = 180; // Time between each effect reveal
+  
+  // Track sounds to play
+  let hasPositive = false;
+  let hasNegative = false;
+  
+  // Animate each card effect with stagger
+  effects.forEach((effectEl, index) => {
+    const barId = effectEl.dataset.bar;
+    const delta = parseInt(effectEl.dataset.delta) || 0;
+    
+    if (delta > 0) hasPositive = true;
+    if (delta < 0) hasNegative = true;
+    
+    setTimeout(() => {
+      // Pop in the effect on consequences card
+      effectEl.classList.add('revealed', 'pop');
+      
+      // Flash the corresponding sidebar bar
+      const fillEl = document.getElementById(`bar-${barId}`);
+      const valEl = document.getElementById(`val-${barId}`);
+      
+      if (fillEl && valEl && delta !== 0) {
+        fillEl.classList.remove('flash-positive', 'flash-negative');
+        void fillEl.offsetWidth;
+        fillEl.classList.add(delta > 0 ? 'flash-positive' : 'flash-negative');
+        
+        valEl.classList.remove('pulse-positive', 'pulse-negative');
+        void valEl.offsetWidth;
+        valEl.classList.add(delta > 0 ? 'pulse-positive' : 'pulse-negative');
+        
+        // Show delta indicator on sidebar
+        showDeltaIndicator(valEl, delta);
+        
+        // Clean up after animation
+        setTimeout(() => {
+          fillEl.classList.remove('flash-positive', 'flash-negative');
+          valEl.classList.remove('pulse-positive', 'pulse-negative');
+        }, 700);
+      }
+      
+      // Play sound for this effect
+      if (delta > 0) {
+        audioManager.playSFX('meterUp');
+      } else if (delta < 0) {
+        audioManager.playSFX('meterDown');
+      }
+    }, delay + index * stagger);
+  });
+  
+  // Animate flag effects after card effects (with a pause)
+  const flagDelay = delay + effects.length * stagger + 400;
+  flagEffects.forEach((effectEl, index) => {
+    setTimeout(() => {
+      effectEl.classList.add('revealed', 'pop');
+    }, flagDelay + index * (stagger / 2));
+  });
 }
 
 function hideConsequences() {
@@ -3977,6 +5985,96 @@ function showWildcard(wc) {
   }
   
   wildcardEl.classList.add('show');
+  
+  // Capture bar values before applying wildcard
+  const beforeBars = {
+    lev: game.bars.trump.lev,
+    pol: game.bars.trump.pol,
+    all: game.bars.trump.all,
+    grip: game.bars.irgc.grip,
+    chest: game.bars.irgc.chest,
+    proxy: game.bars.irgc.proxy
+  };
+  
+  // Apply wildcard effects immediately
+  wc.apply(game);
+  
+  // Clamp all bars to 0-100
+  for (const bar of ['lev', 'pol', 'all']) {
+    game.bars.trump[bar] = Math.max(0, Math.min(100, game.bars.trump[bar]));
+  }
+  for (const bar of ['grip', 'chest', 'proxy']) {
+    game.bars.irgc[bar] = Math.max(0, Math.min(100, game.bars.irgc[bar]));
+  }
+  
+  // Compute deltas
+  const afterBars = {
+    lev: game.bars.trump.lev,
+    pol: game.bars.trump.pol,
+    all: game.bars.trump.all,
+    grip: game.bars.irgc.grip,
+    chest: game.bars.irgc.chest,
+    proxy: game.bars.irgc.proxy
+  };
+  
+  const deltas = {};
+  for (const bar in beforeBars) {
+    deltas[bar] = afterBars[bar] - beforeBars[bar];
+  }
+  
+  // Update bars immediately (no animation - we'll animate manually)
+  updateBars(false);
+  updateFlags();
+  
+  // Animate the wildcard effect cascade after a short delay
+  setTimeout(() => {
+    animateWildcardCascade(deltas);
+  }, 400);
+}
+
+function animateWildcardCascade(deltas) {
+  const barOrder = ['lev', 'pol', 'all', 'grip', 'chest', 'proxy'];
+  const changedBars = barOrder.filter(bar => deltas[bar] !== 0);
+  
+  let delay = 0;
+  const stagger = 200;
+  
+  changedBars.forEach((barId, index) => {
+    const delta = deltas[barId];
+    
+    setTimeout(() => {
+      const fillEl = document.getElementById(`bar-${barId}`);
+      const valEl = document.getElementById(`val-${barId}`);
+      
+      if (fillEl && valEl) {
+        // Flash the bar
+        fillEl.classList.remove('flash-positive', 'flash-negative');
+        void fillEl.offsetWidth;
+        fillEl.classList.add(delta > 0 ? 'flash-positive' : 'flash-negative');
+        
+        // Pulse the value
+        valEl.classList.remove('pulse-positive', 'pulse-negative');
+        void valEl.offsetWidth;
+        valEl.classList.add(delta > 0 ? 'pulse-positive' : 'pulse-negative');
+        
+        // Show delta indicator
+        showDeltaIndicator(valEl, delta);
+        
+        // Play sound
+        if (delta > 0) {
+          audioManager.playSFX('meterUp');
+        } else {
+          audioManager.playSFX('meterDown');
+        }
+        
+        // Clean up after animation
+        setTimeout(() => {
+          fillEl.classList.remove('flash-positive', 'flash-negative');
+          valEl.classList.remove('pulse-positive', 'pulse-negative');
+        }, 700);
+      }
+    }, delay + index * stagger);
+  });
 }
 
 function hideWildcard() {
@@ -4023,6 +6121,9 @@ function setPhase(phase) {
     case 'select':
       indicator.textContent = '';
       btn.style.display = 'none';
+      // Defensive: ensure consequences/wildcard are hidden when entering select
+      hideConsequences();
+      hideWildcard();
       // Show instruction on player's side
       updateSelectInstruction(true);
       break;
@@ -4056,20 +6157,50 @@ function updateDateDisplay(useTypewriter = false) {
 }
 
 function startGame() {
+  console.log('[startGame] Starting game...');
   showScreen('screen-game', true);
   // Clear any leftover night-fade from previous game
   document.querySelector('.board').classList.remove('night-fade');
+  
+  // Reset previous bars tracker for new game
+  previousBars = null;
+  
   updateDateDisplay(true);
-  updateBars();
+  updateBars(false); // Don't animate initial bar setup
   renderFlags();
   updateFlags();
-  renderRosters();
   clearRevealSlots();
   hideConsequences();
   hideWildcard();
   hideCharacterQuotes();
   game.selectedCard = null;
+  
+  // Initialize map controller (starts zoomed in at 1.4x)
+  mapController.init();
+  
+  // Snapshot flag state for next day's comparison
+  mapController.snapshotFlags(game.flags);
+  
+  // Enable player interaction immediately
   setPhase('select');
+  renderRosters();
+  
+  // Run map sweep in background (purely visual, doesn't affect game state)
+  setTimeout(() => {
+    const activeFlags = [];
+    for (const key in game.flags) {
+      if (key === 'airstrikeUsed') continue;
+      if (game.flags[key]) {
+        activeFlags.push({ key, activated: true });
+      }
+    }
+    
+    if (activeFlags.length > 0) {
+      mapController.startDaySweep(activeFlags, true);
+    } else {
+      mapController.zoomTo(1.0, 1400);
+    }
+  }, 800);
 }
 
 function commitCard() {
@@ -4137,7 +6268,7 @@ function flipAndReveal() {
   setTimeout(() => {
     showConsequences(game.trumpCard, game.irgcCard);
     setPhase('consequences');
-  }, 1000);
+  }, 1500);
 }
 
 function showCharacterQuote(side, card) {
@@ -4160,6 +6291,9 @@ function showWildcardPhase() {
   if (game.currentWildcard) {
     const slotTrump = document.getElementById('slot-trump');
     const slotIrgc = document.getElementById('slot-irgc');
+    
+    // Hide VS badge when cards slide out
+    document.getElementById('vs-badge').classList.add('hidden');
     
     // Slide cards out to the sides
     slotTrump.classList.add('slide-out');
@@ -4215,7 +6349,7 @@ function nextDay() {
 
     // Apply per-turn flag effects
     game.applyFlagEffects();
-    updateBars();
+    updateBars(false); // No animation - flag effects apply silently during night transition
     updateFlags();
     
     // Check for win after flag effects
@@ -4225,29 +6359,49 @@ function nextDay() {
       return;
     }
 
-    // Check for story interlude (after days 3, 6, 9, 12)
-    if (INTERLUDE_STORIES[previousDay]) {
-      startInterlude(previousDay, () => {
+    // Check for story interlude (every 2 days)
+    if (checkForInterlude(previousDay)) {
+      startInterlude(() => {
         showScreen('screen-game', true);
-        finishNextDay(board);
+        finishNextDay(board, true); // afterInterlude = true
       });
       return;
     }
 
-    finishNextDay(board);
+    finishNextDay(board, false);
   }, 600); // Wait for fade to black
 }
 
-function finishNextDay(board) {
+function finishNextDay(board, afterInterlude = false) {
   // Update display with typewriter effect
   updateDateDisplay(true);
-  setPhase('select');
-  renderRosters();
+  
+  // If coming from an interlude, set zoomed in state
+  if (afterInterlude) {
+    mapController.setZoomedIn();
+  }
   
   // Fade back up
   setTimeout(() => {
     board.classList.remove('night-fade');
   }, 100);
+  
+  // Snapshot current flags for next day's comparison
+  mapController.snapshotFlags(game.flags);
+  
+  // Enable player interaction immediately
+  setPhase('select');
+  renderRosters();
+  
+  // Run map sweep in background (purely visual, doesn't affect game state)
+  setTimeout(() => {
+    const changedFlags = mapController.getChangedFlags(game.flags);
+    if (changedFlags.length > 0) {
+      mapController.startDaySweep(changedFlags, mapController.zoom > 1.0);
+    } else if (mapController.zoom > 1.0) {
+      mapController.zoomTo(1.0, 1400);
+    }
+  }, 500);
 }
 
 function showEnding(key) {
@@ -4255,7 +6409,7 @@ function showEnding(key) {
   
   // Play victory or defeat sound based on player outcome
   const playerWon = ending.winner === game.playerSide;
-  const isStalemate = ending.winner !== 'trump' && ending.winner !== 'irgc';
+  const isStalemate = ending.winner === 'draw' || ending.winner === 'none';
   if (isStalemate) {
     audioManager.playSFX('defeat');
   } else if (playerWon) {
@@ -4296,9 +6450,13 @@ function showEnding(key) {
 
   showScreen('screen-ending', true);
   
-  // Display ending description using t() for bilingual
+  // Display ending description using body array + signoff
   setTimeout(() => {
-    document.getElementById('ending-desc').textContent = t(ending.desc);
+    const descEl = document.getElementById('ending-desc');
+    // Combine body paragraphs with signoff
+    const bodyText = ending.body ? ending.body.join('\n\n') : '';
+    const signoffText = ending.signoff ? '\n\n' + ending.signoff : '';
+    descEl.textContent = bodyText + signoffText;
   }, 500);
 }
 
@@ -4407,7 +6565,7 @@ function setLanguage(lang) {
   initializeUI();
   // Refresh current view if in game
   if (game.playerSide) {
-    updateBars();
+    updateBars(false); // No animation on language switch
     renderFlags();
     renderRosters();
     updateSelectInstruction(game.phase === 'select');
@@ -4549,13 +6707,16 @@ document.getElementById('btn-action').addEventListener('click', () => {
 document.getElementById('btn-continue').addEventListener('click', () => {
   audioManager.playSFX('click');
   if (game.phase === 'consequences') {
+    // Immediately transition to waiting to prevent double-clicks
+    game.phase = 'waiting';
+    
     // Hide character quotes when moving past consequences
     hideCharacterQuotes();
     
     // Apply card effects NOW when user clicks Continue
     game.applyCard(game.trumpCard, 'trump');
     game.applyCard(game.irgcCard, 'irgc');
-    updateBars();
+    updateBars(false); // No animation - cascade already shown during consequences reveal
     updateFlags();
     
     // Check for win BEFORE showing wildcard
@@ -4576,20 +6737,12 @@ document.getElementById('btn-continue').addEventListener('click', () => {
 document.getElementById('btn-next-day').addEventListener('click', () => {
   audioManager.playSFX('click');
   if (game.phase === 'wildcard') {
-    // Apply wildcard effects NOW when user clicks Next Day
+    // Immediately transition to waiting to prevent double-clicks
+    game.phase = 'waiting';
+    
+    // Wildcard effects were already applied when wildcard was shown
+    // Just check for win and proceed
     if (game.currentWildcard) {
-      game.currentWildcard.apply(game);
-      // Clamp all bars to 0-100 after wildcard
-      for (const bar of ['lev', 'pol', 'all']) {
-        game.bars.trump[bar] = Math.max(0, Math.min(100, game.bars.trump[bar]));
-      }
-      for (const bar of ['grip', 'chest', 'proxy']) {
-        game.bars.irgc[bar] = Math.max(0, Math.min(100, game.bars.irgc[bar]));
-      }
-      updateBars();
-      updateFlags();
-      
-      // Check for win AFTER wildcard effects
       const endKey = game.checkWin();
       if (endKey) {
         hideWildcard();
@@ -4610,6 +6763,33 @@ document.getElementById('btn-restart').addEventListener('click', () => {
   audioManager.applyMusicState('menu');
   game.reset();
   showScreen('screen-select', true);
+});
+
+// ────────────────────────────────────────────────────────────────────────────
+// CODEX (FREE IRAN BRIEFING) EVENT LISTENERS
+// ────────────────────────────────────────────────────────────────────────────
+
+document.getElementById('btn-codex-back').addEventListener('click', () => {
+  hideCodex();
+});
+
+document.getElementById('btn-codex-detail-back').addEventListener('click', () => {
+  hideCodexDetail();
+});
+
+document.getElementById('btn-codex-select').addEventListener('click', () => {
+  audioManager.playSFX('click');
+  showCodex('screen-select');
+});
+
+document.getElementById('btn-codex-ending').addEventListener('click', () => {
+  audioManager.playSFX('click');
+  showCodex('screen-ending');
+});
+
+document.getElementById('btn-codex-game').addEventListener('click', () => {
+  audioManager.playSFX('click');
+  showCodex('screen-game');
 });
 </script>
 
