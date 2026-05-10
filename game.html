@@ -2448,6 +2448,8 @@ const audioManager = {
   applyMusicState(stateName) {
     if (this.music && this.musicEnabled) {
       this.music.applyState(stateName);
+      // Re-apply user volume after state change (syncMix resets to 0.84)
+      this.applyMusicVolume();
     }
   },
   
@@ -3443,6 +3445,8 @@ function showScreen(id, useWipe = false) {
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
       document.getElementById(id).classList.add('active');
       langToggle.classList.toggle('centered', id === 'screen-title');
+      // Sync volume sliders after screen change (they can lose state when hidden)
+      audioManager.syncVolumeUI();
     }, 200);
     setTimeout(() => {
       wipe.classList.remove('active');
@@ -3451,6 +3455,8 @@ function showScreen(id, useWipe = false) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     langToggle.classList.toggle('centered', id === 'screen-title');
+    // Sync volume sliders after screen change
+    audioManager.syncVolumeUI();
   }
 }
 
