@@ -1,0 +1,65 @@
+ANONYMOUS CHARACTERS — PIXEL ART PORTRAITS
+Iran Conflict Game (Carmen Sandiego Style)
+96×96 px, frameless, no borders
+==========================================
+
+FILE: anon_artesh_defector_1.png
+ROLE: Artesh Army Defector (Male, #1)
+DESCRIPTION: A soldier of the Islamic Republic of Iran Army (Artesh) who has crossed over to the resistance. Wears desert camouflage in the tan/brown/khaki digital pattern used by the Artesh. Face wrapped in a tan desert keffiyeh — only his eyes visible, carrying the weight of a hard moral choice. Not menacing: conflicted, quietly courageous. The eyes of a man who chose his conscience over his orders.
+GAME CARD TAGS: Artesh Defector · Desert Camo · Crossed the Line
+
+------------------------------------------
+
+FILE: anon_artesh_defector_2.png
+ROLE: Artesh Army Defector (Male, #2)
+DESCRIPTION: An older, broader Artesh soldier who has defected. Same desert camouflage uniform. Face covered by an olive drab cloth balaclava. Where the first defector shows conflict, this man shows quiet sorrow — he has seen more, lost more, and his eyes carry it. A veteran who finally broke with the regime.
+GAME CARD TAGS: Artesh Defector · Veteran Soldier · Silent Grief
+
+------------------------------------------
+
+FILE: anon_javidan_1.png
+ROLE: Javidan Brigade Fighter (Immortal Guard, #1)
+DESCRIPTION: A member of Iran's elite Javidan Brigade — the "Immortal Guard," the IRGC's most prestigious special forces unit. All-black tactical uniform and body armor with gold unit insignia at the collar. Face covered by a black balaclava. Eyes cold and precise. This is someone trained to operate in the shadows, now operating against the regime that made him.
+GAME CARD TAGS: Javidan Brigade · Immortal Guard · IRGC Elite · Shadow Operative
+
+------------------------------------------
+
+FILE: anon_javidan_2.png
+ROLE: Javidan Brigade Fighter (Immortal Guard, #2)
+DESCRIPTION: A younger Javidan fighter, slighter in build than the first. Black tactical vest, face wrapped in a black and dark red patterned cloth. His eyes show something different from his senior counterpart — not cold calculation but burning conviction. He joined the Immortal Guard believing the propaganda. Now he knows what it is.
+GAME CARD TAGS: Javidan Brigade · Young Defector · True Believer Turned
+
+------------------------------------------
+
+FILE: anon_grieving_mother.png
+ROLE: Grieving Mother
+DESCRIPTION: A young Iranian woman in her late 20s whose child was executed by the Islamic Republic following protest arrests. Wears a black mourning headscarf pulled low, lower face covered — only her eyes visible, red-rimmed from weeping, filled with grief that has curdled into rage. She does not hide anymore. She has already lost everything worth hiding for.
+GAME CARD TAGS: Bereaved Parent · Protest Execution · Grief Into Resistance
+
+------------------------------------------
+
+FILE: anon_grieving_father.png
+ROLE: Grieving Father
+DESCRIPTION: An Iranian man in his 50s who lost his child to a state execution following the protests. Wearing a plain dark coat, a grey scarf pulled up over his mouth and chin. His face is deeply lined, his hair greying at the temples. The eyes above the scarf carry the particular devastation of a parent who outlived his child at the hands of his own government. Heavy, unbroken, still standing.
+GAME CARD TAGS: Bereaved Parent · Protest Execution · Unbowed
+
+------------------------------------------
+
+FILE: anon_protester_wlf.png
+ROLE: Woman, Life, Freedom Street Protester
+DESCRIPTION: A young Iranian woman on the front lines of the Woman, Life, Freedom uprising that began with Mahsa Amini's death in 2022 and reignited in 2026. Dark hair loose around her face, wearing a green protest bandana as a mask. Eyes bright with defiance. She has been in the streets before and she will be there again. The green is deliberate — the color of the movement.
+GAME CARD TAGS: Woman Life Freedom · Street Protester · Mahsa Generation
+
+------------------------------------------
+
+FILE: anon_courier.png
+ROLE: Underground Resistance Courier
+DESCRIPTION: An androgynous figure who moves information, documents, and contraband through Tehran's surveillance grid. Dark hoodie pulled up, white surgical mask covering nose and mouth. Eyes sharp and watchful — the eyes of someone who has learned to read a street in seconds and knows which cameras to avoid. Gender deliberately ambiguous: the regime cannot profile what it cannot categorize.
+GAME CARD TAGS: Underground Network · Information Courier · Surveillance Evasion
+
+------------------------------------------
+
+FILE: anon_journalist.png
+ROLE: Exiled Journalist in Hiding
+DESCRIPTION: An older Iranian male journalist, mid-50s, working in exile under threat of assassination. Rumpled blazer over an open-collar shirt, a worn press badge lanyard barely visible beneath a grey scarf wrapped across the lower half of his face. His hair is silver and wild. His eyes are exhausted and completely alert. He has been filing dispatches the regime wants silenced for thirty years. He intends to file thirty more.
+GAME CARD TAGS: Exiled Press · In Hiding · Chain Murder Risk · Diaspora Voice
