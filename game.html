@@ -1009,6 +1009,16 @@ body::before {
   display: flex; align-items: center; justify-content: center;
   font-size: 8px; color: var(--dim);
   margin-bottom: 8px;
+  overflow: hidden;
+}
+.card-tooltip .tooltip-art.has-image {
+  background: transparent;
+}
+.card-tooltip .tooltip-art img {
+  image-rendering: pixelated;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 .card-tooltip .tooltip-desc {
   font-family: var(--vt); font-size: 17px;
@@ -1078,6 +1088,10 @@ body::before {
   cursor: help;
   transform: translate(-50%, -50%);
   transition: opacity .3s, border-color .3s, color .3s, box-shadow .3s;
+  z-index: 20;
+}
+.flag:hover {
+  z-index: 150;
 }
 .flag.active {
   opacity: 1; border-color: var(--gold); color: var(--gold);
@@ -1221,6 +1235,144 @@ body::before {
 }
 
 /* Flag positions are now set via JavaScript with absolute pixel coords on the 1400x800 map canvas */
+
+/* ═══════════════════════════════════════════════════════════════════
+   VOICE MARKERS - Smuggled messages from inside Iran
+   ═══════════════════════════════════════════════════════════════════ */
+
+.voices-container {
+  position: absolute; inset: 0;
+  pointer-events: none;
+}
+
+.voice-marker {
+  position: absolute;
+  width: 96px; height: 96px;
+  pointer-events: auto;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+}
+.voice-marker.open,
+.voice-marker.pinned {
+  z-index: 15;
+}
+
+.voice-marker .portrait-img {
+  width: 100%; height: 100%;
+  border: 2px solid var(--gold);
+  background: var(--bg);
+  object-fit: cover;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  transition: box-shadow 0.2s ease;
+}
+
+.voice-marker:hover .portrait-img,
+.voice-marker.open .portrait-img,
+.voice-marker.pinned .portrait-img {
+  box-shadow: 0 0 12px rgba(255,210,74,.5), 0 0 24px rgba(255,210,74,.25);
+}
+
+.voice-marker.pinned .portrait-img {
+  box-shadow: 0 0 16px rgba(255,210,74,.7), 0 0 32px rgba(255,210,74,.35);
+}
+
+/* Voice bubble - talk bubble tooltip */
+.voice-bubble {
+  position: absolute;
+  left: 104px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 280px;
+  padding: 12px 14px;
+  background: rgba(6,8,12,.95);
+  border: 2px solid var(--gold);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 100;
+}
+
+/* Show bubble on hover OR when pinned */
+.voice-marker:hover .voice-bubble,
+.voice-marker.pinned .voice-bubble {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Talk bubble arrow pointing to portrait */
+.voice-bubble::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-right: 12px solid var(--gold);
+}
+.voice-bubble::after {
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-right: 10px solid rgba(6,8,12,.95);
+}
+
+/* Bubble positioned on left for markers near right edge */
+.voice-marker.bubble-left .voice-bubble {
+  left: auto;
+  right: 104px;
+}
+.voice-marker.bubble-left .voice-bubble::before {
+  left: auto;
+  right: -12px;
+  border-right: none;
+  border-left: 12px solid var(--gold);
+}
+.voice-marker.bubble-left .voice-bubble::after {
+  left: auto;
+  right: -8px;
+  border-right: none;
+  border-left: 10px solid rgba(6,8,12,.95);
+}
+
+.voice-bubble .vb-header {
+  font-family: var(--px);
+  font-size: 8px;
+  color: var(--gold);
+  letter-spacing: .15em;
+  margin-bottom: 6px;
+  text-shadow: 0 0 8px rgba(255,210,74,.4);
+}
+
+.voice-bubble .vb-character {
+  font-family: var(--px);
+  font-size: 9px;
+  color: var(--dim);
+  letter-spacing: .1em;
+  margin-bottom: 8px;
+}
+
+.voice-bubble .vb-quote {
+  font-family: var(--vt);
+  font-size: 16px;
+  color: var(--txt);
+  line-height: 1.4;
+  font-style: italic;
+}
+
+/* Farsi support for voice bubbles */
+#game.lang-fa .voice-bubble .vb-quote {
+  font-family: var(--fa);
+  font-size: 18px;
+  line-height: 1.6;
+  direction: rtl;
+}
 
 /* Map viewport - clips the larger map canvas */
 .map-area {
@@ -1463,16 +1615,23 @@ body::before {
   border: 3px solid var(--bdr); border-radius: 6px;
   background: rgba(6,8,12,.95);
   display: flex; align-items: center; justify-content: center;
+  background-size: cover;
+  background-position: center;
+  image-rendering: pixelated;
 }
 .card-back::after {
-  content: '?';
-  font-family: var(--px);
-  font-size: 40px;
-  color: var(--dim);
-  opacity: .4;
+  content: '';
 }
-.card-back.trump { border-color: rgba(82,255,143,.4); }
-.card-back.irgc { border-color: rgba(255,90,103,.4); }
+.card-back.trump { 
+  border-color: rgba(82,255,143,.6);
+  background-image: url('image/card/card-back-alliance.png');
+  box-shadow: 0 0 15px rgba(82,255,143,.3);
+}
+.card-back.irgc { 
+  border-color: rgba(255,90,103,.6);
+  background-image: url('image/card/card-back-irgc.png');
+  box-shadow: 0 0 15px rgba(255,90,103,.3);
+}
 
 .big-card {
   width: 170px; height: 250px;
@@ -1542,7 +1701,14 @@ body::before {
   flex: 1; display: flex; align-items: center; justify-content: center;
   background: rgba(0,0,0,.3);
   font-family: var(--px); font-size: 7px; color: var(--dim);
-  text-align: center; padding: 8px;
+  text-align: center; padding: 0;
+  overflow: hidden;
+}
+.big-card .card-art img {
+  image-rendering: pixelated;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 .big-card .card-voice {
   padding: 10px 8px;
@@ -1937,6 +2103,26 @@ body::before {
 .codex-card-img.has-image::before {
   display: none;
 }
+.codex-card-tag {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(6,8,12,.75);
+  font-family: var(--px);
+  font-size: 9px;
+  color: var(--gold);
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  opacity: 0;
+  transition: opacity .2s;
+  z-index: 2;
+  text-shadow: 0 2px 8px rgba(0,0,0,.8);
+}
+.codex-card:hover .codex-card-tag {
+  opacity: 1;
+}
 .codex-card-body {
   padding: 12px;
 }
@@ -1987,10 +2173,49 @@ body::before {
   cursor: pointer;
   transition: all .2s;
   letter-spacing: .1em;
-  margin-bottom: 24px;
 }
 .codex-detail-back:hover {
   background: rgba(255,210,74,.15);
+}
+
+/* Detail top nav bar — back + counter + prev/next all in one row */
+.codex-detail-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.codex-detail-nav .codex-detail-back {
+  margin-bottom: 0;
+  flex-shrink: 0;
+}
+.codex-nav-counter {
+  font-family: var(--px);
+  font-size: 9px;
+  color: var(--dim);
+  letter-spacing: .1em;
+  white-space: nowrap;
+  flex: 1;
+  text-align: center;
+}
+.codex-nav-btn {
+  font-family: var(--px);
+  font-size: 10px;
+  padding: 8px 14px;
+  background: transparent;
+  border: 2px solid var(--gold);
+  color: var(--gold);
+  cursor: pointer;
+  transition: all .2s;
+  letter-spacing: .1em;
+  flex-shrink: 0;
+}
+.codex-nav-btn:hover {
+  background: rgba(255,210,74,.15);
+}
+.codex-nav-btn:disabled {
+  opacity: .2;
+  cursor: not-allowed;
 }
 .codex-detail-img {
   width: 100%;
@@ -2664,7 +2889,12 @@ body::before {
     <div class="codex-grid" id="codex-grid"></div>
     <div class="codex-detail" id="codex-detail">
       <div class="codex-detail-inner">
-        <button class="codex-detail-back" id="btn-codex-detail-back"><span class="btn-en">◀ BACK TO GRID</span><span class="btn-fa">◀ بازگشت</span></button>
+        <div class="codex-detail-nav">
+          <button class="codex-detail-back" id="btn-codex-detail-back"><span class="btn-en">◀ BACK TO GRID</span><span class="btn-fa">◀ بازگشت</span></button>
+          <span class="codex-nav-counter" id="codex-nav-counter"></span>
+          <button class="codex-nav-btn prev" id="btn-codex-prev">◀ PREV</button>
+          <button class="codex-nav-btn next" id="btn-codex-next">NEXT ▶</button>
+        </div>
         <div class="codex-detail-img" id="codex-detail-img"></div>
         <div class="codex-detail-title" id="codex-detail-title"></div>
         <div class="codex-detail-title-fa" id="codex-detail-title-fa"></div>
@@ -2756,6 +2986,9 @@ body::before {
               
               <!-- Status flags positioned on the larger canvas -->
               <div class="flags-container" id="flags-container"></div>
+              
+              <!-- Voice markers - smuggled messages from inside Iran -->
+              <div class="voices-container" id="voices-container"></div>
             </div>
           </div>
           
@@ -3706,6 +3939,8 @@ const TRUMP_CARDS = [
   { id: 'confuse', 
     name: { en: 'CONFUSE', fa: 'گیج کردن' }, 
     gate: null,
+    art: 'image/card/trump_confuse.png',
+    artPosition: '15%',
     desc: { 
       en: 'Post erratic, apocalyptic threats on Truth Social. The "madman strategy" keeps the IRGC guessing about what America will do next.',
       fa: 'تهدیدهای نامنظم و آخرالزمانی در Truth Social. "استراتژی دیوانه" سپاه را در حدس نگه می‌دارد.'
@@ -3716,6 +3951,8 @@ const TRUMP_CARDS = [
   { id: 'airstrike', 
     name: { en: 'AIRSTRIKE', fa: 'حمله هوایی' }, 
     gate: { bar: 'pol', min: 30 },
+    art: 'image/card/trump_airstrike.png',
+    artPosition: '60%',
     desc: { 
       en: 'Precision drone strikes on IRGC commanders and military infrastructure. Israel and the US have eliminated dozens of regime figures this way.',
       fa: 'حملات دقیق پهپادی به فرماندهان سپاه و زیرساخت‌های نظامی. اسرائیل و آمریکا ده‌ها چهره رژیم را این‌گونه حذف کرده‌اند.'
@@ -3727,17 +3964,21 @@ const TRUMP_CARDS = [
   { id: 'blockade', 
     name: { en: 'BLOCKADE', fa: 'محاصره' }, 
     gate: null,
+    art: 'image/card/trump_blockade.png',
+    artPosition: '40%',
     desc: { 
       en: 'Naval blockade of Iranian oil exports through the Strait of Hormuz. The regime recently dumped oil into the ocean rather than close wells.',
       fa: 'محاصره دریایی صادرات نفت ایران از تنگه هرمز. رژیم اخیراً نفت را به اقیانوس ریخت تا چاه‌ها را نبندد.'
     },
-    effects: { lev: +3, pol: -5, all: -1, grip: +2, chest: -8, proxy: -3 },
+    effects: { lev: +3, pol: -5, all: -1, grip: +2, chest: -6, proxy: -3 },
     setsFlag: 'BLOCKADE',
     voice: { en: "Strait closed to regime tankers. End of story.", fa: "تنگه برای نفتکش‌های رژیم بسته شد. پایان داستان." }
   },
   { id: 'escort', 
     name: { en: 'ESCORT', fa: 'اسکورت' }, 
     gate: null,
+    art: 'image/card/trump_escort.png',
+    artPosition: '35%',
     desc: { 
       en: 'US Navy carrier group escorts allied tankers through the Strait. Shows commitment to freedom of navigation and protecting Gulf allies.',
       fa: 'ناوگان هواپیمابر آمریکا نفتکش‌های متحد را از تنگه عبور می‌دهد. تعهد به آزادی دریانوردی و حفاظت از متحدان خلیج.'
@@ -3749,16 +3990,20 @@ const TRUMP_CARDS = [
   { id: 'sanction', 
     name: { en: 'SANCTION', fa: 'تحریم' }, 
     gate: null,
+    art: 'image/card/trump_sanction.png',
+    artPosition: '60%',
     desc: { 
       en: 'Freeze regime bank accounts and shell companies worldwide. Maximum pressure cuts off funding for the IRGC and its proxy militias.',
       fa: 'مسدود کردن حساب‌های بانکی و شرکت‌های پوششی رژیم در سراسر جهان. فشار حداکثری بودجه سپاه و شبه‌نظامیان را قطع می‌کند.'
     },
-    effects: { lev: +2, pol: -1, all: +1, grip: +1, chest: -7, proxy: -4 },
+    effects: { lev: +2, pol: -1, all: +1, grip: +1, chest: -5, proxy: -4 },
     voice: { en: "Frozen. Every account. Every shell company.", fa: "مسدود شد. هر حساب. هر شرکت پوششی." }
   },
   { id: 'diplomacy', 
     name: { en: 'DIPLOMACY', fa: 'دیپلماسی' }, 
     gate: { bar: 'all', min: 1 },
+    art: 'image/card/trump_diplomacy.png',
+    artPosition: '40%',
     desc: { 
       en: 'Offer negotiations to test regime willingness to deal. Could lead to ceasefire or expose their bad faith to the world.',
       fa: 'پیشنهاد مذاکره برای آزمایش تمایل رژیم. می‌تواند به آتش‌بس منجر شود یا بدعهدی آنها را افشا کند.'
@@ -3769,6 +4014,8 @@ const TRUMP_CARDS = [
   { id: 'selloil', 
     name: { en: 'SELL OIL', fa: 'فروش نفت' }, 
     gate: { bar: 'all', min: 10 },
+    art: 'image/card/trump_sell_oil.png',
+    artPosition: '70%',
     desc: { 
       en: "Release US strategic petroleum reserves to crash oil prices. Lower prices devastate the regime's only major revenue source.",
       fa: 'آزادسازی ذخایر استراتژیک نفت آمریکا برای سقوط قیمت‌ها. قیمت پایین تنها منبع درآمد رژیم را نابود می‌کند.'
@@ -3779,6 +4026,8 @@ const TRUMP_CARDS = [
   { id: 'armjavidan', 
     name: { en: 'ARM JAVIDAN', fa: 'مسلح کردن جاویدان' }, 
     gate: { bar: 'all', min: 20 },
+    art: 'image/card/trump_arm_javidan.png',
+    artPosition: '65%',
     desc: { 
       en: 'Supply weapons to the Javidan resistance fighters inside Iran. The Lion and Sun flag rises as Iranians arm themselves for liberation.',
       fa: 'تأمین سلاح برای جنگجویان مقاومت جاویدان در ایران. پرچم شیر و خورشید برمی‌خیزد و ایرانیان برای آزادی مسلح می‌شوند.'
@@ -3789,6 +4038,8 @@ const TRUMP_CARDS = [
   { id: 'invade', 
     name: { en: 'INVADE', fa: 'حمله زمینی' }, 
     gate: { bar: 'pol', min: 50, bar2: 'all', min2: 40 },
+    art: 'image/card/trump_invade.png',
+    artPosition: '80%',
     desc: { 
       en: 'Full ground invasion with US Marines landing at Bandar Abbas. The ultimate escalation—regime change by force.',
       fa: 'حمله زمینی کامل با فرود تفنگداران دریایی آمریکا در بندرعباس. تشدید نهایی — تغییر رژیم با زور.'
@@ -3806,26 +4057,32 @@ const IRGC_CARDS = [
   { id: 'harass', 
     name: { en: 'HARASS STRAIT', fa: 'آزار تنگه' }, 
     gate: { bar: 'proxy', min: 10 },
+    art: 'image/card/irgc_harass.png',
+    artPosition: '70%',
     desc: { 
       en: 'Send fast attack boats to harass commercial shipping in the Strait of Hormuz. Threaten global oil supplies to gain leverage.',
       fa: 'ارسال قایق‌های تندرو برای آزار کشتیرانی تجاری در تنگه هرمز. تهدید منابع نفت جهانی برای کسب اهرم.'
     },
-    effects: { lev: -4, pol: -5, all: -3, grip: +3, chest: -3, proxy: +2 },
+    effects: { lev: -4, pol: -5, all: -3, grip: +3, chest: -1, proxy: +2 },
     voice: { en: "We do not retreat from our waters.", fa: "ما از آب‌های خود عقب‌نشینی نمی‌کنیم." }
   },
   { id: 'attack', 
     name: { en: 'ATTACK NEIGHBORS', fa: 'حمله به همسایگان' }, 
     gate: { bar: 'proxy', min: 20 },
+    art: 'image/card/irgc_attack_neighbors.png',
+    artPosition: '45%',
     desc: { 
       en: 'Launch drone and missile attacks on Saudi Arabia, UAE, or Israel. Proxy forces strike regime enemies across the region.',
       fa: 'حملات پهپادی و موشکی به عربستان، امارات یا اسرائیل. نیروهای نیابتی دشمنان رژیم را در سراسر منطقه می‌زنند.'
     },
-    effects: { lev: -3, pol: -4, all: -5, grip: +2, chest: -4, proxy: +5 },
+    effects: { lev: -3, pol: -4, all: -5, grip: +2, chest: -2, proxy: +5 },
     voice: { en: "We strike anywhere we choose.", fa: "هر جا بخواهیم ضربه می‌زنیم." }
   },
   { id: 'execute', 
     name: { en: 'EXECUTE DISSIDENTS', fa: 'اعدام مخالفان' }, 
     gate: { bar: 'grip', min: 25 },
+    art: 'image/card/irgc_execute.png',
+    artPosition: '75%',
     desc: { 
       en: "Mass executions of protesters and political prisoners. The regime's brutal response to the January uprising that killed over 30,000.",
       fa: 'اعدام‌های دسته‌جمعی معترضان و زندانیان سیاسی. پاسخ وحشیانه رژیم به قیام ژانویه که بیش از ۳۰ هزار نفر را کشت.'
@@ -3835,7 +4092,9 @@ const IRGC_CARDS = [
   },
   { id: 'capture', 
     name: { en: 'CAPTURE AIRMEN', fa: 'اسیر کردن خلبان' }, 
-    gate: { bar: 'proxy', min: 25, special: 'airstrikeUsed' },
+    gate: { bar: 'proxy', min: 25 },
+    art: 'image/card/irgc_capture.png',
+    artPosition: '55%',
     desc: { 
       en: 'Capture downed American pilots after an airstrike. Use them as hostages for negotiating leverage.',
       fa: 'اسیر کردن خلبانان آمریکایی سرنگون‌شده پس از حمله هوایی. استفاده از آنها به عنوان گروگان برای اهرم مذاکره.'
@@ -3846,6 +4105,8 @@ const IRGC_CARDS = [
   { id: 'aivideo', 
     name: { en: 'AI VIDEO', fa: 'ویدیوی هوش مصنوعی' }, 
     gate: null,
+    art: 'image/card/irgc_aivideo.png',
+    artPosition: '30%',
     desc: { 
       en: 'Release AI-generated propaganda videos showing IRGC victories. The infamous LEGO-style videos meant to boost morale and confuse.',
       fa: 'انتشار ویدیوهای تبلیغاتی ساخته هوش مصنوعی از پیروزی‌های سپاه. ویدیوهای بدنام سبک لگو برای تقویت روحیه و گیج کردن.'
@@ -3856,6 +4117,8 @@ const IRGC_CARDS = [
   { id: 'freehijab', 
     name: { en: 'FREE HIJAB', fa: 'آزادی حجاب' }, 
     gate: null,
+    art: 'image/card/irgc_freehijab.png',
+    artPosition: '25%',
     desc: { 
       en: 'Relax mandatory hijab enforcement to reduce public anger. A desperate concession from the regime that sparked the Woman Life Freedom movement.',
       fa: 'کاهش اجبار حجاب برای کم کردن خشم عمومی. امتیاز ناامیدانه رژیم که جنبش زن زندگی آزادی را برانگیخت.'
@@ -3866,6 +4129,8 @@ const IRGC_CARDS = [
   { id: 'rally', 
     name: { en: 'NIGHTLY RALLY', fa: 'تجمع شبانه' }, 
     gate: null,
+    art: 'image/card/irgc_rally.png',
+    artPosition: '35%',
     desc: { 
       en: 'Organize paid pro-regime rallies with bused-in supporters. State TV broadcasts crowds chanting support for the Supreme Leader.',
       fa: 'برگزاری تجمعات حکومتی با حامیان اتوبوسی. تلویزیون دولتی جمعیت را در حال شعار حمایت از رهبر پخش می‌کند.'
@@ -3876,22 +4141,26 @@ const IRGC_CARDS = [
   { id: 'selloil', 
     name: { en: 'SELL OIL', fa: 'فروش نفت' }, 
     gate: null,
+    art: 'image/card/irgc_selloil.png',
+    artPosition: '35%',
     desc: { 
       en: "Export oil through smuggling networks to China and others. The regime's main revenue source—unless the US blockade cuts it off.",
       fa: 'صادرات نفت از طریق شبکه‌های قاچاق به چین و دیگران. منبع اصلی درآمد رژیم — مگر اینکه محاصره آمریکا آن را قطع کند.'
     },
-    effects: { lev: -2, pol: -1, all: -1, grip: +2, chest: +8, proxy: +1 },
+    effects: { lev: -2, pol: -1, all: -1, grip: +2, chest: +10, proxy: +1 },
     blockedBy: 'BLOCKADE',
     voice: { en: "The tankers sail tonight. Beijing pays in gold.", fa: "نفتکش‌ها امشب حرکت می‌کنند. پکن با طلا می‌پردازد." }
   },
   { id: 'import', 
     name: { en: 'IMPORT MILITIA', fa: 'وارد کردن شبه‌نظامی' }, 
     gate: { bar: 'chest', min: 15, bar2: 'proxy', min2: 20 },
+    art: 'image/card/irgc_importmilitia.png',
+    artPosition: '35%',
     desc: { 
       en: 'Bring in Iraqi PMF and Afghan Fatemiyoun militias. The regime cannot trust its own forces, so it imports loyal fighters.',
       fa: 'وارد کردن شبه‌نظامیان حشدالشعبی عراق و فاطمیون افغان. رژیم به نیروهای خود اعتماد ندارد، پس جنگجویان وفادار وارد می‌کند.'
     },
-    effects: { lev: -1, pol: -3, all: +4, grip: +6, chest: -10, proxy: +5 },
+    effects: { lev: -1, pol: -3, all: +4, grip: +6, chest: -7, proxy: +5 },
     setsFlag: 'IRAQI_PMF',
     voice: { en: "Loyal forces from beyond our borders strengthen the Sepah.", fa: "نیروهای وفادار از آن سوی مرزها سپاه را تقویت می‌کنند." }
   }
@@ -3905,10 +4174,11 @@ const IRGC_CARDS = [
 const CODEX_DATA = [
   {
     id: 'c1-1979',
+    tag: 'HIJACK',
     title: { en: '1979 — THE HIJACK', fa: '۱۳۵۷ — ربودن انقلاب' },
     body: {
-      en: "The 1979 revolution toppled the Shah, but it was hijacked within months by Khomeini's Islamists. The non-religious factions that brought millions into the streets were purged, executed, or driven into exile. The Iranian people have been resisting an occupying force from within ever since.",
-      fa: 'انقلاب ۱۳۵۷ شاه را برانداخت، اما در عرض چند ماه توسط اسلام‌گرایانِ پیرو خمینی ربوده شد. ملت ایران از همان روز تاکنون با اشغالگری از درون می‌جنگد.'
+      en: "The 1979 revolution toppled the Shah, our nation was hijacked by an brutal theocracy that has grown into a military dictatorship. The Iranian people have been resisting an occupying force from within ever since.",
+      fa: ''
     },
     bullets: [
       'Original 1979 coalition: leftists, nationalists, liberals, clerics',
@@ -3916,11 +4186,12 @@ const CODEX_DATA = [
       'Islamic Republic constitution ratified December 1979',
       '46 years of continuous internal resistance and external pressure'
     ],
-    img: 'image/codex/1979-hijack.png',
+    img: 'image/codex/codex_hijack.png',
     label_data: '[ CODEX — 1979 HIJACK ]'
   },
   {
     id: 'c2-pahlavi',
+    tag: 'TRANSITION',
     title: { en: 'REZA PAHLAVI — 40 YEARS OF SOLITUDE', fa: 'رضا پهلوی — چهل سال تنهایی' },
     body: {
       en: "For four decades, the Crown Prince walked alone. Mocked by the regime. Ignored by Western politicians who preferred appeasing terrorists to supporting freedom. He carried the weight of an exiled crown without any guarantee his nation would call him back. Then, in January 2026, it did.",
@@ -3928,15 +4199,16 @@ const CODEX_DATA = [
     },
     bullets: [
       'Living in exile since 1979',
-      'Calls for democracy and a secular Iran chosen by referendum',
-      'Endorsed Woman, Life, Freedom (Zan, Zendegi, Azadi) movement',
-      'The January 2026 surge moved on his explicit call to action'
+      'He created the Iran Prosperity Project, a detailed plan to transition Iran to secular democracy.',
+      'Pahlavi is a household name inside Iran and a unifying figure when no opposition can rise up under oppression.',
+      'His support inside Iran was demonstrated by the January 2026 surge when millions of protesters moved on his explicit call to action.'
     ],
     img: 'image/portrait/iranian_people/pahlavi.png',
     label_data: '[ CODEX — REZA PAHLAVI ]'
   },
   {
     id: 'c3-lion-sun',
+    tag: 'SYMBOL',
     title: { en: 'THE LION & SUN', fa: 'شیر و خورشید' },
     body: {
       en: "Iran's flag before 1979. A lion holding a sword, a sun rising behind. Banned by the regime, criminalized inside Iran, but worn proudly by every protester from Tehran to Westwood. It predates the Islamic Republic by more than 800 years.",
@@ -3948,11 +4220,12 @@ const CODEX_DATA = [
       "Carrying it inside Iran can be prosecuted as moharebeh",
       "Reza Pahlavi: post-regime flag is a question for the people's referendum"
     ],
-    img: 'image/codex/lion-and-sun.png',
+    img: 'image/codex/codex_lion_sun.png',
     label_data: '[ CODEX — LION & SUN FLAG ]'
   },
   {
     id: 'c4-mahsa',
+    tag: 'SPARK',
     title: { en: 'ZHINA "MAHSA" AMINI — 2022', fa: 'ژینا «مهسا» امینی — ۲۰۲۲' },
     body: {
       en: "A 22-year-old Iranian-Kurdish woman beaten to death by the morality police for showing too much hair. Her death set off the largest protest movement in the regime's 40-year history. The chant: Woman, Life, Freedom (Zan, Zendegi, Azadi).",
@@ -3969,6 +4242,7 @@ const CODEX_DATA = [
   },
   {
     id: 'c5-january-surge',
+    tag: 'UPRISING',
     title: { en: 'JANUARY 2026 — THE SURGE', fa: 'ژانویه ۲۰۲۵ — خروش' },
     body: {
       en: '48 hours of joy in early January. Millions flooded the streets after Reza Pahlavi\'s call. The chant "Javid Shah" — Long Live the King — filled neighborhoods. The fear evaporated. People looked to their left and right and saw a nation reborn.',
@@ -3977,14 +4251,16 @@ const CODEX_DATA = [
     bullets: [
       "Following the Prince's explicit January call to action",
       'Estimated millions of demonstrators in 48 hours',
-      '"Javid Shah" chants in Tehran, Mashhad, Esfahan, Shiraz, Tabriz',
-      "Preceded the regime's blackout-and-massacre response"
+      '"Javid Shah" chants in every city in Iran, from Tehran to Mashhad, Esfahan, Shiraz, and Tabriz',
+      'The regime responded by firing live rounds into crowds and even hunting protestors in hospitals.'
+      'More than 40,000 of mostly young people were killed.'
     ],
-    img: 'image/codex/january-surge.png',
+    img: 'image/codex/codex_january_surge.png',
     label_data: '[ CODEX — JANUARY SURGE ]'
   },
   {
     id: 'c6-massacre',
+    tag: 'TRAGEDY',
     title: { en: 'THE MASSACRE — 40,000 SOULS', fa: 'کشتار — ۴۰هزار جان' },
     body: {
       en: "When the streets surged after the Prince's call, the regime's answer was slaughter. Body bags ran out. Eighteen-wheelers carried away the bravest children. They tried to drown the revolution in blood.",
@@ -3993,7 +4269,7 @@ const CODEX_DATA = [
     bullets: [
       'Estimated 40,000+ killed during the January 2026 wave',
       'IRGC trucks mounted with machine guns opened fire on civilians',
-      'Body bags ran out; 18-wheelers used to clear bodies',
+      'Families were forced to search for their loved ones among thousands of body bags.',
       'The internet went dark to hide casualty counts from the world'
     ],
     img: 'image/story/massacre.png',
@@ -4001,6 +4277,7 @@ const CODEX_DATA = [
   },
   {
     id: 'c7-internet-blackout',
+    tag: 'CENSORSHIP',
     title: { en: 'WHEN THE INTERNET GOES DARK', fa: 'وقتی اینترنت قطع می‌شود' },
     body: {
       en: "The regime cuts the cable when bullets fly. A blackout is not a glitch — it is the prelude to a massacre. Diaspora groups have built mesh networks, smuggled Starlink terminals, and trained citizen reporters to keep the truth coming out.",
@@ -4008,47 +4285,55 @@ const CODEX_DATA = [
     },
     bullets: [
       'Iran has the highest rate of internet shutdowns of any country',
-      'Starlink terminals smuggled in by diaspora and resistance networks',
-      'VPN use is functionally universal in urban Iran',
-      'Blackout = world should assume the worst is happening'
+      'Starlink terminals smuggled inside are illegal and their use has been punished by execution.',
+      'Officials and propagandists have "White SIM Cards" which allow them to communicate only the regimes message to the outside world.',
+      'When a government resorts to censoring its entire population, the world should assume the worst is happening.'
     ],
     img: 'image/story/internet-blackout.png',
     label_data: '[ CODEX — INTERNET BLACKOUT ]'
   },
   {
     id: 'c8-khamenei',
+    tag: 'TYRANT',
     title: { en: 'ALI KHAMENEI — THE ARCHITECT OF MISERY', fa: 'علی خامنه‌ای — معمار رنج' },
     body: {
-      en: "Supreme Leader from 1989. He ordered the executions, the proxy wars, the suppression of every protest movement for 36 years. The dictator who designed the apparatus that killed the bravest of an entire generation. In this game-world: assassinated. The euphoria swept Iran like a hurricane.",
-      fa: 'رهبر جمهوری اسلامی از ۱۳۶۸. کسی که فرمان اعدام، جنگ‌های نیابتی و سرکوب هر جنبش اعتراضی را در ۳۶ سال صادر کرد. در این بازی: ترور شده.'
+      en: "A savory, pan-fried meat patty made from a blend of ground beef or lamb, grated potatoes, and onions. It is seasoned with turmeric, saffron, and aromatic herbs, then coated in breadcrumbs to achieve a golden, crispy exterior.",
+      fa: 'یک کتلت خوشمزه و سرخ‌شده از مخلوط گوشت چرخ‌کرده گاو یا گوسفند، سیب‌زمینی رنده‌شده و پیاز. با زردچوبه، زعفران و سبزی‌های معطر چاشنی زده شده و با آرد سوخاری پوشانده می‌شود تا پوسته‌ای طلایی و ترد پیدا کند.'
     },
     bullets: [
-      'Born 1939; Supreme Leader of Iran from 1989',
-      'Ordered the response to every major protest wave: 1999, 2009, 2017, 2019, 2022, 2026',
+      'The second so called Supreme Leader of Iran beggining in 1989',
+      'He is responsible for countless atrocities and unbelievable cruelty to the Iranian people.',
+      'Ordered a brutal response to every major protest wave: 1999, 2009, 2017, 2019, 2022, 2026',
       'Held final authority over IRGC, judiciary, foreign policy, nuclear program',
-      'In this game scenario, has been assassinated, leaving a vacuum'
+      'Killed by an all female Israeli Airstrike on February 28th using munitions that we dipped in pork fat.',
+      'Supporters could not give Khamenei a proper barrial and he is believe to be still in refrigeration.',
+      'Regime propagandists still control his social media accounts and occasional send tweets on his behalf from hell.'
     ],
-    img: 'image/codex/khamenei.png',
+    img: 'image/codex/codex_khamenei.png',
     label_data: '[ CODEX — ALI KHAMENEI ]'
   },
   {
     id: 'c9-mojtaba-cardboard',
+    tag: 'VACUUM',
     title: { en: 'MOJTABA + THE CARDBOARD', fa: 'مجتبی و مقوای تبلیغاتی' },
     body: {
       en: "Khamenei's son and presumed heir lies in a coma. The regime, desperate for continuity, props up an actual cardboard cutout of Mojtaba to issue official statements \"from his bedside.\" A leaked photo of the cutout's edge is the meme that broke the regime's spell.",
       fa: 'پسر خامنه‌ای و جانشین فرضی او در کما است. رژیم، در ناامیدی برای حفظ تداوم، یک مقوای تبلیغاتیِ واقعی از مجتبی ساخته است تا «از بستر بیماری» بیانیه صادر کند.'
     },
     bullets: [
-      "Mojtaba Khamenei was the regime's succession plan",
-      'Coma announcement coincided with the post-Khamenei vacuum',
-      'The cardboard cutout is real in the game-world; based on regime tradition of staged photo-ops',
-      'Cardboard Mojtaba fires as a one-shot the first turn Regime Grip drops below 35%'
+      'Mojtaba Khamenei was selected by the Assembly of Experts and installed as the third Supreme Leader.',
+      'He has not been seen in public, created a video or an audio recording since the first airstrikes of the war.',
+      'He is believed to be severely injured, potentially in a coma or even dead.',
+      'A crude cardboard cutout was used at ceremonies celebrating his installation.',
+      'Elements of the regime now claim to deliver unverifyable message from Mojtaba.',
+      'His condition creates a power vacuum delegitimizing the religious authorities and allowing the IRGC to defacto run the country.'
     ],
-    img: 'image/codex/cardboard-mojtaba.png',
+    img: 'image/codex/codex_cardboard_mojtaba.png',
     label_data: '[ CODEX — MOJTABA CARDBOARD ]'
   },
   {
     id: 'c10-irgc',
+    tag: 'MILITARY',
     title: { en: 'IRGC — THE GUARD CORPS', fa: 'سپاه پاسداران انقلاب اسلامی' },
     body: {
       en: "A parallel army founded in 1979 by Khomeini, loyal not to the nation but to the regime. They control major sectors of the Iranian economy through front companies. They are the iron skeleton holding the Islamic Republic upright. They are the obstacle waiting to be removed.",
@@ -4056,15 +4341,16 @@ const CODEX_DATA = [
     },
     bullets: [
       'Designated terrorist organization by the US (2019), Canada (2024), and others',
-      'Estimated to control 20-40% of the Iranian economy through front companies',
+      'Also a mafia that controls 20-40% of the Iranian economy through front companies',
       'Operates Quds Force (foreign ops) and the Basij (internal repression)',
-      'Their commanders are in line for personal sanctions, indictments, and prosecution'
+      'Their commanders are in line for personal sanctions, indictments, and prosecution',
     ],
     img: 'image/portrait/irgc/irgc.png',
     label_data: '[ CODEX — IRGC ]'
   },
   {
     id: 'c11-basij',
+    tag: 'ENFORCERS',
     title: { en: 'BASIJ — THE VOLUNTEER ENFORCERS', fa: 'بسیج — مأموران داوطلب' },
     body: {
       en: "The IRGC's paramilitary auxiliary. Mosque-recruited, ideologically primed, often unpaid in money but rewarded in privilege — university quotas, jobs, exemption from rules. They are who is on the corner when the protest starts. They are what the protest fears most.",
@@ -4081,6 +4367,7 @@ const CODEX_DATA = [
   },
   {
     id: 'c12-proxies',
+    tag: 'PROXIES',
     title: { en: 'THE OCTOPUS — IRGC PROXIES', fa: 'هشت‌پا — نیروهای نیابتی سپاه' },
     body: {
       en: "Hezbollah in Lebanon. The Houthis in Yemen. Kataib Hezbollah in Iraq. Liwa Fatemiyoun in Syria. Hamas in Gaza. The IRGC's tentacles. Funded, trained, armed, and given missions from Tehran. Cripple the tentacles, and the head can be cut.",
@@ -4097,6 +4384,7 @@ const CODEX_DATA = [
   },
   {
     id: 'c13-hormuz',
+    tag: 'GEOGRAPHY',
     title: { en: 'STRAIT OF HORMUZ — THE CHOKEPOINT', fa: 'تنگه هرمز — گلوگاه جهان' },
     body: {
       en: "A narrow passage between Iran and Oman. Roughly 20% of all the world's petroleum passes through it every day. Whoever controls Hormuz holds the world's gas pump. Iran's southern coast lines its entire northern shore.",
@@ -4106,77 +4394,34 @@ const CODEX_DATA = [
       'About 21 million barrels of oil per day pass through (~20% of global supply)',
       'Width at narrowest point: ~21 nautical miles',
       'Bandar-e Abbas (Iran) and Khasab (Oman) are the dominant ports',
-      'IRGC speedboats from Bandar-e Abbas are how the strait is harassed'
+      'Even with limited resources the IRGC Sepah navy can prevent passage by threatening billion dollar oil tankers and making them uninsurable.',
+      'IRGC speedboats from Bandar-e Abbas, missiles, drones and underwater mines are used to harass the strait and curtail freedom of navigation.',
+      'This effects all countries that use the Persian Gulf to transport oil and other goods including UAE, Saudi Arabia, Qatar, Kuwait and Oman.'
     ],
-    img: 'image/codex/hormuz.png',
+    img: 'image/codex/codex_hormuz.png',
     label_data: '[ CODEX — STRAIT OF HORMUZ ]'
   },
   {
-    id: 'c14-bibi-ally',
-    title: { en: 'STRIKING THE HEAD OF THE OCTOPUS', fa: 'ضربه به سر هشت‌پا' },
-    body: {
-      en: "The Israeli people have stood as a genuine ally to the Iranian people. The IDF strikes the head of the octopus while the Iranian people dismantle its tentacles from within. This is one fight, on two fronts. A free Iran will normalize relations with Israel. The Crown Prince has said so explicitly.",
-      fa: 'مردم اسرائیل متحد واقعی مردم ایران بوده‌اند. ارتش اسرائیل سر هشت‌پا را می‌زند، در حالی‌که مردم ایران از درون بازوهایش را قطع می‌کنند. ایران آزاد، روابط با اسرائیل را عادی خواهد کرد.'
-    },
-    bullets: [
-      "Israeli ops since 2024 have severely degraded Hezbollah's leadership",
-      "Iranian regime is the only state that calls publicly for Israel's destruction",
-      'Reza Pahlavi has visited Israel and called for normalization',
-      'Iranian protesters have publicly thanked the IDF in 2024-25 demonstrations'
-    ],
-    img: 'image/portrait/outsider/bibi.png',
-    label_data: '[ CODEX — IDF AS ALLY ]'
-  },
-  {
-    id: 'c15-diaspora',
-    title: { en: 'WESTWOOD. TRAFALGAR. DUNDAS.', fa: 'وست‌وود. ترافالگار. داندس.' },
-    body: {
-      en: "The Iranian diaspora — Los Angeles, London, Toronto, Berlin, Stockholm — is louder than the regime. Lion & Sun flags fill streets in cities the state media cannot reach. Every rally is a megaphone the regime cannot silence.",
-      fa: 'دیاسپورای ایرانی — لس‌آنجلس، لندن، تورنتو، برلین، استکهلم — از رژیم بلندتر است. بلندگویی که رژیم نمی‌تواند خاموشش کند.'
-    },
-    bullets: [
-      'Largest diaspora hubs: USA (especially LA), Canada (Toronto), UK, Germany, Sweden',
-      'Diaspora-funded media (Manoto, Iran International) reach inside Iran via satellite',
-      'Many diaspora professionals build circumvention/encryption tools used inside Iran',
-      'Overwhelmingly anti-regime; predominantly Pahlavi-aligned'
-    ],
-    img: 'image/portrait/iranian_people/diaspora.png',
-    label_data: '[ CODEX — DIASPORA ]'
-  },
-  {
-    id: 'c16-free-iran',
-    title: { en: 'FREE IRAN — THE FINAL BATTLE', fa: 'ایران آزاد — نبرد نهایی' },
-    body: {
-      en: 'The board is set. The pieces are finally in our favor. The issue is no longer whether the Islamic Republic will fall — only the timing of its collapse. The Iranian people and their King are moving to the absolute top of the battlefield. We will see each other in Free Iran.',
-      fa: 'صفحه چیده شده. مهره‌ها به نفع ماست. دیگر سؤال این نیست که جمهوری اسلامی سقوط می‌کند یا نه — تنها سؤال، زمان آن است. یکدیگر را در ایران آزاد خواهیم دید.'
-    },
-    bullets: [
-      'Succession crisis post-Khamenei has fractured the clerical establishment',
-      'War chest hemorrhaging: sanctions + sabotage + worker strikes',
-      'Proxy network significantly degraded',
-      'Coordinated diaspora and inside-Iran movement is operationally aligned'
-    ],
-    img: 'image/codex/free-iran.png',
-    label_data: '[ CODEX — FREE IRAN ]'
-  },
-  {
-    id: 'c17-hyperinflation',
+    id: 'c14-hyperinflation',
+    tag: 'ECONOMY',
     title: { en: 'HYPERINFLATION — A DAILY GAMBLE', fa: 'تورم لجام‌گسیخته — قمار روزانه' },
     body: {
-      en: "Inside Iran, ordinary acts — buying boots, paying rent, taking a bus — have become daily gambles. The rial has lost over 99% of its value since 1979. Inflation devours wages faster than workers can earn them. The regime's response is to print more money, accelerating the spiral, and to claw the same worthless currency back out of the pockets of the people they pretend to govern.",
+      en: "Inside Iran, ordinary acts — buying boots, paying rent, taking a bus — have become daily gambles. The rial has lost over 99% of its value since 1979 as the government has attempted to print new money to paper over domestic problems. Inflation devours wages faster than workers can earn them. The regime's response is to print more money, accelerating the spiral, and to claw the same worthless currency back out of the pockets of the people they pretend to govern.",
       fa: 'در ایران، کارهای ساده روزمره — خریدن چکمه، اجاره، اتوبوس — قمار مالی شده‌اند. ریال از ۱۳۵۷ تاکنون بیش از ۹۹٪ ارزشش را از دست داده. تورم، حقوق را سریع‌تر از کسب می‌خورد. واکنش رژیم: چاپ پول بیشتر، تشدید بحران، و کشیدن همان پول بی‌ارزش از جیب مردم.'
     },
     bullets: [
       'Rial has lost >99% of its value vs. USD since 1979',
       'Annual inflation has run 30-50% for several consecutive years',
       'Real wages have been negative for most of the last decade',
-      'The regime prints money to pay the IRGC and military first; the rest of the country last'
+      'The regime prints money to pay the IRGC and military first; the rest of the country last',
+      'This has resulted in job loss and food insecurity for most Iranians.'
     ],
-    img: 'image/codex/hyperinflation.png',
+    img: 'image/codex/codex_hyperinflation.png',
     label_data: '[ CODEX — HYPERINFLATION ]'
   },
   {
-    id: 'c18-strikes',
+    id: 'c15-strikes',
+    tag: 'RESISTANCE',
     title: { en: 'GENERAL STRIKES — THE LIFEBLOOD', fa: 'اعتصاب عمومی — رگ حیاتِ رژیم' },
     body: {
       en: "When oil workers walk off, the regime stops bleeding hard currency. Petrochemical, steel, and refinery strikes have hit Iran in waves since 2018. In 2025 the pattern is sharper — wages can no longer buy bread, and the workers in the modern industries the regime feeds on are at the breaking point. The general strike is no longer a question of \"if\". It is invisible until it isn't.",
@@ -4192,23 +4437,60 @@ const CODEX_DATA = [
     label_data: '[ CODEX — GENERAL STRIKES ]'
   },
   {
-    id: 'c19-sanctions',
-    title: { en: 'SANCTIONS — STRANGLING THE FUEL', fa: 'تحریم — خفه‌کردن سوخت' },
+    id: 'c16-bibi-ally',
+    tag: 'ISRAEL',
+    title: { en: 'THE ISRAELI MILITARY - STRIKING THE HEAD OF THE OCTOPUS', fa: 'ضربه به سر هشت‌پا' },
     body: {
-      en: "Crushing financial sanctions from the United States are strangling the regime's revenue streams. The machinery of oppression is literally running out of fuel. Every last resource is being poured into keeping the IRGC and Basij alive — while the rest of the country is left to collapse.",
-      fa: 'تحریم‌های مالی سنگین آمریکا، رگ‌های درآمدی رژیم را خفه می‌کنند. ماشین سرکوب در حال بی‌سوخت شدن است.'
+      en: "The Israeli people have stood as a genuine ally to the Iranian people. The IDF strikes the head of the octopus while the Iranian people dismantle its tentacles from within. This is one fight, on two fronts. A free Iran will normalize relations with Israel. The Crown Prince has said so explicitly.",
+      fa: 'مردم اسرائیل متحد واقعی مردم ایران بوده‌اند. ارتش اسرائیل سر هشت‌پا را می‌زند، در حالی‌که مردم ایران از درون بازوهایش را قطع می‌کنند. ایران آزاد، روابط با اسرائیل را عادی خواهد کرد.'
     },
     bullets: [
-      'SWIFT exclusion since 2012, tightened 2018 and 2024-25',
-      'OFAC sanctions target IRGC commanders, oil sales, shadow-banking networks',
-      'Secondary sanctions deter European and Asian firms from any regime exposure',
-      'Chinese / Russian workarounds exist but at heavy discounts and crippling delays'
+      "The Israeli Air force partnered with US forces to destroy targets in Iran during the current war effort."
+      "The Islamic Republic calls publicly for Israel's destruction",
+      "On its own borders Israel is battling with IRGC proxies, Hamas in Gaza and Hezbolla in souther Lebanon."
+      'Reza Pahlavi has visited Israel and called for normalization of relations once Iran is free.',
+      'Iranian protesters have publicly thanked the IDF in 2024-25 demonstrations'
     ],
-    img: 'image/codex/sanctions.png',
-    label_data: '[ CODEX — SANCTIONS ]'
+    img: 'image/portrait/outsider/bibi.png',
+    label_data: '[ CODEX — IDF AS ALLY ]'
   },
   {
-    id: 'c20-defections',
+    id: 'c17-dignified-transfer',
+    tag: 'AMERICA',
+    title: { en: 'THE EAGLE AND THE LION', fa: 'عقاب و شیر' },
+    body: {
+      en: "American boots walk Persian sand. American eyes watch from the Gulf. American steel fills resistance crates. This is not a distant conflict — this is an alliance, forged in shared sacrifice. When a flag-draped coffin returns to Dover, the question is no longer whether America stands with the Lion. The question is whether it will see this through.",
+      fa: 'چکمه‌های آمریکایی بر خاک ایران راه می‌روند. چشمان آمریکایی از خلیج می‌نگرند. فولاد آمریکایی جعبه‌های مقاومت را پر می‌کند. این جنگی دور نیست — این اتحادی است، ساخته‌شده در فداکاری مشترک. وقتی تابوتی پوشیده از پرچم به دوور بازمی‌گردد، سؤال دیگر این نیست که آمریکا در کنار شیر ایستاده یا نه. سؤال این است که تا آخر خواهد ماند یا نه.'
+    },
+    bullets: [
+      'US Fifth Fleet has patrolled the Persian Gulf continuously since 1980',
+      'Joint US-Israeli operations dismantled IRGC networks in 2024-25',
+      'Covert arms supply to Javidan resistance began under executive authority',
+      'The first American KIA transforms the war — at home and abroad'
+    ],
+    img: 'image/codex/codex_dignified_transfer.png',
+    label_data: '[ CODEX — DIGNIFIED TRANSFER ]'
+  },
+  {
+    id: 'c18-diaspora',
+    tag: 'DIASPORA',
+    title: { en: 'WESTWOOD. TRAFALGAR. DUNDAS.', fa: 'وست‌وود. ترافالگار. داندس.' },
+    body: {
+      en: "The Iranian diaspora — Los Angeles, London, Toronto, Berlin, Stockholm — is the voice of their family and friends inside Iran during the internet blackout. Lion & Sun flags fill streets in cities the state media cannot reach. Every rally is a megaphone the regime cannot silence.",
+      fa: 'دیاسپورای ایرانی — لس‌آنجلس، لندن، تورنتو، برلین، استکهلم — از رژیم بلندتر است. بلندگویی که رژیم نمی‌تواند خاموشش کند.'
+    },
+    bullets: [
+      'Largest diaspora hubs: USA (especially LA), Canada (Toronto), UK, Germany, Sweden',
+      'Diaspora-funded media (Manoto, Iran International) reach inside Iran via satellite',
+      'Many diaspora professionals build circumvention/encryption tools used inside Iran',
+      'Overwhelmingly anti-regime; predominantly Pahlavi-aligned'
+    ],
+    img: 'image/portrait/iranian_people/diaspora.png',
+    label_data: '[ CODEX — DIASPORA ]'
+  },
+  {
+    id: 'c19-defections',
+    tag: 'DEFECTORS',
     title: { en: 'THE SILENT UNDERGROUND', fa: 'زیرزمینِ خاموش' },
     body: {
       en: "Defections are already happening. A silent underground network is forming between ordinary citizens and the conscripts, soldiers, and clerics breaking away from the system. After decades of total security control, the regime has suffered an irreversible fracture. Cracks become tunnels. Tunnels become highways out.",
@@ -4218,10 +4500,28 @@ const CODEX_DATA = [
       'Conscripts increasingly refuse orders to fire on civilians',
       'Mid-rank IRGC officers leak documents to diaspora media',
       "Clerics outside Khamenei's inner circle quietly distance from the regime",
-      'Defection-protection networks run through the diaspora'
+      'Defection-protection networks run through the diaspora',
+      'Reza Pahlavi\'s organization allows defectors to covertly communicate their willingness to support the transitional government when finally called upon.'
     ],
-    img: 'image/codex/defections.png',
+    img: 'image/codex/codex_defector.png',
     label_data: '[ CODEX — SILENT UNDERGROUND ]'
+  },
+  {
+    id: 'c20-free-iran',
+    tag: 'FINALE',
+    title: { en: 'FREE IRAN — THE FINAL BATTLE', fa: 'ایران آزاد — نبرد نهایی' },
+    body: {
+      en: 'The board is set. The pieces are finally in our favor. The issue is no longer whether the Islamic Republic will fall — only the timing of its collapse. The Iranian people and their King are moving to the absolute top of the battlefield. We will see each other in Free Iran.',
+      fa: 'صفحه چیده شده. مهره‌ها به نفع ماست. دیگر سؤال این نیست که جمهوری اسلامی سقوط می‌کند یا نه — تنها سؤال، زمان آن است. یکدیگر را در ایران آزاد خواهیم دید.'
+    },
+    bullets: [
+      'Succession crisis post-Khamenei has fractured the clerical establishment',
+      'War chest hemorrhaging: sanctions + sabotage + worker strikes',
+      'Proxy network significantly degraded',
+      'Coordinated diaspora and inside-Iran movement is operationally aligned'
+    ],
+    img: 'image/codex/codex_finalbattle.png',
+    label_data: '[ CODEX — FREE IRAN ]'
   }
 ];
 
@@ -4251,6 +4551,13 @@ function renderCodexGrid() {
       imgArea.appendChild(img);
     }
     
+    if (entry.tag) {
+      const tag = document.createElement('span');
+      tag.className = 'codex-card-tag';
+      tag.textContent = entry.tag;
+      imgArea.appendChild(tag);
+    }
+    
     const body = document.createElement('div');
     body.className = 'codex-card-body';
     
@@ -4274,8 +4581,12 @@ function renderCodexGrid() {
   });
 }
 
+// Track current codex detail index
+let currentCodexIndex = 0;
+
 // Show codex detail for an entry
 function showCodexDetail(index) {
+  currentCodexIndex = index;
   const entry = CODEX_DATA[index];
   const detail = document.getElementById('codex-detail');
   
@@ -4307,7 +4618,15 @@ function showCodexDetail(index) {
     bulletEl.textContent = bullet;
     bulletsEl.appendChild(bulletEl);
   });
-  
+
+  // Update prev/next nav
+  document.getElementById('btn-codex-prev').disabled = index === 0;
+  document.getElementById('btn-codex-next').disabled = index === CODEX_DATA.length - 1;
+  document.getElementById('codex-nav-counter').textContent = `${index + 1} / ${CODEX_DATA.length}`;
+
+  // Scroll to top
+  detail.scrollTop = 0;
+
   // Slide in detail
   detail.classList.add('active');
 }
@@ -4483,6 +4802,103 @@ const FLAG_DATA = {
     ],
     perTurn: { grip: -4 },
     position: { x: 1800, y: 1150 }  // Isfahan/Southeast
+  }
+};
+
+// ────────────────────────────────────────────────────────────────────────────
+// VOICE MESSAGES - Smuggled messages from inside Iran
+// ────────────────────────────────────────────────────────────────────────────
+
+const VOICE_MESSAGES = {
+  courier_tehran: {
+    portrait: 'image/portrait/anonymous_characters/anon_courier.png',
+    character: { en: 'COURIER — TEHRAN', fa: 'پیک — تهران' },
+    transmission: { en: 'SMUGGLED RECORDING', fa: 'ضبط قاچاق شده' },
+    quote: {
+      en: 'The lists are moving. Names of Basij who turned. Safe houses. Routes out. We are not waiting to be saved.',
+      fa: 'لیست‌ها در حرکتند. نام بسیجی‌هایی که برگشتند. خانه‌های امن. راه‌های خروج. ما منتظر نجات نیستیم.'
+    },
+    position: { x: 1400, y: 650 }
+  },
+  protester_shiraz: {
+    portrait: 'image/portrait/anonymous_characters/anon_protester_wlf.png',
+    character: { en: 'PROTESTER — SHIRAZ', fa: 'معترض — شیراز' },
+    transmission: { en: 'VPN UPLINK', fa: 'اتصال VPN' },
+    quote: {
+      en: 'We were in the streets again last night. More of us than before. They cannot stop us all. Iran is waking up.',
+      fa: 'دیشب دوباره در خیابان‌ها بودیم. بیشتر از قبل. نمی‌توانند همه ما را متوقف کنند. ایران بیدار می‌شود.'
+    },
+    position: { x: 1550, y: 1150 }
+  },
+  journalist_exile: {
+    portrait: 'image/portrait/anonymous_characters/anon_journalist.png',
+    character: { en: 'JOURNALIST — IN HIDING', fa: 'روزنامه‌نگار — مخفی' },
+    transmission: { en: 'SATELLITE BROADCAST — MANOTO', fa: 'پخش ماهواره‌ای — من‌وتو' },
+    quote: {
+      en: 'I have been filing dispatches the regime wants silenced for thirty years. I intend to file thirty more.',
+      fa: 'سی سال است گزارش‌هایی می‌فرستم که رژیم می‌خواهد خاموش شوند. قصد دارم سی سال دیگر هم بفرستم.'
+    },
+    position: { x: 900, y: 750 }
+  },
+  grieving_mother: {
+    portrait: 'image/portrait/anonymous_characters/anon_grieving_mother.png',
+    character: { en: 'MOTHER — EVIN', fa: 'مادر — اوین' },
+    transmission: { en: 'SMUGGLED PHONE VIDEO', fa: 'ویدیوی قاچاق از موبایل' },
+    quote: {
+      en: 'They took my son at dawn. I have already lost everything worth hiding for. Now I have nothing left to fear.',
+      fa: 'پسرم را سحر بردند. همه چیزی که ارزش پنهان کردن داشت را از دست دادم. دیگر چیزی برای ترسیدن ندارم.'
+    },
+    position: { x: 1300, y: 550 }
+  },
+  grieving_father: {
+    portrait: 'image/portrait/anonymous_characters/anon_grieving_father.png',
+    character: { en: 'FATHER — KARAJ', fa: 'پدر — کرج' },
+    transmission: { en: 'VOICE MESSAGE — ENCRYPTED', fa: 'پیام صوتی — رمزنگاری شده' },
+    quote: {
+      en: 'My daughter was nineteen. She wanted to be a doctor. They shot her on the roof. I will stand in that street until they answer for it.',
+      fa: 'دخترم نوزده سال داشت. می‌خواست پزشک شود. روی پشت‌بام به او شلیک کردند. در آن خیابان می‌ایستم تا جواب بدهند.'
+    },
+    position: { x: 1250, y: 600 }
+  },
+  defector_artesh: {
+    portrait: 'image/portrait/anonymous_characters/anon_artesh_defector_1.png',
+    character: { en: 'DEFECTOR — ARTESH', fa: 'منشعب — ارتش' },
+    transmission: { en: 'UNDERGROUND NETWORK', fa: 'شبکه زیرزمینی' },
+    quote: {
+      en: 'I was ordered to fire on civilians. I refused. There are more of us than they know. The silent underground grows.',
+      fa: 'دستور شلیک به غیرنظامیان را داشتم. امتناع کردم. ما بیشتر از آنچه فکر می‌کنند هستیم. زیرزمین خاموش رشد می‌کند.'
+    },
+    position: { x: 750, y: 850 }
+  },
+  javidan_fighter: {
+    portrait: 'image/portrait/anonymous_characters/anon_javidan_1.png',
+    character: { en: 'JAVIDAN — IMMORTAL GUARD', fa: 'جاویدان — گارد جاویدان' },
+    transmission: { en: 'ENCRYPTED BURST', fa: 'انتقال رمزنگاری شده' },
+    quote: {
+      en: 'They trained us to kill for the regime. Now we kill for the people. The Lion stirs.',
+      fa: 'ما را آموزش دادند که برای رژیم بکشیم. حالا برای مردم می‌کشیم. شیر بیدار می‌شود.'
+    },
+    position: { x: 1700, y: 950 }
+  },
+  young_javidan: {
+    portrait: 'image/portrait/anonymous_characters/anon_javidan_2.png',
+    character: { en: 'FIGHTER — KURDISTAN', fa: 'رزمنده — کردستان' },
+    transmission: { en: 'SATELLITE PHONE', fa: 'تلفن ماهواره‌ای' },
+    quote: {
+      en: 'The weapons are coming through. Crates from the mountains. The liberated zones are holding. We will see each other in Free Iran.',
+      fa: 'سلاح‌ها دارند می‌آیند. جعبه‌ها از کوه‌ها. مناطق آزاد شده مقاومت می‌کنند. همدیگر را در ایران آزاد می‌بینیم.'
+    },
+    position: { x: 650, y: 650 }
+  },
+  veteran_defector: {
+    portrait: 'image/portrait/anonymous_characters/anon_artesh_defector_2.png',
+    character: { en: 'VETERAN — KHUZESTAN', fa: 'کهنه‌سرباز — خوزستان' },
+    transmission: { en: 'IRAN INTERNATIONAL', fa: 'ایران اینترنشنال' },
+    quote: {
+      en: 'I served forty years. I watched them hollow out everything I believed in. When the order came to fire on the oil workers, I walked away. I will not fire on my own people.',
+      fa: 'چهل سال خدمت کردم. دیدم که همه چیزی که باور داشتم را توخالی کردند. وقتی دستور شلیک به کارگران نفت آمد، رفتم. به مردم خودم شلیک نمی‌کنم.'
+    },
+    position: { x: 700, y: 1100 }
   }
 };
 
@@ -4876,6 +5292,9 @@ const mapController = {
     if (this.sweepActive) {
       this.sweepAborted = true;
     }
+    if (this.patrolActive) {
+      this.patrolAborted = true;
+    }
     this.isDragging = true;
     this.canvas.classList.add('dragging');
     
@@ -5114,6 +5533,94 @@ const mapController = {
     if (!flagData || !flagData.position) return Promise.resolve();
     this.focusFlag = flagKey;
     return this.panTo(flagData.position.x, flagData.position.y, duration);
+  },
+  
+  // Pan to a voice marker by key
+  panToVoice(voiceKey, duration = 1400) {
+    const voiceData = VOICE_MESSAGES[voiceKey];
+    if (!voiceData || !voiceData.position) return Promise.resolve();
+    return this.panTo(voiceData.position.x, voiceData.position.y, duration);
+  },
+  
+  // ═══════════════════════════════════════════════════════════════════
+  // PATROL LOOP - Cycles through active voices and flags
+  // ═══════════════════════════════════════════════════════════════════
+  
+  patrolActive: false,
+  patrolAborted: false,
+  patrolIndex: 0,
+  
+  // Get list of all points of interest (active voices + active flags)
+  getPatrolTargets() {
+    const targets = [];
+    
+    // Add active voice markers
+    for (const voiceKey of game.activeVoices) {
+      const data = VOICE_MESSAGES[voiceKey];
+      if (data && data.position) {
+        targets.push({ type: 'voice', key: voiceKey, position: data.position });
+      }
+    }
+    
+    // Add active flags
+    for (const flagKey in FLAG_DATA) {
+      if (game.flags[flagKey]) {
+        const data = FLAG_DATA[flagKey];
+        if (data && data.position) {
+          targets.push({ type: 'flag', key: flagKey, position: data.position });
+        }
+      }
+    }
+    
+    return targets;
+  },
+  
+  // Start the continuous patrol loop
+  async startPatrol() {
+    if (this.patrolActive) return;
+    
+    const targets = this.getPatrolTargets();
+    if (targets.length === 0) return;
+    
+    console.log('[MapController] Starting patrol with', targets.length, 'targets');
+    this.patrolActive = true;
+    this.patrolAborted = false;
+    this.patrolIndex = 0;
+    
+    // Zoom out for patrol view
+    if (this.zoom > 1.0) {
+      await this.zoomTo(1.0, 1200);
+    }
+    
+    while (this.patrolActive && !this.patrolAborted) {
+      const target = targets[this.patrolIndex];
+      console.log('[MapController] Patrol visiting', target.type, target.key, '(' + (this.patrolIndex + 1) + '/' + targets.length + ')');
+      
+      // Pan to target
+      await this.panTo(target.position.x, target.position.y, 1400);
+      
+      if (this.patrolAborted) break;
+      
+      // Hold for 5 seconds
+      await this.pause(5000);
+      
+      if (this.patrolAborted) break;
+      
+      // Move to next target (loop back to first after last)
+      this.patrolIndex = (this.patrolIndex + 1) % targets.length;
+    }
+    
+    this.patrolActive = false;
+    console.log('[MapController] Patrol ended, aborted:', this.patrolAborted);
+  },
+  
+  // Stop the patrol loop
+  stopPatrol() {
+    if (this.patrolActive) {
+      console.log('[MapController] Stopping patrol');
+      this.patrolAborted = true;
+      this.patrolActive = false;
+    }
   }
 };
 
@@ -5147,6 +5654,16 @@ const game = {
   trumpCard: null,
   irgcCard: null,
   currentWildcard: null,
+  activeVoices: [],  // Which voice markers to show this day (2-3 random)
+
+  // Select 2-3 random voice markers for the current day
+  selectActiveVoices() {
+    const allVoices = Object.keys(VOICE_MESSAGES);
+    const shuffled = allVoices.sort(() => Math.random() - 0.5);
+    const count = 2 + Math.floor(Math.random() * 2); // 2 or 3
+    this.activeVoices = shuffled.slice(0, count);
+    console.log('[Game] Active voices for day', this.day, ':', this.activeVoices);
+  },
 
   reset() {
     this.playerSide = null;
@@ -5154,7 +5671,7 @@ const game = {
     this.phase = 'select';
     this.bars = {
       trump: { lev: 30, pol: 60, all: 50 },
-      irgc: { grip: 45, chest: 50, proxy: 50 }
+      irgc: { grip: 50, chest: 50, proxy: 50 }
     };
     this.cooldowns = { trump: {}, irgc: {} };
     this.flags = {
@@ -5167,6 +5684,7 @@ const game = {
     this.trumpCard = null;
     this.irgcCard = null;
     this.currentWildcard = null;
+    this.activeVoices = [];
     // Reset per-game interlude tracking (global seen list persists across games)
     interludeManager.resetForNewGame();
   },
@@ -5259,15 +5777,65 @@ const game = {
 };
 
 // ────────────────────────────────────────────────────────────────────────────
-// AI OPPONENT
+// AI OPPONENT - Strategic scoring-based card selection
 // ────────────────────────────────────────────────────────────────────────────
 
 function pickAICard() {
   const aiSide = game.getAISide();
+  const playerSide = game.playerSide;
   const cards = game.getAICards();
   const available = cards.filter(c => game.isCardAvailable(c, aiSide));
   if (available.length === 0) return cards[0];
-  return available[Math.floor(Math.random() * available.length)];
+  
+  const aiMeters = game.bars[aiSide];
+  const playerMeters = game.bars[playerSide];
+  
+  // Find weakest meters for targeting/defending
+  const aiMeterKeys = aiSide === 'trump' ? ['lev', 'pol', 'all'] : ['grip', 'chest', 'proxy'];
+  const playerMeterKeys = playerSide === 'trump' ? ['lev', 'pol', 'all'] : ['grip', 'chest', 'proxy'];
+  
+  const aiWeakest = aiMeterKeys.reduce((min, key) => 
+    aiMeters[key] < aiMeters[min] ? key : min, aiMeterKeys[0]);
+  const playerWeakest = playerMeterKeys.reduce((min, key) => 
+    playerMeters[key] < playerMeters[min] ? key : min, playerMeterKeys[0]);
+  
+  const aiWeakestValue = aiMeters[aiWeakest];
+  const playerWeakestValue = playerMeters[playerWeakest];
+  
+  // Defense urgency: prioritize defense when AI meter is critical
+  const defenseUrgency = aiWeakestValue < 20 ? 2.0 : (aiWeakestValue < 35 ? 1.3 : 1.0);
+  
+  // Score each available card
+  const scored = available.map(card => {
+    const effects = card.effects;
+    
+    // Offense: how much does this card hurt the player's weakest meter?
+    // Negative effect on player = positive offense score
+    const offenseScore = -(effects[playerWeakest] || 0);
+    
+    // Defense: how much does this card help the AI's weakest meter?
+    // Positive effect on AI = positive defense score
+    const defenseScore = (effects[aiWeakest] || 0);
+    
+    // Bonus for cards that deal significant damage across multiple meters
+    let broadDamage = 0;
+    for (const key of playerMeterKeys) {
+      if (effects[key] < -3) broadDamage += 1;
+    }
+    
+    // Combine scores with defense urgency weighting
+    const baseScore = offenseScore + (defenseScore * defenseUrgency) + (broadDamage * 0.5);
+    
+    // Add randomness (0.85 to 1.15) for unpredictability
+    const randomFactor = 0.85 + Math.random() * 0.3;
+    const finalScore = baseScore * randomFactor;
+    
+    return { card, score: finalScore };
+  });
+  
+  // Sort by score descending and pick the best
+  scored.sort((a, b) => b.score - a.score);
+  return scored[0].card;
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -5674,6 +6242,75 @@ function updateFlags() {
   });
 }
 
+// ────────────────────────────────────────────────────────────────────────────
+// VOICE MARKERS - Smuggled messages from inside Iran
+// ────────────────────────────────────────────────────────────────────────────
+
+function renderVoiceMarkers() {
+  const container = document.getElementById('voices-container');
+  container.innerHTML = '';
+  
+  // Only render active voices for this day
+  for (const voiceKey of game.activeVoices) {
+    const data = VOICE_MESSAGES[voiceKey];
+    if (!data) continue;
+    const el = document.createElement('div');
+    el.className = 'voice-marker';
+    el.dataset.voice = voiceKey;
+    
+    // Position marker using absolute pixel coordinates
+    if (data.position) {
+      el.style.left = data.position.x + 'px';
+      el.style.top = data.position.y + 'px';
+    }
+    
+    // Add bubble-left class for markers near right edge
+    if (data.position && data.position.x > 1800) {
+      el.classList.add('bubble-left');
+    }
+    
+    el.innerHTML = `
+      <img class="portrait-img" src="${data.portrait}" alt="${t(data.character)}">
+      <div class="voice-bubble">
+        <div class="vb-header">${t(data.transmission)}</div>
+        <div class="vb-character">${t(data.character)}</div>
+        <div class="vb-quote">"${t(data.quote)}"</div>
+      </div>
+    `;
+    
+    // Click handler to toggle pin (stays visible after hover leaves)
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const wasPinned = el.classList.contains('pinned');
+      // Unpin all others
+      document.querySelectorAll('.voice-marker.pinned').forEach(m => m.classList.remove('pinned'));
+      // Toggle this one
+      if (!wasPinned) {
+        el.classList.add('pinned');
+      }
+    });
+    
+    // Hover on another marker unpins the currently pinned one
+    el.addEventListener('mouseenter', () => {
+      document.querySelectorAll('.voice-marker.pinned').forEach(m => {
+        if (m !== el) m.classList.remove('pinned');
+      });
+    });
+    
+    container.appendChild(el);
+  }
+}
+
+// Close pinned voice bubbles when clicking elsewhere on the map
+function setupVoiceMarkerCloseHandler() {
+  document.getElementById('map-canvas').addEventListener('click', (e) => {
+    // Don't close if clicking on a voice marker (handled by marker's own click)
+    if (!e.target.closest('.voice-marker')) {
+      document.querySelectorAll('.voice-marker.pinned').forEach(m => m.classList.remove('pinned'));
+    }
+  });
+}
+
 function renderRosters() {
   const trumpPanel = document.getElementById('roster-trump');
   const irgcPanel = document.getElementById('roster-irgc');
@@ -5712,10 +6349,14 @@ function createMiniCard(card, side) {
   // Build tooltip HTML showing full card preview with effects
   const e = card.effects;
   // Tooltip positioning handled by CSS based on #game.lang-fa
+  const artPos = card.artPosition || '50%';
+  const tooltipArtContent = card.art 
+    ? `<img src="${card.art}" alt="${t(card.name)}" style="object-position:center ${artPos};">`
+    : `[${t(card.name)}]`;
   const tooltipHtml = `
     <div class="card-tooltip">
       <div class="tooltip-header">${t(card.name)}</div>
-      <div class="tooltip-art">[CARD ART]</div>
+      <div class="tooltip-art${card.art ? ' has-image' : ''}">${tooltipArtContent}</div>
       <div class="tooltip-desc">${t(card.desc) || ''}</div>
       <div class="tooltip-effects">
         <div class="effect-col trump">
@@ -5746,6 +6387,7 @@ function createMiniCard(card, side) {
 function selectCard(card) {
   if (game.phase !== 'select') return; // Prevent multiple plays
   audioManager.playSFX('cardSelect');
+  mapController.stopPatrol();  // Stop camera patrol when card is selected
   game.selectedCard = card;
   commitCard();
 }
@@ -5753,9 +6395,13 @@ function selectCard(card) {
 function createBigCard(card, side) {
   const el = document.createElement('div');
   el.className = `big-card ${side}`;
+  const artPos = card.artPosition || '50%';
+  const artContent = card.art 
+    ? `<img src="${card.art}" alt="${t(card.name)}" style="object-position:center ${artPos};">`
+    : `[${t(card.name)}]`;
   el.innerHTML = `
     <div class="card-header">${t(card.name)}</div>
-    <div class="card-art">[CARD ART]</div>
+    <div class="card-art">${artContent}</div>
   `;
   return el;
 }
@@ -6168,6 +6814,8 @@ function startGame() {
   updateDateDisplay(true);
   updateBars(false); // Don't animate initial bar setup
   renderFlags();
+  game.selectActiveVoices();  // Pick 2-3 random voices for this day
+  renderVoiceMarkers();
   updateFlags();
   clearRevealSlots();
   hideConsequences();
@@ -6178,6 +6826,9 @@ function startGame() {
   // Initialize map controller (starts zoomed in at 1.4x)
   mapController.init();
   
+  // Setup click-away handler for voice bubbles
+  setupVoiceMarkerCloseHandler();
+  
   // Snapshot flag state for next day's comparison
   mapController.snapshotFlags(game.flags);
   
@@ -6185,8 +6836,8 @@ function startGame() {
   setPhase('select');
   renderRosters();
   
-  // Run map sweep in background (purely visual, doesn't affect game state)
-  setTimeout(() => {
+  // Run map sweep in background, then start patrol loop
+  setTimeout(async () => {
     const activeFlags = [];
     for (const key in game.flags) {
       if (key === 'airstrikeUsed') continue;
@@ -6196,10 +6847,13 @@ function startGame() {
     }
     
     if (activeFlags.length > 0) {
-      mapController.startDaySweep(activeFlags, true);
+      await mapController.startDaySweep(activeFlags, true);
     } else {
-      mapController.zoomTo(1.0, 1400);
+      await mapController.zoomTo(1.0, 1400);
     }
+    
+    // Start continuous patrol loop after sweep
+    mapController.startPatrol();
   }, 800);
 }
 
@@ -6352,6 +7006,10 @@ function nextDay() {
     updateBars(false); // No animation - flag effects apply silently during night transition
     updateFlags();
     
+    // Select new voices for this day
+    game.selectActiveVoices();
+    renderVoiceMarkers();
+    
     // Check for win after flag effects
     const flagEndKey = game.checkWin();
     if (flagEndKey) {
@@ -6393,14 +7051,17 @@ function finishNextDay(board, afterInterlude = false) {
   setPhase('select');
   renderRosters();
   
-  // Run map sweep in background (purely visual, doesn't affect game state)
-  setTimeout(() => {
+  // Run map sweep in background, then start patrol loop
+  setTimeout(async () => {
     const changedFlags = mapController.getChangedFlags(game.flags);
     if (changedFlags.length > 0) {
-      mapController.startDaySweep(changedFlags, mapController.zoom > 1.0);
+      await mapController.startDaySweep(changedFlags, mapController.zoom > 1.0);
     } else if (mapController.zoom > 1.0) {
-      mapController.zoomTo(1.0, 1400);
+      await mapController.zoomTo(1.0, 1400);
     }
+    
+    // Start continuous patrol loop after sweep
+    mapController.startPatrol();
   }, 500);
 }
 
@@ -6567,6 +7228,7 @@ function setLanguage(lang) {
   if (game.playerSide) {
     updateBars(false); // No animation on language switch
     renderFlags();
+    renderVoiceMarkers();
     renderRosters();
     updateSelectInstruction(game.phase === 'select');
     updateDateDisplay();
@@ -6775,6 +7437,14 @@ document.getElementById('btn-codex-back').addEventListener('click', () => {
 
 document.getElementById('btn-codex-detail-back').addEventListener('click', () => {
   hideCodexDetail();
+});
+
+document.getElementById('btn-codex-prev').addEventListener('click', () => {
+  if (currentCodexIndex > 0) showCodexDetail(currentCodexIndex - 1);
+});
+
+document.getElementById('btn-codex-next').addEventListener('click', () => {
+  if (currentCodexIndex < CODEX_DATA.length - 1) showCodexDetail(currentCodexIndex + 1);
 });
 
 document.getElementById('btn-codex-select').addEventListener('click', () => {

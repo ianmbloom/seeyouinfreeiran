@@ -10,27 +10,47 @@
 Paste this at the start of every image prompt:
 
 ```
-16-bit pixel art, late 80s/early 90s SNES-era arcade game style.
-Limited 8–12 color palette per scene from the locked Lion-and-Sun palette
-(deep-navy night #06080c, Trump green #52ff8f/#1ecc5e, IRGC red #ff5a67/#c0222e,
-Pahlavi gold #ffd24a, off-white highlight #fafff7, streetlamp orange #ff9e3a,
-bunker amber #ffd54a, warm skin #f4c89c/#a86c4a).
-Heavy 1px black outlines, flat cel-shading, no anti-aliasing, no gradients,
-scanline-friendly. SCENE LIGHTING: night or dawn ONLY — never midday.
+Neo-noir HD pixel art, rendered in the aesthetic space between 16-bit SNES and
+32-bit PC adventure games — inspired by Snatcher, Beneath a Steel Sky, and
+The Last Night. Heavy dithering throughout: dense pointillist dot patterns govern
+all tonal transitions across skies, surfaces, and light falloff — no smooth
+gradients anywhere. Characters and key objects carry crisp 1px black outlines,
+slightly thicker on foreground elements to enforce depth separation. All shading
+uses flat cel-shading foundations with dithered transitions between tonal zones.
+No anti-aliasing, no sub-pixel rendering, scanline-friendly pixel structure.
+Mixed-resolution texture detail — select surfaces carry finer grain than the base
+pixel grid. Lighting is volumetric and cinematic, with multiple distinct light
+sources per scene (lanterns, neon signs, moonlight, streetlamps, fire); high
+contrast deep blacks against warm isolated light pools, with all light falloff
+rendered through dithering rather than gradients. Strict locked palette:
+deep-navy #06080c, greens #52ff8f and #1ecc5e, reds #ff5a67 and #c0222e,
+gold #ffd24a, off-white #fafff7, orange #ff9e3a, amber #ffd54a, warm skin tones
+#f4c89c and #a86c4a — maximum 8–12 colors per scene, with complementary color
+pairings (teal/orange, blue/yellow) for cinematic contrast. Human figures use
+realistic adult proportions — no chibi, no stylization. Compositions are cinematic
+and wide with dramatic vanishing points, strong foreground/background separation,
+and dense environmental storytelling; every scene loaded with narrative detail.
+Persian text and signage integrated naturally into environments.
+Mood: gritty retrofuturist pixel noir — the atmosphere of a Ridley Scott film
+rendered through a late-90s adventure game lens. Serious, dramatic, visceral.
+SCENE LIGHTING: night or dawn ONLY — never midday.
 ```
 
 ## A2. Universal Negative Prompt
 
 ```
---no photorealism, 3D render, anime, cartoon-modern, soft gradients,
-anti-aliasing, lens flare, motion blur, depth of field, HDR, daylight,
-noon sun, bright midday, modern UI elements, social media logos,
-Twitter bird, platform branding, game UI, borders, frames, picture frames,
-decorative borders, card frames, HUD elements, interface chrome, vignette,
-rounded corners, drop shadows on edges
+--no photorealism, 3D render, anime, cartoon-modern, chibi, soft gradients,
+smooth gradients, anti-aliasing, sub-pixel rendering, lens flare, motion blur,
+depth of field, HDR, daylight, noon sun, bright midday, flat unlit surfaces,
+modern UI elements, social media logos, Twitter bird, platform branding, game UI,
+borders, frames, picture frames, decorative borders, card frames, HUD elements,
+interface chrome, vignette, rounded corners, drop shadows on edges,
+painterly brushwork, watercolor, impressionism, cel-shading without dithering
 ```
 
 **Critical:** All assets are raw art only. The game applies borders, frames, and UI chrome at runtime via CSS. Never bake frames or borders into the generated images.
+
+**Style references:** Snatcher (1988), Beneath a Steel Sky (1994), The Last Night (2017). The target is the tonal overlap between these — cinematic noir atmosphere, dithered pixel precision, adult proportions, dense world-building detail.
 
 ---
 
@@ -244,8 +264,11 @@ rounded corners, drop shadows on edges
 
 **Portrait prompt suffix** (add to every portrait prompt):
 ```
-Head and shoulders portrait, 96x96 pixels, tight crop, no frame, no border,
-no picture frame, no decorative elements, raw pixel art, simple background.
+Head and shoulders portrait, tight crop, no frame, no border, no picture frame,
+no decorative elements. Raw pixel art. Simple deep-navy background or single
+contextual light source. Realistic adult proportions. Heavy dithering on skin
+tones and background falloff. Multiple light sources permitted (e.g. CRT glow
++ desk lamp). Cinematic mood. Serious, not caricatured.
 ```
 
 ### Allied / Trump Side
