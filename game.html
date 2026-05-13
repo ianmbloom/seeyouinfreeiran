@@ -5645,7 +5645,10 @@ const mapController = {
   targetZoom: 1.0,
   previousFlags: {},
   isDragging: false,
+  hasMoved: false,
+  moveThreshold: 5,
   dragStart: { x: 0, y: 0 },
+  dragStartPos: { x: 0, y: 0 },
   sweepActive: false,
   sweepAborted: false,
   
@@ -5711,16 +5714,25 @@ const mapController = {
       this.mouseOverMap = false;
       this.updatePatrolPause();
     });
+    
+    // Touch-friendly pause detection
+    this.viewport.addEventListener('touchstart', () => {
+      this.mouseOverMap = true;
+      this.updatePatrolPause();
+    }, { passive: true });
+    this.viewport.addEventListener('touchend', () => {
+      // Delay clearing to allow tap-to-focus to complete
+      setTimeout(() => {
+        this.mouseOverMap = false;
+        this.updatePatrolPause();
+      }, 300);
+    }, { passive: true });
   },
   
   startDrag(e) {
-    if (this.sweepActive) {
-      this.sweepAborted = true;
-    }
-    if (this.patrolActive) {
-      this.patrolAborted = true;
-    }
+    // Don't abort sweep/patrol yet - wait for actual movement
     this.isDragging = true;
+    this.hasMoved = false;
     this.canvas.classList.add('dragging');
     
     const point = e.touches ? e.touches[0] : e;
@@ -5728,6 +5740,8 @@ const mapController = {
       x: point.clientX - this.position.x,
       y: point.clientY - this.position.y
     };
+    // Store starting position to detect movement threshold
+    this.dragStartPos = { x: point.clientX, y: point.clientY };
     
     if (e.touches) e.preventDefault();
   },
@@ -5736,6 +5750,19 @@ const mapController = {
     if (!this.isDragging) return;
     
     const point = e.touches ? e.touches[0] : e;
+    
+    // Check if we've moved beyond threshold (triggers patrol/sweep abort)
+    if (!this.hasMoved) {
+      const dx = Math.abs(point.clientX - this.dragStartPos.x);
+      const dy = Math.abs(point.clientY - this.dragStartPos.y);
+      if (dx > this.moveThreshold || dy > this.moveThreshold) {
+        this.hasMoved = true;
+        // NOW abort patrol/sweep since user is actually dragging
+        if (this.sweepActive) this.sweepAborted = true;
+        if (this.patrolActive) this.patrolAborted = true;
+      }
+    }
+    
     let newX = point.clientX - this.dragStart.x;
     let newY = point.clientY - this.dragStart.y;
     
@@ -5759,6 +5786,14 @@ const mapController = {
     if (!this.isDragging) return;
     this.isDragging = false;
     if (this.canvas) this.canvas.classList.remove('dragging');
+    
+    // Restart patrol after a delay if user actually dragged (not just clicked)
+    if (this.hasMoved && this.patrolAborted) {
+      setTimeout(() => {
+        this.patrolAborted = false;
+        this.startPatrol();
+      }, 2500);
+    }
   },
   
   applyTransform(withTransition = true, duration = 600, easing = null) {
@@ -6022,6 +6057,8 @@ const mapController = {
       await this.zoomTo(1.0, 1200);
     }
     
+    let isFirstIteration = true;
+    
     while (this.patrolActive && !this.patrolAborted) {
       // Wait while paused
       while (this.patrolPaused && !this.patrolAborted) {
@@ -6032,19 +6069,23 @@ const mapController = {
       const target = targets[this.patrolIndex];
       console.log('[MapController] Patrol visiting', target.type, target.key, '(' + (this.patrolIndex + 1) + '/' + targets.length + ')');
       
-      // Pan to target
-      await this.panTo(target.position.x, target.position.y, 1400);
+      // Pan to target (slow drift for reconnaissance feel)
+      await this.panTo(target.position.x, target.position.y, 2800);
       
       if (this.patrolAborted) break;
       
-      // Hold for 5 seconds (checking pause/abort periodically)
-      for (let i = 0; i < 50 && !this.patrolAborted; i++) {
-        while (this.patrolPaused && !this.patrolAborted) {
+      // Skip hold on first iteration (zoom out already provided dwell time)
+      if (!isFirstIteration) {
+        // Hold for 5 seconds (checking pause/abort periodically)
+        for (let i = 0; i < 50 && !this.patrolAborted; i++) {
+          while (this.patrolPaused && !this.patrolAborted) {
+            await this.pause(100);
+          }
+          if (this.patrolAborted) break;
           await this.pause(100);
         }
-        if (this.patrolAborted) break;
-        await this.pause(100);
       }
+      isFirstIteration = false;
       
       if (this.patrolAborted) break;
       
@@ -6812,6 +6853,12 @@ function renderFlags() {
       mapController.panToFlag(flagKey, 800);
     });
     
+    // Forward mousedown to map controller so dragging works through flags
+    el.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      mapController.startDrag(e);
+    });
+    
     container.appendChild(el);
   }
 }
@@ -6861,7 +6908,7 @@ function renderVoiceMarkers() {
     const displayChar = locText ? `${charText} — ${locText}` : charText;
     
     el.innerHTML = `
-      <img class="portrait-img" src="${data.portrait}" alt="${displayChar}">
+      <img class="portrait-img" src="${data.portrait}" alt="${displayChar}" draggable="false">
       <div class="voice-bubble">
         <div class="vb-character">${charText}</div>
         <div class="vb-header">${t(data.transmission)}</div>
@@ -6923,6 +6970,12 @@ function renderVoiceMarkers() {
       typeVoiceQuote();
     });
     
+    // Forward mousedown to map controller so dragging works through voice markers
+    el.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      mapController.startDrag(e);
+    });
+    
     container.appendChild(el);
   }
 }
@@ -6964,6 +7017,7 @@ function renderMapMarkers() {
     icon.className = 'map-marker-icon';
     icon.src = `image/map_elements/map_element_${marker.type}.png`;
     icon.alt = t(marker.name);
+    icon.draggable = false;
     el.appendChild(icon);
     
     // Tooltip with name
@@ -6971,6 +7025,12 @@ function renderMapMarkers() {
     tooltip.className = 'map-marker-tooltip';
     tooltip.textContent = t(marker.name);
     el.appendChild(tooltip);
+    
+    // Forward mousedown to map controller so dragging works through map markers
+    el.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      mapController.startDrag(e);
+    });
     
     container.appendChild(el);
   }
@@ -7007,6 +7067,7 @@ function renderGravestoneMarkers() {
     icon.className = 'gravestone-icon';
     icon.src = 'image/map_elements/map_element_gravestone.png';
     icon.alt = t(javidNamEntry.title);
+    icon.draggable = false;
     el.appendChild(icon);
     
     // Tooltip with name and hint
@@ -7028,6 +7089,12 @@ function renderGravestoneMarkers() {
       setTimeout(() => {
         showMemorialDetail(javidNamIndex);
       }, 100);
+    });
+    
+    // Forward mousedown to map controller so dragging works through gravestones
+    el.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      mapController.startDrag(e);
     });
     
     container.appendChild(el);
