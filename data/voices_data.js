@@ -2,7 +2,7 @@ const VOICE_MESSAGES = {
   courier_tehran: {
       "portrait": "image/portrait/anonymous_characters/anon_courier.png",
       "character": {
-          "en": "COURIER",
+          "en": "WINE COURIER",
           "fa": "پیک"
       },
       "location": {
@@ -10,12 +10,12 @@ const VOICE_MESSAGES = {
           "fa": "تهران"
       },
       "transmission": {
-          "en": "SMUGGLED VOICE MEMO",
-          "fa": "ضبط صوتی قاچاق شده"
+          "en": "DISCORD CONVERSATION",
+          "fa": ""
       },
       "quote": {
-          "en": "We are no longer waiting to be saved.",
-          "fa": "لیست‌ها در حرکتند. نام بسیجی‌هایی که برگشتند. خانه‌های امن. راه‌های خروج. ما منتظر نجات نیستیم."
+          "en": "It is finally our turn. It is our turn to take power. It is our turn to dispense justice.",
+          "fa": ""
       },
       "position": {
           "x": 1396,
@@ -83,7 +83,7 @@ const VOICE_MESSAGES = {
           "fa": "پیام صوتی واتس‌اپ"
       },
       "quote": {
-          "en": "They took my son at dawn. I have already lost everything worth hiding for. Now I have nothing left to fear.",
+          "en": "I lost my only son in January. He was a hero of Iran torn apart at just 17 by Basij animals. We never wanted to get involved but now nothing is left for my husband and I except revenge.",
           "fa": "پسرم را سحر بردند. همه چیزی که ارزش پنهان کردن داشت را از دست دادم. دیگر چیزی برای ترسیدن ندارم."
       },
       "position": {
@@ -106,7 +106,7 @@ const VOICE_MESSAGES = {
           "fa": "پیام صوتی تلگرام"
       },
       "quote": {
-          "en": "My daughter was nineteen. She wanted to be a doctor. They shot her on the roof. I will stand in that street until they answer for it.",
+          "en": "My daughter was nineteen. She wanted to be a doctor. The shot her in the street. I searched through hundreds of body bags to find her.",
           "fa": "دخترم نوزده سال داشت. می‌خواست پزشک شود. روی پشت‌بام به او شلیک کردند. در آن خیابان می‌ایستم تا جواب بدهند."
       },
       "position": {
@@ -117,7 +117,7 @@ const VOICE_MESSAGES = {
   defector_artesh: {
       "portrait": "image/portrait/anonymous_characters/anon_artesh_defector_1.png",
       "character": {
-          "en": "DEFECTOR",
+          "en": "ARTESH DEFECTOR",
           "fa": "منشعب"
       },
       "location": {
@@ -129,8 +129,8 @@ const VOICE_MESSAGES = {
           "fa": "پیام سیگنال"
       },
       "quote": {
-          "en": "I was ordered to fire on civilians. I refused. There are more of us than they know. The silent underground grows.",
-          "fa": "دستور شلیک به غیرنظامیان را داشتم. امتناع کردم. ما بیشتر از آنچه فکر می‌کنند هستیم. زیرزمین خاموش رشد می‌کند."
+          "en": "I cannot get the images of those nights out of my mind. We were ordered to kill our brothers sisters and cousins. When the time comes again I will stand with the people.",
+          "fa": ""
       },
       "position": {
           "x": 1778,
@@ -140,7 +140,7 @@ const VOICE_MESSAGES = {
   javidan_fighter: {
       "portrait": "image/portrait/anonymous_characters/anon_javidan_1.png",
       "character": {
-          "en": "JAVIDAN",
+          "en": "GARD-E JAVIDAN FIGHTER",
           "fa": "جاویدان"
       },
       "location": {
@@ -148,12 +148,12 @@ const VOICE_MESSAGES = {
           "fa": "گارد جاویدان"
       },
       "transmission": {
-          "en": "ENCRYPTED VOICE MEMO",
-          "fa": "پیام صوتی رمزنگاری شده"
+          "en": "GOPRO VIDEO RECORDING",
+          "fa": ""
       },
       "quote": {
-          "en": "They trained us to kill for the regime. Now we kill for the people. The Lion stirs.",
-          "fa": "ما را آموزش دادند که برای رژیم بکشیم. حالا برای مردم می‌کشیم. شیر بیدار می‌شود."
+          "en": "Tonight we eliminated several Basij enforcers at a checkpoint in Mashad city. This operation is dedicated to our fallen daughter Nika Shakarami. Glory to Iran.",
+          "fa": ""
       },
       "position": {
           "x": 1585,
@@ -186,15 +186,15 @@ const VOICE_MESSAGES = {
   veteran_defector: {
       "portrait": "image/portrait/anonymous_characters/anon_artesh_defector_2.png",
       "character": {
-          "en": "VETERAN",
-          "fa": "کهنه‌سرباز"
+          "en": "ARTESH VETERAN",
+          "fa": ""
       },
       "location": {
           "en": "KHUZESTAN",
           "fa": "خوزستان"
       },
       "transmission": {
-          "en": "BBC PERSIAN CALL-IN",
+          "en": "X.COM VIDEO",
           "fa": "تماس با بی‌بی‌سی فارسی"
       },
       "quote": {
@@ -267,7 +267,7 @@ const VOICE_MESSAGES = {
           "fa": "گروه چت سیگنال"
       },
       "quote": {
-          "en": "My \"study circles\" teach first aid, legal rights, how to document abuses. The saline and gauze are hidden under boxes labeled \"old reagents.\" The regime thinks I teach chemistry. I teach survival.",
+          "en": "My study circles teach first aid, legal rights, how to document abuses. The saline and gauze are hidden under boxes labeled \"old reagents.\" The regime thinks I teach chemistry. I teach survival.",
           "fa": "حلقه‌های مطالعاتی من کمک‌های اولیه، حقوق قانونی و مستندسازی سوءاستفاده‌ها را آموزش می‌دهند. سرم و گاز زیر جعبه‌های \"معرف‌های قدیمی\" پنهان‌اند. رژیم فکر می‌کند شیمی درس می‌دهم. من بقا درس می‌دهم."
       },
       "position": {
@@ -382,8 +382,8 @@ const VOICE_MESSAGES = {
           "fa": ""
       },
       "quote": {
-          "en": "In January a flood of young people wounded by gunshots came into our hospital. I keep an encrypted folder of X-rays and bullet trajectories. One day someone will use them as evidence.",
-          "fa": "معترضان و لباس‌شخصی‌ها را یکسان پانسمان می‌کنم. اما باندهایی که دور نیروهای امنیتی می‌پیچم سفت‌تر و کمتر ملایم‌اند. یک پوشه رمزنگاری شده از عکس‌های اشعه ایکس و مسیر گلوله‌ها دارم. روزی کسی از آن‌ها به عنوان مدرک استفاده خواهد کرد."
+          "en": "In January a flood of young protesters wounded by gunshots came into our hospital. I keep an encrypted folder of X-rays and bullet trajectories. One day someone will use them as evidence.",
+          "fa": ""
       },
       "position": {
           "x": 1373,

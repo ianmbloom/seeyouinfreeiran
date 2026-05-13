@@ -16,7 +16,8 @@ const WILDCARDS = [
       "effect": {
           "en": "GRIP -5, LEV +3",
           "fa": "کنترل -۵، اهرم +۳"
-      }
+      },
+      "effects": { grip: -5, lev: +3 }
   },
   {
       "portrait": "image/portrait/outsider/bibi.png",
@@ -35,7 +36,8 @@ const WILDCARDS = [
       "effect": {
           "en": "CHEST -8, GRIP -4",
           "fa": "خزانه -۸، کنترل -۴"
-      }
+      },
+      "effects": { chest: -8, grip: -4 }
   },
   {
       "portrait": "image/portrait/anonymous_characters2/anon_oil_worker.png",
@@ -54,7 +56,8 @@ const WILDCARDS = [
       "effect": {
           "en": "CHEST -10, GRIP -3",
           "fa": "خزانه -۱۰، کنترل -۳"
-      }
+      },
+      "effects": { chest: -10, grip: -3 }
   },
   {
       "portrait": "image/portrait/anonymous_characters2/anon_young_podcaster.png",
@@ -73,7 +76,8 @@ const WILDCARDS = [
       "effect": {
           "en": "GRIP -4",
           "fa": "کنترل -۴"
-      }
+      },
+      "effects": { grip: -4 }
   },
   {
       "portrait": "image/portrait/anonymous_characters2/anon_former_basij.png",
@@ -92,7 +96,8 @@ const WILDCARDS = [
       "effect": {
           "en": "GRIP -5, LEV +3",
           "fa": "کنترل -۵، اهرم +۳"
-      }
+      },
+      "effects": { grip: -5, lev: +3 }
   },
   {
       "portrait": "image/portrait/outsider/putin.png",
@@ -111,7 +116,8 @@ const WILDCARDS = [
       "effect": {
           "en": "GRIP +4, ALLY -4",
           "fa": "کنترل +۴، متحدان -۴"
-      }
+      },
+      "effects": { grip: +4, all: -4 }
   },
   {
       "portrait": "image/portrait/outsider/xi.png",
@@ -130,7 +136,8 @@ const WILDCARDS = [
       "effect": {
           "en": "CHEST +3, ALLY -2",
           "fa": "خزانه +۳، متحدان -۲"
-      }
+      },
+      "effects": { chest: +3, all: -2 }
   },
   {
       "portrait": "image/portrait/iranian_people/diaspora.png",
@@ -149,7 +156,8 @@ const WILDCARDS = [
       "effect": {
           "en": "GRIP -15",
           "fa": "کنترل -۱۵"
-      }
+      },
+      "effects": { grip: -15 }
   },
   {
       "portrait": "image/portrait/outsider/rubio.png",
@@ -168,7 +176,8 @@ const WILDCARDS = [
       "effect": {
           "en": "POL +5, GRIP -3",
           "fa": "سیاسی +۵"
-      }
+      },
+      "effects": { pol: +5, grip: -3 }
   },
   {
       "portrait": "image/portrait/outsider/macron.png",
@@ -187,7 +196,8 @@ const WILDCARDS = [
       "effect": {
           "en": "ALLY -3",
           "fa": "متحدان -۳"
-      }
+      },
+      "effects": { all: -3 }
   },
   {
       "portrait": "image/portrait/outsider/starmer.png",
@@ -206,7 +216,8 @@ const WILDCARDS = [
       "effect": {
           "en": "ALLY +4, POL +2",
           "fa": "متحدان +۴، سیاسی +۲"
-      }
+      },
+      "effects": { all: +4, pol: +2 }
   },
   {
       "portrait": "image/portrait/outsider/zelensky.png",
@@ -225,7 +236,8 @@ const WILDCARDS = [
       "effect": {
           "en": "ALLY +3, PROXY -2",
           "fa": "متحدان +۳، نیابتی -۲"
-      }
+      },
+      "effects": { all: +3, proxy: -2 }
   },
   {
       "portrait": "image/portrait/outsider/opec.png",
@@ -244,6 +256,7 @@ const WILDCARDS = [
       "effect": {
           "en": "CHEST -5",
           "fa": "خزانه -۵"
-      }
+      },
+      "effects": { chest: -5 }
   }
 ];

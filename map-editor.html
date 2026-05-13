@@ -2322,10 +2322,10 @@ function dataChanged(current, original) {
 // Calculate diff between current and original markers
 function calculateMarkerDiffs() {
   const diff = {
-    elements: { added: [], moved: [], modified: [], removed: [] },
-    voices: { added: [], moved: [], modified: [], removed: [] },
-    flags: { added: [], moved: [], modified: [], removed: [] },
-    gravestones: { added: [], moved: [], modified: [], removed: [] }
+    elements: { added: {}, moved: {}, modified: {}, removed: {} },
+    voices: { added: {}, moved: {}, modified: {}, removed: {} },
+    flags: { added: {}, moved: {}, modified: {}, removed: {} },
+    gravestones: { added: {}, moved: {}, modified: {}, removed: {} }
   };
   
   // Build lookup maps
@@ -2347,24 +2347,35 @@ function calculateMarkerDiffs() {
     'gravestone': 'gravestones'
   };
   
+  // Helper to extract marker data for export
+  function markerData(m) {
+    return {
+      position: { x: m.x, y: m.y },
+      name: m.name,
+      fullData: m.fullData
+    };
+  }
+  
   // Find added, moved, and modified
   for (const key of Object.keys(currentByKey)) {
     const current = currentByKey[key];
     const category = typeToCategory[current.assetType];
     
     if (!(key in originalByKey)) {
-      diff[category].added.push(current.assetId);
+      diff[category].added[current.assetId] = markerData(current);
     } else {
       const original = originalByKey[key];
       if (positionChanged(current, original)) {
-        diff[category].moved.push({
-          id: current.assetId,
+        diff[category].moved[current.assetId] = {
           from: { x: original.x, y: original.y },
           to: { x: current.x, y: current.y }
-        });
+        };
       }
       if (dataChanged(current, original)) {
-        diff[category].modified.push(current.assetId);
+        diff[category].modified[current.assetId] = {
+          before: markerData(original),
+          after: markerData(current)
+        };
       }
     }
   }
@@ -2375,7 +2386,7 @@ function calculateMarkerDiffs() {
     const category = typeToCategory[original.assetType];
     
     if (!(key in currentByKey)) {
-      diff[category].removed.push(original.assetId);
+      diff[category].removed[original.assetId] = markerData(original);
     }
   }
   
@@ -2389,8 +2400,8 @@ async function exportBundle() {
   // Count total changes
   let totalChanges = 0;
   for (const category of Object.values(changes)) {
-    totalChanges += category.added.length + category.moved.length +
-                    category.modified.length + category.removed.length;
+    totalChanges += Object.keys(category.added).length + Object.keys(category.moved).length +
+                    Object.keys(category.modified).length + Object.keys(category.removed).length;
   }
 
   // Create ZIP with all JS files + changes.json

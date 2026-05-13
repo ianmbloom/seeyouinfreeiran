@@ -2316,52 +2316,58 @@ function valuesEqual(a, b) {
 
 // Generate diff for object-based collections (like voices)
 function diffObjects(current, original) {
-  const diff = { added: [], modified: [], removed: [] };
+  const diff = { added: {}, modified: {}, removed: {} };
   const currentKeys = Object.keys(current);
   const originalKeys = Object.keys(original);
-  
+
   for (const key of currentKeys) {
     if (!(key in original)) {
-      diff.added.push(key);
+      diff.added[key] = current[key];
     } else if (!valuesEqual(current[key], original[key])) {
-      diff.modified.push(key);
+      diff.modified[key] = {
+        before: original[key],
+        after: current[key]
+      };
     }
   }
-  
+
   for (const key of originalKeys) {
     if (!(key in current)) {
-      diff.removed.push(key);
+      diff.removed[key] = original[key];
     }
   }
-  
+
   return diff;
 }
 
 // Generate diff for array-based collections (like codex, javidnam, etc.)
 function diffArrays(current, original, idField = 'id') {
-  const diff = { added: [], modified: [], removed: [] };
-  
+  const diff = { added: {}, modified: {}, removed: {} };
+
   const currentById = {};
   const originalById = {};
-  
+
   for (const item of current) {
     if (item[idField]) currentById[item[idField]] = item;
   }
   for (const item of original) {
     if (item[idField]) originalById[item[idField]] = item;
   }
-  
+
   for (const id of Object.keys(currentById)) {
     if (!(id in originalById)) {
-      diff.added.push(id);
+      diff.added[id] = currentById[id];
     } else if (!valuesEqual(currentById[id], originalById[id])) {
-      diff.modified.push(id);
+      diff.modified[id] = {
+        before: originalById[id],
+        after: currentById[id]
+      };
     }
   }
-  
+
   for (const id of Object.keys(originalById)) {
     if (!(id in currentById)) {
-      diff.removed.push(id);
+      diff.removed[id] = originalById[id];
     }
   }
   
@@ -2384,7 +2390,7 @@ async function exportBundle() {
   
   // Count total changes
   const totalChanges = Object.values(changes).reduce((sum, diff) => 
-    sum + diff.added.length + diff.modified.length + diff.removed.length, 0);
+    sum + Object.keys(diff.added).length + Object.keys(diff.modified).length + Object.keys(diff.removed).length, 0);
   
   // Create ZIP with all JS files + changes.json
   const zip = new JSZip();
