@@ -1040,6 +1040,9 @@ img { image-rendering: pixelated; image-rendering: crisp-edges; }
 <script src="data/gravestones_data.js"></script>
 <script src="data/elements_data.js"></script>
 
+<!-- JSZip for export bundling -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
 <script>
 // ════════════════════════════════════════════════════════════════════════════
 // CONTENT EDITOR - State Management
@@ -2365,7 +2368,7 @@ function diffArrays(current, original, idField = 'id') {
   return diff;
 }
 
-function exportBundle() {
+async function exportBundle() {
   // Clean wildcards data (remove apply function)
   const cleanWildcards = state.data.wildcards.map(w => { const copy = {...w}; delete copy.apply; return copy; });
   const cleanOriginalWildcards = state.originalData.wildcards.map(w => { const copy = {...w}; delete copy.apply; return copy; });
@@ -2383,37 +2386,42 @@ function exportBundle() {
   const totalChanges = Object.values(changes).reduce((sum, diff) => 
     sum + diff.added.length + diff.modified.length + diff.removed.length, 0);
   
-  const bundle = {
+  // Create ZIP with all JS files + changes.json
+  const zip = new JSZip();
+  const dataFolder = zip.folder('data');
+  
+  // Add all JS data files
+  dataFolder.file('voices_data.js', generateVoicesOutput());
+  dataFolder.file('wildcards_data.js', generateWildcardsOutput());
+  dataFolder.file('codex_data.js', generateCodexOutput());
+  dataFolder.file('javid_nam_data.js', generateJavidNamOutput());
+  dataFolder.file('daily_briefings_data.js', generateDailyOutput());
+  
+  // Add changes summary
+  const changesSummary = {
     _meta: {
       exportedAt: new Date().toISOString(),
       editor: 'content-editor',
-      version: 2,
       totalChanges: totalChanges
     },
-    changes: changes,
-    full: {
-      voices: state.data.voices,
-      wildcards: cleanWildcards,
-      codex: state.data.codex,
-      javidnam: state.data.javidnam,
-      daily: state.data.daily
-    }
+    changes: changes
   };
+  zip.file('changes.json', JSON.stringify(changesSummary, null, 2));
   
-  const json = JSON.stringify(bundle, null, 2);
-  const blob = new Blob([json], { type: 'application/json' });
+  // Generate and download ZIP
+  const blob = await zip.generateAsync({ type: 'blob' });
   const url = URL.createObjectURL(blob);
   
   const timestamp = new Date().toISOString().slice(0,10);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `content-export-${timestamp}.json`;
+  a.download = `content-export-${timestamp}.zip`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
   
-  showExportNotification(`Export downloaded! ${totalChanges} change(s). Email to seeyouinfreeiran@gmail.com`);
+  showExportNotification(`ZIP downloaded! ${totalChanges} change(s). Email to seeyouinfreeiran@gmail.com`);
 }
 
 document.getElementById('btn-export').addEventListener('click', exportBundle);

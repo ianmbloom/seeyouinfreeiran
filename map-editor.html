@@ -931,6 +931,9 @@ img, .map-canvas {
 <script src="data/elements_data.js"></script>
 <script src="data/gravestones_data.js"></script>
 <script src="data/javid_nam_data.js"></script>
+
+<!-- JSZip for export bundling -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body>
 
@@ -2379,68 +2382,52 @@ function calculateMarkerDiffs() {
   return diff;
 }
 
-function exportBundle() {
+async function exportBundle() {
   // Calculate diffs
   const changes = calculateMarkerDiffs();
-  
+
   // Count total changes
   let totalChanges = 0;
   for (const category of Object.values(changes)) {
-    totalChanges += category.added.length + category.moved.length + 
+    totalChanges += category.added.length + category.moved.length +
                     category.modified.length + category.removed.length;
   }
+
+  // Create ZIP with all JS files + changes.json
+  const zip = new JSZip();
+  const dataFolder = zip.folder('data');
   
-  // Build full data export
-  const full = {
-    elements: {},
-    voices: {},
-    flags: {},
-    gravestones: {}
-  };
+  // Add all JS data files
+  dataFolder.file('elements_data.js', generateOutputForType('elements'));
+  dataFolder.file('voices_data.js', generateOutputForType('voices'));
+  dataFolder.file('flags_data.js', generateOutputForType('flags'));
+  dataFolder.file('gravestones_data.js', generateOutputForType('gravestones'));
   
-  for (const marker of state.placedMarkers) {
-    const data = {
-      position: { x: marker.x, y: marker.y },
-      ...marker.fullData
-    };
-    delete data.position.position;
-    
-    if (marker.assetType === 'element') {
-      full.elements[marker.assetId] = data;
-    } else if (marker.assetType === 'voice') {
-      full.voices[marker.assetId] = data;
-    } else if (marker.assetType === 'flag') {
-      full.flags[marker.assetId] = data;
-    } else if (marker.assetType === 'gravestone') {
-      full.gravestones[marker.assetId] = data;
-    }
-  }
-  
-  const bundle = {
+  // Add changes summary
+  const changesSummary = {
     _meta: {
       exportedAt: new Date().toISOString(),
       editor: 'map-editor',
-      version: 2,
       totalChanges: totalChanges
     },
-    changes: changes,
-    full: full
+    changes: changes
   };
+  zip.file('changes.json', JSON.stringify(changesSummary, null, 2));
   
-  const json = JSON.stringify(bundle, null, 2);
-  const blob = new Blob([json], { type: 'application/json' });
+  // Generate and download ZIP
+  const blob = await zip.generateAsync({ type: 'blob' });
   const url = URL.createObjectURL(blob);
-  
+
   const timestamp = new Date().toISOString().slice(0,10);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `map-export-${timestamp}.json`;
+  a.download = `map-export-${timestamp}.zip`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
   
-  showExportNotification(`Export downloaded! ${totalChanges} change(s). Email to seeyouinfreeiran@gmail.com`);
+  showExportNotification(`ZIP downloaded! ${totalChanges} change(s). Email to seeyouinfreeiran@gmail.com`);
 }
 
 document.getElementById('btn-export').addEventListener('click', exportBundle);
