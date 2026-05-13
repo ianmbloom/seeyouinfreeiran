@@ -1087,6 +1087,7 @@ body::before {
 .flags-container {
   position: absolute; inset: 0;
   pointer-events: none;
+  z-index: 5;
 }
 .flag {
   position: absolute;
@@ -1095,10 +1096,17 @@ body::before {
   border: 2px solid var(--bdr);
   font-family: var(--px); font-size: 9px;
   color: var(--dim); background: rgba(6,8,12,.8);
-  opacity: .35;
-  pointer-events: auto;
+  opacity: 0;
+  pointer-events: none;
   cursor: help;
   transform: translate(-50%, -50%);
+  /* z-index set dynamically based on Y position */
+}
+.flag:hover {
+  z-index: 9000 !important;
+}
+.flag.focused {
+  z-index: 9001 !important;
   transition: opacity .3s, border-color .3s, color .3s, box-shadow .3s;
   z-index: 20;
 }
@@ -1109,6 +1117,7 @@ body::before {
   opacity: 1; border-color: var(--gold); color: var(--gold);
   background: rgba(6,8,12,.95);
   box-shadow: 0 0 12px rgba(255,210,74,.3);
+  pointer-events: auto;
 }
 .flag .icon { font-size: 20px; line-height: 1; }
 .flag .flag-label { text-align: center; line-height: 1.2; }
@@ -1198,7 +1207,7 @@ body::before {
   border-radius: 6px;
   padding: 12px;
   width: 220px;
-  z-index: 100;
+  z-index: 10000;
   opacity: 0;
   pointer-events: none;
   transition: opacity .2s;
@@ -1255,6 +1264,7 @@ body::before {
 .voices-container {
   position: absolute; inset: 0;
   pointer-events: none;
+  z-index: 10;
 }
 
 .voice-marker {
@@ -1263,11 +1273,14 @@ body::before {
   pointer-events: auto;
   cursor: pointer;
   transform: translate(-50%, -50%);
-  z-index: 5;
+  /* z-index set dynamically based on Y position */
+}
+.voice-marker:hover {
+  z-index: 9000 !important;
 }
 .voice-marker.open,
 .voice-marker.pinned {
-  z-index: 15;
+  z-index: 9001 !important;
 }
 
 .voice-marker .portrait-img {
@@ -1303,7 +1316,7 @@ body::before {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s ease;
-  z-index: 100;
+  z-index: 10000;
 }
 
 /* Show bubble on hover OR when pinned */
@@ -1367,7 +1380,16 @@ body::before {
   font-size: 9px;
   color: var(--dim);
   letter-spacing: .1em;
+  margin-bottom: 2px;
+}
+
+.voice-bubble .vb-location {
+  font-family: var(--px);
+  font-size: 8px;
+  color: var(--gold);
+  letter-spacing: .08em;
   margin-bottom: 8px;
+  opacity: 0.8;
 }
 
 .voice-bubble .vb-quote {
@@ -1388,6 +1410,163 @@ body::before {
   font-size: 18px;
   line-height: 1.6;
   direction: rtl;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   MAP MARKERS - Cities, ports, oil fields, nuclear sites
+   ═══════════════════════════════════════════════════════════════════ */
+
+.map-markers-container {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.map-marker {
+  position: absolute;
+  pointer-events: auto;
+  cursor: default;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  /* z-index set dynamically based on Y position */
+}
+.map-marker:hover {
+  z-index: 9000 !important;
+}
+
+.map-marker-icon {
+  width: 96px;
+  height: 96px;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  transition: filter 0.2s ease;
+}
+
+.map-marker:hover .map-marker-icon {
+  filter: brightness(1.2);
+}
+
+.map-marker-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 4px;
+  padding: 4px 8px;
+  background: rgba(6,8,12,.9);
+  border: 1px solid rgba(250,255,247,.3);
+  font-family: var(--px);
+  font-size: 8px;
+  color: var(--txt);
+  letter-spacing: .1em;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 10000;
+}
+
+.map-marker:hover .map-marker-tooltip {
+  opacity: 1;
+}
+
+/* Marker type-specific colors */
+.map-marker[data-type="oil"] .map-marker-tooltip { border-color: rgba(255,180,50,.5); }
+.map-marker[data-type="nuclear_site"] .map-marker-tooltip { border-color: rgba(255,90,103,.5); }
+.map-marker[data-type="port"] .map-marker-tooltip { border-color: rgba(100,180,255,.5); }
+
+/* Farsi support for map markers */
+#game.lang-fa .map-marker-tooltip {
+  font-family: var(--fa);
+  font-size: 10px;
+  direction: rtl;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   GRAVESTONE MARKERS - Javid Nam memorials
+   ═══════════════════════════════════════════════════════════════════ */
+
+.gravestones-container {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.gravestone-marker {
+  position: absolute;
+  pointer-events: auto;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* z-index set dynamically based on Y position */
+}
+.gravestone-marker:hover {
+  z-index: 9000 !important;
+}
+
+.gravestone-icon {
+  width: 72px;
+  height: 72px;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  transition: filter 0.2s ease;
+}
+
+.gravestone-marker:hover .gravestone-icon {
+  filter: drop-shadow(0 0 6px rgba(250,255,247,.5));
+}
+
+.gravestone-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 6px;
+  padding: 6px 10px;
+  background: rgba(6,8,12,.95);
+  border: 1px solid rgba(250,255,247,.4);
+  font-family: var(--px);
+  font-size: 9px;
+  color: var(--txt);
+  letter-spacing: .08em;
+  white-space: nowrap;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 10000;
+}
+
+.gravestone-marker:hover .gravestone-tooltip {
+  opacity: 1;
+}
+
+.gravestone-tooltip .gs-name {
+  display: block;
+  margin-bottom: 2px;
+}
+
+.gravestone-tooltip .gs-hint {
+  display: block;
+  font-size: 7px;
+  color: rgba(250,255,247,.5);
+  letter-spacing: .05em;
+}
+
+/* Farsi support for gravestone tooltips */
+#game.lang-fa .gravestone-tooltip {
+  font-family: var(--fa);
+  font-size: 11px;
+  direction: rtl;
+}
+
+#game.lang-fa .gravestone-tooltip .gs-hint {
+  font-size: 9px;
 }
 
 /* Map viewport - clips the larger map canvas */
@@ -1840,8 +2019,12 @@ body::before {
   border: 2px solid var(--gold); border-radius: 6px;
   background: rgba(0,0,0,.4);
   display: flex; align-items: center; justify-content: center;
-  font-family: var(--px); font-size: 6px; color: var(--dim);
   flex-shrink: 0;
+  overflow: hidden;
+}
+.wildcard .wc-portrait img {
+  width: 100%; height: 100%;
+  object-fit: cover;
 }
 .wildcard .wc-message {
   position: relative;
@@ -3703,6 +3886,12 @@ body::before {
               
               <!-- Voice markers - smuggled messages from inside Iran -->
               <div class="voices-container" id="voices-container"></div>
+              
+              <!-- Location markers - cities, ports, oil, nuclear (hover for name) -->
+              <div class="map-markers-container" id="map-markers-container"></div>
+              
+              <!-- Gravestone markers - Javid Nam memorials (click to remember) -->
+              <div class="gravestones-container" id="gravestones-container"></div>
             </div>
           </div>
           
@@ -3741,7 +3930,7 @@ body::before {
           <div class="wildcard" id="wildcard">
             <div class="wc-title">WILDCARD</div>
             <div class="wc-content">
-              <div class="wc-portrait" id="wc-portrait">[CHAR]</div>
+              <div class="wc-portrait" id="wc-portrait"><img id="wc-portrait-img" src="" alt=""></div>
               <div class="wc-message">
                 <div class="wc-character" id="wc-character"></div>
                 <div class="wc-quote" id="wc-quote"></div>
@@ -3847,6 +4036,16 @@ body::before {
   <button class="lang-btn active" data-lang="en">EN</button>
   <button class="lang-btn" data-lang="fa">فا</button>
 </div>
+
+<!-- External data files (editable via map-editor.html and content-editor.html) -->
+<script src="data/flags_data.js"></script>
+<script src="data/voices_data.js"></script>
+<script src="data/elements_data.js"></script>
+<script src="data/gravestones_data.js"></script>
+<script src="data/wildcards_data.js"></script>
+<script src="data/codex_data.js"></script>
+<script src="data/javid_nam_data.js"></script>
+<script src="data/daily_briefings_data.js"></script>
 
 <script>
 // ════════════════════════════════════════════════════════════════════════════
@@ -4883,818 +5082,17 @@ const IRGC_CARDS = [
   }
 ];
 
-// ════════════════════════════════════════════════════════════════════════════
-// FREE IRAN BRIEFING (CODEX) — Educational entries about the Iranian situation
-// Structure: id, title{en,fa}, body{en,fa}, bullets[], img, label_data
-// ════════════════════════════════════════════════════════════════════════════
+// CODEX_DATA is now loaded from data/codex_data.js
 
-const CODEX_DATA = [
-  {
-    id: 'c1-1979',
-    tag: 'HIJACK',
-    title: { en: '1979 — THE HIJACK', fa: '۱۳۵۷ — ربودن انقلاب' },
-    body: {
-      en: "The 1979 revolution toppled the Shah, our nation was hijacked by an brutal theocracy that has grown into a military dictatorship. The Iranian people have been resisting an occupying force from within ever since.",
-      fa: ''
-    },
-    bullets: [
-      'Original 1979 coalition: leftists, nationalists, liberals, clerics',
-      'Khomeini consolidated by purging non-Islamist allies within 12 months',
-      'Islamic Republic constitution ratified December 1979',
-      '46 years of continuous internal resistance and external pressure'
-    ],
-    img: 'image/codex/codex_hijack.png',
-    label_data: '[ CODEX — 1979 HIJACK ]'
-  },
-  {
-    id: 'c2-pahlavi',
-    tag: 'TRANSITION',
-    title: { en: 'REZA PAHLAVI — 40 YEARS OF SOLITUDE', fa: 'رضا پهلوی — چهل سال تنهایی' },
-    body: {
-      en: "For four decades, the Crown Prince walked alone. Mocked by the regime. Ignored by Western politicians who preferred appeasing terrorists to supporting freedom. He carried the weight of an exiled crown without any guarantee his nation would call him back. Then, in January 2026, it did.",
-      fa: 'چهل سال — شاهزاده در تنهایی محض راه رفت. رژیم مسخره‌اش کرد. غرب نادیده‌اش گرفت. اما او وزن تاجی در تبعید را بر دوش کشید — تا ژانویه ۲۰۲۵، وقتی ملت او را خواند.'
-    },
-    bullets: [
-      'Living in exile since 1979',
-      'He created the Iran Prosperity Project, a detailed plan to transition Iran to secular democracy.',
-      'Pahlavi is a household name inside Iran and a unifying figure when no opposition can rise up under oppression.',
-      'His support inside Iran was demonstrated by the January 2026 surge when millions of protesters moved on his explicit call to action.'
-    ],
-    img: 'image/portrait/iranian_people/pahlavi.png',
-    label_data: '[ CODEX — REZA PAHLAVI ]'
-  },
-  {
-    id: 'c3-lion-sun',
-    tag: 'SYMBOL',
-    title: { en: 'THE LION & SUN', fa: 'شیر و خورشید' },
-    body: {
-      en: "Iran's flag before 1979. A lion holding a sword, a sun rising behind. Banned by the regime, criminalized inside Iran, but worn proudly by every protester from Tehran to Westwood. It predates the Islamic Republic by more than 800 years.",
-      fa: 'پرچم ایران پیش از ۱۳۵۷. شیری که شمشیر دارد و خورشیدی که از پشتش طلوع می‌کند. ممنوع. جرم. اما با افتخار از تهران تا وست‌وود برافراشته می‌شود — و تاریخش از جمهوری اسلامی هشت قرن قدیمی‌تر است.'
-    },
-    bullets: [
-      'Used as a Persian state emblem since the 12th century',
-      'Banned by the Islamic Republic in 1980',
-      "Carrying it inside Iran can be prosecuted as moharebeh",
-      "Reza Pahlavi: post-regime flag is a question for the people's referendum"
-    ],
-    img: 'image/codex/codex_lion_sun.png',
-    label_data: '[ CODEX — LION & SUN FLAG ]'
-  },
-  {
-    id: 'c4-mahsa',
-    tag: 'SPARK',
-    title: { en: 'ZHINA "MAHSA" AMINI — 2022', fa: 'ژینا «مهسا» امینی — ۲۰۲۲' },
-    body: {
-      en: "A 22-year-old Iranian-Kurdish woman beaten to death by the morality police for showing too much hair. Her death set off the largest protest movement in the regime's 40-year history. The chant: Woman, Life, Freedom (Zan, Zendegi, Azadi).",
-      fa: 'دختر ۲۲ ساله کرد که گشت ارشاد او را به‌خاطر چند تار مو کشت. مرگش بزرگ‌ترین جنبش اعتراضی ۴۰ سال اخیر را برپا کرد. شعار: زن، زندگی، آزادی.'
-    },
-    bullets: [
-      '"Zhina" was her real (Kurdish) name; "Mahsa" was a regime-approved alias',
-      'Arrested by the morality police (Gasht-e Ershad) in Tehran, Sept 13 2022',
-      'Died in custody Sept 16 2022',
-      'The 2022-23 protests reached every Iranian province and ~120 cities'
-    ],
-    img: 'image/portrait/dissident/portait_mahsa_v2.png',
-    label_data: '[ CODEX — MAHSA AMINI ]'
-  },
-  {
-    id: 'c5-january-surge',
-    tag: 'UPRISING',
-    title: { en: 'JANUARY 2026 — THE SURGE', fa: 'ژانویه ۲۰۲۵ — خروش' },
-    body: {
-      en: '48 hours of joy in early January. Millions flooded the streets after Reza Pahlavi\'s call. The chant "Javid Shah" — Long Live the King — filled neighborhoods. The fear evaporated. People looked to their left and right and saw a nation reborn.',
-      fa: '۴۸ ساعت شادی در ابتدای ژانویه. به دعوت رضا پهلوی، میلیون‌ها نفر به خیابان‌ها ریختند. شعار «جاوید شاه» محله‌ها را پر کرد. ترس بخار شد.'
-    },
-    bullets: [
-      "Following the Prince's explicit January call to action",
-      'Estimated millions of demonstrators in 48 hours',
-      '"Javid Shah" chants in every city in Iran, from Tehran to Mashhad, Esfahan, Shiraz, and Tabriz',
-      'The regime responded by firing live rounds into crowds and even hunting protestors in hospitals.',
-      'More than 40,000 of mostly young people were killed.'
-    ],
-    img: 'image/codex/codex_january_surge.png',
-    label_data: '[ CODEX — JANUARY SURGE ]'
-  },
-  {
-    id: 'c6-massacre',
-    tag: 'TRAGEDY',
-    title: { en: 'THE MASSACRE — 40,000 SOULS', fa: 'کشتار — ۴۰هزار جان' },
-    body: {
-      en: "When the streets surged after the Prince's call, the regime's answer was slaughter. Body bags ran out. Eighteen-wheelers carried away the bravest children. They tried to drown the revolution in blood.",
-      fa: 'وقتی خیابان‌ها به صدای شاهزاده پاسخ دادند، پاسخ رژیم کشتار بود. کیسه‌های جنازه تمام شد. کامیون‌های هجده‌چرخ، جوانان بی‌باک ما را با خود بردند. خواستند انقلاب را در خون غرق کنند.'
-    },
-    bullets: [
-      'Estimated 40,000+ killed during the January 2026 wave',
-      'IRGC trucks mounted with machine guns opened fire on civilians',
-      'Families were forced to search for their loved ones among thousands of body bags.',
-      'The internet went dark to hide casualty counts from the world'
-    ],
-    img: 'image/story/massacre.png',
-    label_data: '[ CODEX — JANUARY MASSACRE ]'
-  },
-  {
-    id: 'c7-internet-blackout',
-    tag: 'CENSORSHIP',
-    title: { en: 'WHEN THE INTERNET GOES DARK', fa: 'وقتی اینترنت قطع می‌شود' },
-    body: {
-      en: "The regime cuts the cable when bullets fly. A blackout is not a glitch — it is the prelude to a massacre. Diaspora groups have built mesh networks, smuggled Starlink terminals, and trained citizen reporters to keep the truth coming out.",
-      fa: 'وقتی گلوله می‌بارد، رژیم اینترنت را قطع می‌کند. خاموشی یک نقص فنی نیست — مقدمه کشتار است.'
-    },
-    bullets: [
-      'Iran has the highest rate of internet shutdowns of any country',
-      'Starlink terminals smuggled inside are illegal and their use has been punished by execution.',
-      'Officials and propagandists have "White SIM Cards" which allow them to communicate only the regimes message to the outside world.',
-      'When a government resorts to censoring its entire population, the world should assume the worst is happening.'
-    ],
-    img: 'image/story/internet-blackout.png',
-    label_data: '[ CODEX — INTERNET BLACKOUT ]'
-  },
-  {
-    id: 'c8-khamenei',
-    tag: 'TYRANT',
-    title: { en: 'ALI KHAMENEI — THE ARCHITECT OF MISERY', fa: 'علی خامنه‌ای — معمار رنج' },
-    body: {
-      en: "A savory, pan-fried meat patty made from a blend of ground beef or lamb, grated potatoes, and onions. It is seasoned with herbs, then coated in breadcrumbs to achieve a golden, crispy exterior.",
-      fa: 'یک کتلت خوشمزه و سرخ‌شده از مخلوط گوشت چرخ‌کرده گاو یا گوسفند، سیب‌زمینی رنده‌شده و پیاز. با زردچوبه، زعفران و سبزی‌های معطر چاشنی زده شده و با آرد سوخاری پوشانده می‌شود تا پوسته‌ای طلایی و ترد پیدا کند.'
-    },
-    bullets: [
-      'The second so called Supreme Leader of Iran beggining in 1989',
-      'He is responsible for countless atrocities and unbelievable cruelty to the Iranian people.',
-      'Ordered a brutal response to every major protest wave: 1999, 2009, 2017, 2019, 2022, 2026',
-      'Held final authority over IRGC, judiciary, foreign policy, nuclear program',
-      'Killed by an all female Israeli Airstrike on February 28th using munitions that we dipped in pork fat.',
-      'Supporters could not give Khamenei a proper barrial and he is believe to be still in refrigeration.',
-      'Regime propagandists still control his social media accounts and occasional send tweets on his behalf from hell.'
-    ],
-    img: 'image/codex/codex_khamenei.png',
-    label_data: '[ CODEX — ALI KHAMENEI ]'
-  },
-  {
-    id: 'c9-mojtaba-cardboard',
-    tag: 'VACUUM',
-    title: { en: 'MOJTABA + THE CARDBOARD', fa: 'مجتبی و مقوای تبلیغاتی' },
-    body: {
-      en: "Khamenei's son and presumed heir lies in a coma. The regime, desperate for continuity, props up an actual cardboard cutout of Mojtaba to issue official statements \"from his bedside.\" A leaked photo of the cutout's edge is the meme that broke the regime's spell.",
-      fa: 'پسر خامنه‌ای و جانشین فرضی او در کما است. رژیم، در ناامیدی برای حفظ تداوم، یک مقوای تبلیغاتیِ واقعی از مجتبی ساخته است تا «از بستر بیماری» بیانیه صادر کند.'
-    },
-    bullets: [
-      'Mojtaba Khamenei was selected by the Assembly of Experts and installed as the third Supreme Leader.',
-      'He has not been seen in public, created a video or an audio recording since the first airstrikes of the war.',
-      'He is believed to be severely injured, potentially in a coma or even dead.',
-      'A crude cardboard cutout was used at ceremonies celebrating his installation.',
-      'Elements of the regime now claim to deliver unverifyable message from Mojtaba.',
-      'His condition creates a power vacuum delegitimizing the religious authorities and allowing the IRGC to defacto run the country.'
-    ],
-    img: 'image/codex/codex_cardboard_mojtaba.png',
-    label_data: '[ CODEX — MOJTABA CARDBOARD ]'
-  },
-  {
-    id: 'c10-irgc',
-    tag: 'MILITARY',
-    title: { en: 'IRGC — THE GUARD CORPS', fa: 'سپاه پاسداران انقلاب اسلامی' },
-    body: {
-      en: "A parallel army founded in 1979 by Khomeini, loyal not to the nation but to the regime. They control major sectors of the Iranian economy through front companies. They are the iron skeleton holding the Islamic Republic upright. They are the obstacle waiting to be removed.",
-      fa: 'ارتشی موازی که خمینی در ۱۳۵۷ بنیان نهاد — وفادار نه به ملت، که به نظام. ستون آهنیِ نگه‌دارنده جمهوری اسلامی. مانعی که باید برداشته شود.'
-    },
-    bullets: [
-      'Designated terrorist organization by the US (2019), Canada (2024), and others',
-      'Also a mafia that controls 20-40% of the Iranian economy through front companies',
-      'Operates Quds Force (foreign ops) and the Basij (internal repression)',
-      'Their commanders are in line for personal sanctions, indictments, and prosecution',
-    ],
-    img: 'image/portrait/irgc/irgc.png',
-    label_data: '[ CODEX — IRGC ]'
-  },
-  {
-    id: 'c11-basij',
-    tag: 'ENFORCERS',
-    title: { en: 'BASIJ — THE VOLUNTEER ENFORCERS', fa: 'بسیج — مأموران داوطلب' },
-    body: {
-      en: "The IRGC's paramilitary auxiliary. Mosque-recruited, ideologically primed, often unpaid in money but rewarded in privilege — university quotas, jobs, exemption from rules. They are who is on the corner when the protest starts. They are what the protest fears most.",
-      fa: 'نیروی شبه‌نظامیِ سپاه. در مساجد جذب می‌شوند. اغلب بی‌حقوق، اما با امتیاز.'
-    },
-    bullets: [
-      'Membership estimates: from several hundred thousand to several million',
-      'First-line crowd-control against demonstrations',
-      '"Lebas-Shakhsi" plain-clothes motorcycle squads beat and kidnap protesters',
-      'Recruitment incentives: university quotas, government jobs, special permits'
-    ],
-    img: 'image/story/basij.png',
-    label_data: '[ CODEX — BASIJ MILITIA ]'
-  },
-  {
-    id: 'c12-proxies',
-    tag: 'PROXIES',
-    title: { en: 'THE OCTOPUS — IRGC PROXIES', fa: 'هشت‌پا — نیروهای نیابتی سپاه' },
-    body: {
-      en: "Hezbollah in Lebanon. The Houthis in Yemen. Kataib Hezbollah in Iraq. Liwa Fatemiyoun in Syria. Hamas in Gaza. The IRGC's tentacles. Funded, trained, armed, and given missions from Tehran. Cripple the tentacles, and the head can be cut.",
-      fa: 'حزب‌الله. حوثی‌ها. کتائب حزب‌الله. لشکر فاطمیون. حماس. بازوهای هشت‌پای سپاه — همگی از تهران تأمین، تربیت و مأموریت می‌گیرند.'
-    },
-    bullets: [
-      'Estimated annual proxy spending in the multiple billions of USD',
-      'Hezbollah substantially degraded since 2024 Israeli operations',
-      'Houthis continue Red Sea / Bab-el-Mandeb attacks',
-      'Iraqi Shia militias control border crossings and skim oil revenue'
-    ],
-    img: 'image/story/proxy-octopus.png',
-    label_data: '[ CODEX — PROXY OCTOPUS ]'
-  },
-  {
-    id: 'c13-hormuz',
-    tag: 'GEOGRAPHY',
-    title: { en: 'STRAIT OF HORMUZ — THE CHOKEPOINT', fa: 'تنگه هرمز — گلوگاه جهان' },
-    body: {
-      en: "A narrow passage between Iran and Oman. Roughly 20% of all the world's petroleum passes through it every day. Whoever controls Hormuz holds the world's gas pump. Iran's southern coast lines its entire northern shore.",
-      fa: 'گذرگاهی باریک میان ایران و عمان. حدود ۲۰٪ نفت جهان روزانه از آن می‌گذرد. هرکس هرمز را در دست دارد، پمپ بنزین جهان را در دست دارد.'
-    },
-    bullets: [
-      'About 21 million barrels of oil per day pass through (~20% of global supply)',
-      'Width at narrowest point: ~21 nautical miles',
-      'Bandar-e Abbas (Iran) and Khasab (Oman) are the dominant ports',
-      'Even with limited resources the IRGC Sepah navy can prevent passage by threatening billion dollar oil tankers and making them uninsurable.',
-      'IRGC speedboats from Bandar-e Abbas, missiles, drones and underwater mines are used to harass the strait and curtail freedom of navigation.',
-      'This effects all countries that use the Persian Gulf to transport oil and other goods including UAE, Saudi Arabia, Qatar, Kuwait and Oman.'
-    ],
-    img: 'image/codex/codex_hormuz.png',
-    label_data: '[ CODEX — STRAIT OF HORMUZ ]'
-  },
-  {
-    id: 'c14-hyperinflation',
-    tag: 'ECONOMY',
-    title: { en: 'HYPERINFLATION — A DAILY GAMBLE', fa: 'تورم لجام‌گسیخته — قمار روزانه' },
-    body: {
-      en: "Inside Iran, ordinary acts — buying boots, paying rent, taking a bus — have become daily gambles. The rial has lost over 99% of its value since 1979 as the government has attempted to print new money to paper over domestic problems. Inflation devours wages faster than workers can earn them. The regime's response is to print more money, accelerating the spiral, and to claw the same worthless currency back out of the pockets of the people they pretend to govern.",
-      fa: 'در ایران، کارهای ساده روزمره — خریدن چکمه، اجاره، اتوبوس — قمار مالی شده‌اند. ریال از ۱۳۵۷ تاکنون بیش از ۹۹٪ ارزشش را از دست داده. تورم، حقوق را سریع‌تر از کسب می‌خورد. واکنش رژیم: چاپ پول بیشتر، تشدید بحران، و کشیدن همان پول بی‌ارزش از جیب مردم.'
-    },
-    bullets: [
-      'Rial has lost >99% of its value vs. USD since 1979',
-      'Annual inflation has run 30-50% for several consecutive years',
-      'Real wages have been negative for most of the last decade',
-      'The regime prints money to pay the IRGC and military first; the rest of the country last',
-      'This has resulted in job loss and food insecurity for most Iranians.'
-    ],
-    img: 'image/codex/codex_hyperinflation.png',
-    label_data: '[ CODEX — HYPERINFLATION ]'
-  },
-  {
-    id: 'c15-strikes',
-    tag: 'RESISTANCE',
-    title: { en: 'GENERAL STRIKES — THE LIFEBLOOD', fa: 'اعتصاب عمومی — رگ حیاتِ رژیم' },
-    body: {
-      en: "When oil workers walk off, the regime stops bleeding hard currency. Petrochemical, steel, and refinery strikes have hit Iran in waves since 2018. In 2025 the pattern is sharper — wages can no longer buy bread, and the workers in the modern industries the regime feeds on are at the breaking point. The general strike is no longer a question of \"if\". It is invisible until it isn't.",
-      fa: 'وقتی کارگران نفت از کار می‌کشند، رژیم خون‌ریزی ارز سخت را متوقف می‌بیند. اعتصابات پتروشیمی، فولاد و پالایش از ۱۳۹۷ به این سو موج‌وار به ایران رسیده.'
-    },
-    bullets: [
-      'Asaluyeh / South Pars: largest petrochemical strike waves 2018, 2021, 2025',
-      'Mahshahr, Abadan: prolonged refinery worker stoppages',
-      'Esfahan, Ahvaz: steel-mill worker actions',
-      'Pensioner protests in 30+ cities now monthly'
-    ],
-    img: 'image/story/general-strikes.png',
-    label_data: '[ CODEX — GENERAL STRIKES ]'
-  },
-  {
-    id: 'c16-bibi-ally',
-    tag: 'ISRAEL',
-    title: { en: 'THE ISRAELI MILITARY - STRIKING THE HEAD OF THE OCTOPUS', fa: 'ضربه به سر هشت‌پا' },
-    body: {
-      en: "The Israeli people have stood as a genuine ally to the Iranian people. The IDF strikes the head of the octopus while the Iranian people dismantle its tentacles from within. This is one fight, on two fronts. A free Iran will normalize relations with Israel. The Crown Prince has said so explicitly.",
-      fa: 'مردم اسرائیل متحد واقعی مردم ایران بوده‌اند. ارتش اسرائیل سر هشت‌پا را می‌زند، در حالی‌که مردم ایران از درون بازوهایش را قطع می‌کنند. ایران آزاد، روابط با اسرائیل را عادی خواهد کرد.'
-    },
-    bullets: [
-      "The Israeli Air force partnered with US forces to destroy targets in Iran during the current war effort.",
-      "The Islamic Republic calls publicly for Israel's destruction",
-      "On its own borders Israel is battling with IRGC proxies, Hamas in Gaza and Hezbolla in souther Lebanon.",
-      'Reza Pahlavi has visited Israel and called for normalization of relations once Iran is free.',
-      'Iranian protesters have publicly thanked the IDF in 2024-25 demonstrations'
-    ],
-    img: 'image/portrait/outsider/bibi.png',
-    label_data: '[ CODEX — IDF AS ALLY ]'
-  },
-  {
-    id: 'c17-dignified-transfer',
-    tag: 'AMERICA',
-    title: { en: 'THE EAGLE AND THE LION', fa: 'عقاب و شیر' },
-    body: {
-      en: "American boots walk Persian sand. American eyes watch from the Gulf. American steel fills resistance crates. This is not a distant conflict — this is an alliance, forged in shared sacrifice. When a flag-draped coffin returns to Dover, the question is no longer whether America stands with the Lion. The question is whether it will see this through.",
-      fa: 'چکمه‌های آمریکایی بر خاک ایران راه می‌روند. چشمان آمریکایی از خلیج می‌نگرند. فولاد آمریکایی جعبه‌های مقاومت را پر می‌کند. این جنگی دور نیست — این اتحادی است، ساخته‌شده در فداکاری مشترک. وقتی تابوتی پوشیده از پرچم به دوور بازمی‌گردد، سؤال دیگر این نیست که آمریکا در کنار شیر ایستاده یا نه. سؤال این است که تا آخر خواهد ماند یا نه.'
-    },
-    bullets: [
-      'US Fifth Fleet has patrolled the Persian Gulf continuously since 1980',
-      'Joint US-Israeli operations dismantled IRGC networks in 2024-25',
-      'Covert arms supply to Javidan resistance began under executive authority',
-      'The first American KIA transforms the war — at home and abroad'
-    ],
-    img: 'image/codex/codex_dignified_transfer.png',
-    label_data: '[ CODEX — DIGNIFIED TRANSFER ]'
-  },
-  {
-    id: 'c18-diaspora',
-    tag: 'DIASPORA',
-    title: { en: 'WESTWOOD. TRAFALGAR. DUNDAS.', fa: 'وست‌وود. ترافالگار. داندس.' },
-    body: {
-      en: "The Iranian diaspora — Los Angeles, London, Toronto, Berlin, Stockholm — is the voice of their family and friends inside Iran during the internet blackout. Lion & Sun flags fill streets in cities the state media cannot reach. Every rally is a megaphone the regime cannot silence.",
-      fa: 'دیاسپورای ایرانی — لس‌آنجلس، لندن، تورنتو، برلین، استکهلم — از رژیم بلندتر است. بلندگویی که رژیم نمی‌تواند خاموشش کند.'
-    },
-    bullets: [
-      'Largest diaspora hubs: USA (especially LA), Canada (Toronto), UK, Germany, Sweden',
-      'Diaspora-funded media (Manoto, Iran International) reach inside Iran via satellite',
-      'Many diaspora professionals build circumvention/encryption tools used inside Iran',
-      'Overwhelmingly anti-regime; predominantly Pahlavi-aligned'
-    ],
-    img: 'image/portrait/iranian_people/diaspora.png',
-    label_data: '[ CODEX — DIASPORA ]'
-  },
-  {
-    id: 'c19-defections',
-    tag: 'DEFECTORS',
-    title: { en: 'THE SILENT UNDERGROUND', fa: 'زیرزمینِ خاموش' },
-    body: {
-      en: "Defections are already happening. A silent underground network is forming between ordinary citizens and the conscripts, soldiers, and clerics breaking away from the system. After decades of total security control, the regime has suffered an irreversible fracture. Cracks become tunnels. Tunnels become highways out.",
-      fa: 'ریزش‌ها آغاز شده‌اند. شبکه‌ای زیرزمینی و خاموش، میان شهروندان عادی و سربازان، سربازوظیفه‌ها و روحانیانی که از نظام می‌گریزند، در حال شکل‌گیری است.'
-    },
-    bullets: [
-      'Conscripts increasingly refuse orders to fire on civilians',
-      'Mid-rank IRGC officers leak documents to diaspora media',
-      "Clerics outside Khamenei's inner circle quietly distance from the regime",
-      'Defection-protection networks run through the diaspora',
-      'Reza Pahlavi\'s organization allows defectors to covertly communicate their willingness to support the transitional government when finally called upon.'
-    ],
-    img: 'image/codex/codex_defector.png',
-    label_data: '[ CODEX — SILENT UNDERGROUND ]'
-  },
-  {
-    id: 'c20-free-iran',
-    tag: 'FINALE',
-    title: { en: 'FREE IRAN — THE FINAL BATTLE', fa: 'ایران آزاد — نبرد نهایی' },
-    body: {
-      en: 'The board is set. The pieces are finally in our favor. The issue is no longer whether the Islamic Republic will fall — only the timing of its collapse. The Iranian people and their King are moving to the absolute top of the battlefield. We will see each other in Free Iran.',
-      fa: 'صفحه چیده شده. مهره‌ها به نفع ماست. دیگر سؤال این نیست که جمهوری اسلامی سقوط می‌کند یا نه — تنها سؤال، زمان آن است. یکدیگر را در ایران آزاد خواهیم دید.'
-    },
-    bullets: [
-      'Succession crisis post-Khamenei has fractured the clerical establishment',
-      'War chest hemorrhaging: sanctions + sabotage + worker strikes',
-      'Proxy network significantly degraded',
-      'Coordinated diaspora and inside-Iran movement is operationally aligned'
-    ],
-    img: 'image/codex/codex_finalbattle.png',
-    label_data: '[ CODEX — FREE IRAN ]'
-  }
-];
+// JAVID_NAM_DATA is now loaded from data/javid_nam_data.js
 
-// ════════════════════════════════════════════════════════════════════════════
-// JAVID NAM (جاوید نام) — ETERNAL NAMES MEMORIAL
-// Profiles of Iranian dissidents executed or killed by the Islamic Republic
-// "Javid Nam" reclaims martyrdom from state religious framing as eternal heroes
-// ════════════════════════════════════════════════════════════════════════════
-
-const JAVID_NAM_DATA = [
-  {
-    id: 'jn-neda',
-    era: 'GREEN MOVEMENT',
-    title: { en: 'NEDA AGHA-SOLTAN', fa: 'ندا آقاسلطان' },
-    born: 'January 23, 1983, Tehran',
-    died: 'June 20, 2009',
-    age: 26,
-    location: 'Tehran',
-    charge: 'None — shot in the street',
-    biography: {
-      en: 'A philosophy student and aspiring musician, Neda was participating in the protests against the fraudulent re-election of Mahmoud Ahmadinejad when a Basij paramilitary member shot her through the chest on a Tehran street. A mobile phone video of her death was uploaded immediately to the internet and within hours was seen by tens of millions worldwide. Time magazine called it "probably the most widely witnessed death in human history." She became the face of the Green Movement and of Iranian resistance to the world. The Iranian government claimed she had been killed by protesters, or by the CIA, or by her own music teacher. She was 26 years old.',
-      fa: ''
-    },
-    tags: ['Green Movement 2009', 'Symbol of Resistance', 'Shot in Street', 'Viral Martyrdom'],
-    img: 'image/portrait/dissident/portrait_neda_v2.png',
-    label_data: '[ JAVID NAM — NEDA AGHA-SOLTAN ]'
-  },
-  {
-    id: 'jn-ghotbzadeh',
-    era: 'REVOLUTIONARY PURGES',
-    title: { en: 'SADEGH GHOTBZADEH', fa: 'صادق قطب‌زاده' },
-    born: 'February 24, 1936, Tehran',
-    died: 'September 15, 1982',
-    age: 46,
-    location: 'Evin Prison',
-    charge: '"Plotting the assassination of Khomeini and overthrow of the Islamic Republic"',
-    biography: {
-      en: 'A Western-educated intellectual and close personal confidant of Ayatollah Khomeini during his exile in France, Ghotbzadeh served as Foreign Minister during the 1979-1981 hostage crisis — one of the most visible faces of the new Islamic Republic. He was charming, secular in lifestyle, and genuinely believed the Revolution could become a liberal democracy. He was wrong. As Khomeini consolidated theocratic power, Ghotbzadeh grew disillusioned and began conspiring to establish a "real republic." Arrested on April 8, 1982, he was subjected to severe torture before a forced televised confession. After a 26-day trial, he was shot by firing squad. More than 70 associates were executed.',
-      fa: ''
-    },
-    tags: ['Insider Turned Dissident', 'Foreign Minister', 'Firing Squad', 'Evin Prison', '1982'],
-    img: 'image/portrait/dissident/portrait_ghotbzadeh_v2.png',
-    label_data: '[ JAVID NAM — SADEGH GHOTBZADEH ]'
-  },
-  {
-    id: 'jn-nika',
-    era: 'WOMAN LIFE FREEDOM',
-    title: { en: 'NIKA SHAKARAMI', fa: 'نیکا شاکرمی' },
-    born: 'October 2, 2005, Khorramabad',
-    died: 'September 20, 2022',
-    age: 16,
-    location: 'Tehran',
-    charge: 'None — killed after detention',
-    biography: {
-      en: 'Nika Shakarami wore all black. She drew skulls. She was obsessed with true crime and anime. She had a voice that stopped rooms — a video circulated worldwide of her belting out "Soltane Ghalbha," a classic Persian love song, with total fearless abandonment. A woman singing alone in public is forbidden in Iran. She did not appear to care. On September 20, 2022 — four days after Mahsa Amini died — Nika went to the protests near Laleh Park. She stood on a dumpster, held her hijab over her head, and set it on fire. She was detained approximately an hour later. Her body was found dumped under a highway overpass. The government claimed she jumped from a building. She was sixteen years and eighteen days old.',
-      fa: ''
-    },
-    tags: ['Woman Life Freedom', 'Singer', 'Symbol of Uprising', 'Youngest Martyr', '2022'],
-    img: 'image/portrait/dissident/portrait_shakarami_v2.png',
-    label_data: '[ JAVID NAM — NIKA SHAKARAMI ]'
-  },
-  {
-    id: 'jn-forouhars',
-    era: 'CHAIN MURDERS',
-    title: { en: 'DARIUSH & PARVANEH FOROUHAR', fa: 'داریوش و پروانه فروهر' },
-    born: 'Dariush 1928; Parvaneh 1939',
-    died: 'November 22, 1998',
-    age: 70,
-    location: 'Tehran',
-    charge: 'None — murdered by intelligence agents',
-    biography: {
-      en: 'One of the most beloved couples in Iranian civil society. Dariush was a veteran nationalist politician, founder of the Pan-Iranist Party, and former labor minister. Parvaneh was a fierce human rights advocate and party co-leader. Together they represented a secular, democratic Iran. They refused to flee after the Revolution and continued holding open meetings despite years of harassment. On November 22, 1998, Ministry of Intelligence agents broke in and stabbed Dariush 11 times and Parvaneh 24 times. Their murders sparked the exposure of the "Chain Murders" — a decade-long government program of assassinating secular intellectuals.',
-      fa: ''
-    },
-    tags: ['Chain Murders', 'Couple', 'Stabbed in Home', '1998', 'Nationalist', 'Human Rights'],
-    img: 'image/portrait/dissident/portrait_forouhars_v2.png',
-    label_data: '[ JAVID NAM — THE FOROUHARS ]'
-  },
-  {
-    id: 'jn-saleh',
-    era: 'JANUARY 2026',
-    title: { en: 'SALEH MOHAMMADI', fa: 'صالح محمدی' },
-    born: 'March 11, 2007, Qom',
-    died: 'March 19, 2026',
-    age: 19,
-    location: 'Qom',
-    charge: 'Moharebeh and murder of a police officer during January 2026 protests',
-    biography: {
-      en: 'A national-level freestyle wrestling champion who won bronze at the 2024 Saitiev Cup, Saleh Mohammadi was 18 when arrested on January 15, 2026. He was accused of participating in the killing of a police officer in Qom. His family insisted he was at his uncle\'s house; CCTV footage apparently did not show him at the scene. The court denied his family\'s request for independent lawyers and based its verdict on confessions he said were extracted "under torture." His hands had been fractured during beatings. He turned 19 in prison on March 11. He was publicly hanged on March 19 — one week after his birthday. His last Instagram post: "And we stood stronger than we ever imagined for ourselves."',
-      fa: ''
-    },
-    tags: ['January 2026', 'Teenager', 'Wrestler', 'Public Hanging', 'Torture Confession'],
-    img: 'image/portrait/dissident/portrait_mohammadi_v2.png',
-    label_data: '[ JAVID NAM — SALEH MOHAMMADI ]'
-  },
-  {
-    id: 'jn-kazemi',
-    era: 'GREEN MOVEMENT',
-    title: { en: 'ZAHRA KAZEMI', fa: 'زهرا کاظمی' },
-    born: '1955, Shiraz, Iran',
-    died: 'July 11, 2003',
-    age: 48,
-    location: 'Evin Prison',
-    charge: '"Photographing outside Evin Prison"',
-    biography: {
-      en: 'An Iranian-Canadian freelance photojournalist based in Montreal, Kazemi was arrested on June 23, 2003, while photographing families of prisoners waiting outside Evin Prison during student protests. She was taken inside Evin and subjected to brutal torture — her skull was fractured and she suffered brain damage from beatings. The Iranian government initially denied culpability, then claimed she had died of a stroke. A reformist MP who viewed her body reported she had been raped and tortured. The intelligence officer charged with her murder was acquitted. Her son has fought for 20+ years to bring her killers to justice.',
-      fa: ''
-    },
-    tags: ['Journalist', 'Iranian-Canadian', 'Tortured in Custody', 'Evin Prison', '2003'],
-    img: 'image/portrait/dissident/portrait_kazemi_v2.png',
-    label_data: '[ JAVID NAM — ZAHRA KAZEMI ]'
-  },
-  {
-    id: 'jn-mahsa',
-    era: 'WOMAN LIFE FREEDOM',
-    title: { en: 'ZHINA "MAHSA" AMINI', fa: 'ژینا «مهسا» امینی' },
-    born: 'September 21, 1999',
-    died: 'September 16, 2022',
-    age: 22,
-    location: 'Tehran',
-    charge: 'None — beaten to death by morality police',
-    biography: {
-      en: 'A 22-year-old Iranian-Kurdish woman beaten to death by the morality police for showing too much hair. Her death set off the largest protest movement in the regime\'s history. The chant: Woman, Life, Freedom (Zan, Zendegi, Azadi). "Zhina" was her real Kurdish name; "Mahsa" was a regime-approved alias. Arrested by the morality police (Gasht-e Ershad) in Tehran on September 13, 2022. Died in custody September 16, 2022. The 2022-23 protests reached every Iranian province and ~120 cities.',
-      fa: ''
-    },
-    tags: ['Woman Life Freedom', 'Kurdish', 'Morality Police', 'Symbol of Uprising', '2022'],
-    img: 'image/portrait/dissident/portait_mahsa_v2.png',
-    label_data: '[ JAVID NAM — MAHSA AMINI ]'
-  },
-  {
-    id: 'jn-bakhtiar',
-    era: 'REVOLUTIONARY PURGES',
-    title: { en: 'SHAPOUR BAKHTIAR', fa: 'شاپور بختیار' },
-    born: '1914, Lordegan, Iran',
-    died: 'August 6, 1991',
-    age: 77,
-    location: 'Paris, France',
-    charge: 'Sentenced to death in absentia (1979); murdered abroad',
-    biography: {
-      en: 'The last Prime Minister of the Shah\'s government, Bakhtiar was a French-educated lawyer, socialist, and lifelong democrat who agreed to serve in a last-ditch attempt to steer Iran toward constitutional government. He failed — Khomeini arrived in Tehran while Bakhtiar was still PM. He fled to Paris, where he became the most prominent Iranian opposition figure in exile for a decade. In May 1979, the "Hanging Judge" Sadegh Khalkhali sentenced him to death in absentia. On August 6, 1991, three assassins from Iran\'s intelligence services broke into his home in Suresnes and stabbed him and his secretary to death.',
-      fa: ''
-    },
-    tags: ['Last PM of the Shah', 'Exile', 'Paris Assassination', 'IRGC Hit', '1991'],
-    img: 'image/portrait/dissident/portrait_bakhtiar_v2.png',
-    label_data: '[ JAVID NAM — SHAPOUR BAKHTIAR ]'
-  },
-  {
-    id: 'jn-panahi',
-    era: 'MINORITIES',
-    title: { en: 'RAMIN HOSSEIN-PANAHI', fa: 'رامین حسین‌پناهی' },
-    born: '1995, Javanroud, Kurdistan',
-    died: 'September 8, 2018',
-    age: 23,
-    location: "Raja'i Shahr Prison",
-    charge: 'Moharebeh — alleged membership in Kurdish opposition group PJAK',
-    biography: {
-      en: 'A young Iranian Kurd arrested in January 2017, accused of membership in PJAK (Kurdish Free Life Party). His trial was found by international rights groups to be "grossly unfair" with serious torture allegations. His execution was delayed multiple times due to international campaigns — on one occasion, his niece Nishtiman committed suicide after security forces subjected the family to intense intimidation. Ramin was executed alongside cousins Zaniar and Loghman Moradi on September 8, 2018. All three maintained their innocence. Amnesty International called the executions "an outrage." His case highlighted Iran\'s systematic targeting of the Kurdish minority.',
-      fa: ''
-    },
-    tags: ['Kurdish', 'PJAK', 'Torture Allegations', 'Minority Persecution', '2018'],
-    img: 'image/portrait/dissident/portrait_panahi_v2.png',
-    label_data: '[ JAVID NAM — RAMIN HOSSEIN-PANAHI ]'
-  },
-  {
-    id: 'jn-shekari',
-    era: 'WOMAN LIFE FREEDOM',
-    title: { en: 'MOHSEN SHEKARI', fa: 'محسن شکاری' },
-    born: 'February 24, 2000',
-    died: 'December 8, 2022',
-    age: 22,
-    location: 'Tehran',
-    charge: 'Moharebeh — blocking a road and injuring a Basij member',
-    biography: {
-      en: 'The first person executed as a direct result of the 2022 "Woman, Life, Freedom" uprising. Shekari was 22, arrested after a September 25 protest in Tehran\'s Sattar Khan district, accused of blocking a road and wounding a Basij member. His trial lasted less than three weeks from conviction to execution — a speed that shocked legal observers worldwide. He appealed; the Supreme Court upheld the sentence on November 20; he was hanged on December 8. Amnesty International said the charges did not legally justify the death penalty. His execution was designed to terrorize the protest movement.',
-      fa: ''
-    },
-    tags: ['Woman Life Freedom', 'First Execution', '22 Years Old', 'Sham Trial', 'December 2022'],
-    img: 'image/portrait/dissident/portrait_shekari_v2.png',
-    label_data: '[ JAVID NAM — MOHSEN SHEKARI ]'
-  },
-  {
-    id: 'jn-farrokhzad',
-    era: 'CHAIN MURDERS',
-    title: { en: 'FEREYDOUN FARROKHZAD', fa: 'فریدون فرخزاد' },
-    born: 'September 29, 1938, Tehran',
-    died: 'August 7, 1992',
-    age: 53,
-    location: 'Bonn, Germany',
-    charge: 'None — murdered by Iranian intelligence abroad',
-    biography: {
-      en: 'The brother of Iran\'s greatest modern poet, Forough Farrokhzad, Fereydoun was himself a celebrated entertainer — a flamboyant TV host, singer, and comedian beloved by Iranians before the Revolution, known for his charisma and boundary-breaking performances. After 1979, he went into exile in Germany, where he became an outspoken critic of the Islamic Republic. On August 7, 1992, he was found stabbed repeatedly in his Bonn apartment. For decades the murder was officially unsolved. In March 2025, former IRGC minister Mohsen Rafiqdoost admitted that the IRGC paid Basque separatists to carry out assassinations of dissidents abroad.',
-      fa: ''
-    },
-    tags: ['Singer & Entertainer', 'Exile', 'Assassinated Abroad', 'Germany 1992'],
-    img: 'image/portrait/dissident/portrait_farrokhzad_v2.png',
-    label_data: '[ JAVID NAM — FEREYDOUN FARROKHZAD ]'
-  },
-  {
-    id: 'jn-navid',
-    era: 'ATHLETES',
-    title: { en: 'NAVID AFKARI', fa: 'نوید افکاری' },
-    born: 'July 22, 1993, Shiraz',
-    died: 'September 12, 2020',
-    age: 27,
-    location: 'Shiraz',
-    charge: 'Murder of a security guard during 2018 protests (charge disputed)',
-    biography: {
-      en: 'An Iranian wrestling champion — national-level competitor — arrested in connection with the 2018 economic protests in Shiraz. He was accused of murdering a security guard, a charge he and his family denied and which rights groups found dubious. Afkari alleged his confessions were extracted under torture. Before his execution, he smuggled an audio message out of prison: "My name is Navid Afkari and I am an Iranian citizen. I have been sentenced to death for a crime I did not commit." US President Trump and the International Olympic Committee directly appealed to Iran to spare him. Iran executed him secretly, in the early hours of September 12, 2020, without notifying his family or lawyers. He was 27.',
-      fa: ''
-    },
-    tags: ['Wrestler', '2018 Protests', 'Secret Execution', 'Torture Confession', '2020'],
-    img: 'image/portrait/dissident/portrait_afkari_v2.png',
-    label_data: '[ JAVID NAM — NAVID AFKARI ]'
-  },
-  {
-    id: 'jn-monfared',
-    era: 'LIVING PRISONER',
-    title: { en: 'MARYAM AKBARI MONFARED', fa: 'مریم اکبری منفرد' },
-    born: 'December 14, 1976',
-    died: null,
-    age: null,
-    location: 'Evin Prison',
-    charge: 'Moharebeh — "enmity against God"',
-    biography: {
-      en: 'A living emblem of the 1988 massacre\'s continuing legacy. Three of Monfared\'s brothers and one of her sisters were executed during the 1988 mass killings. In October 2016, from inside Evin Prison\'s women\'s ward, she filed an unprecedented formal complaint with the Tehran Prosecutor General demanding investigation into her siblings\' executions. The regime\'s response was to deny her medical treatment and increase her restrictions. She remains imprisoned. Her courage in filing a formal complaint against state massacre — from inside the prison where her family was killed — is considered one of the most extraordinary acts of dissent in the Islamic Republic\'s history.',
-      fa: ''
-    },
-    tags: ['1988 Massacre', 'Living Prisoner', 'Evin Prison', 'Family Massacre', 'Prisoner of Conscience'],
-    img: 'image/portrait/dissident/portrait_monfared_v2.png',
-    label_data: '[ JAVID NAM — MARYAM AKBARI MONFARED ]'
-  },
-  {
-    id: 'jn-rahnavard',
-    era: 'WOMAN LIFE FREEDOM',
-    title: { en: 'MAJIDREZA RAHNAVARD', fa: 'مجیدرضا رهنورد' },
-    born: 'June 16, 1999',
-    died: 'December 12, 2022',
-    age: 23,
-    location: 'Mashhad',
-    charge: 'Moharebeh — allegedly stabbing two Basij militia members',
-    biography: {
-      en: 'The second protester executed during the Woman Life Freedom uprising, and the first to be executed publicly — hanged from a crane in Mashhad in an act of deliberate terror theater. His single trial session before a Revolutionary Court lasted one day. He was convicted on December 12 — the entire process from trial to hanging took two weeks. Human rights groups noted that execution by crane in a public space is specifically designed to maximize psychological trauma on the population. Rahnavard was 23. His family was not allowed to collect his body immediately. Amnesty International stated the execution exposed "Iran\'s judiciary for what it is: a tool of repression."',
-      fa: ''
-    },
-    tags: ['Woman Life Freedom', 'Public Hanging', 'Crane Execution', '23 Years Old', 'Mashhad'],
-    img: 'image/portrait/dissident/portrait_rahnavard_v2.png',
-    label_data: '[ JAVID NAM — MAJIDREZA RAHNAVARD ]'
-  },
-  {
-    id: 'jn-mahjoubi',
-    era: 'MINORITIES',
-    title: { en: 'BEHNAM MAHJOUBI', fa: 'بهنام محجوبی' },
-    born: '~1985',
-    died: 'February 21, 2021',
-    age: 36,
-    location: 'Evin Prison',
-    charge: '"Propaganda against the system" — arrested for Sufi dervish protest',
-    biography: {
-      en: 'A member of Iran\'s Sufi Gonabadi dervish minority — a mystical Muslim order systematically persecuted by the Islamic Republic. Mahjoubi was arrested in 2018 following the crackdown on a large Gonabadi protest. He suffered from severe epilepsy, ignored by prison authorities. While imprisoned in Evin, he was subjected to months of torture and denied medication despite urgent appeals from his family and international rights organizations. He was transferred to hospital after collapsing and died on February 21, 2021. Iranian authorities claimed he had poisoned himself. Rights groups rejected this account.',
-      fa: ''
-    },
-    tags: ['Sufi Dervish', 'Religious Minority', 'Died in Custody', 'Torture', 'Evin Prison', '2021'],
-    img: 'image/portrait/dissident/portrait_mahjoubi_v2.png',
-    label_data: '[ JAVID NAM — BEHNAM MAHJOUBI ]'
-  },
-  {
-    id: 'jn-karami',
-    era: 'WOMAN LIFE FREEDOM',
-    title: { en: 'MOHAMMAD MEHDI KARAMI', fa: 'محمدمهدی کرمی' },
-    born: 'November 1, 2001, Bijar, Kurdistan Province',
-    died: 'January 7, 2023',
-    age: 21,
-    location: 'Rajai Shahr Prison, Karaj',
-    charge: 'Moharebeh — alleged killing of a Basij member during protests',
-    biography: {
-      en: 'A national karate champion and member of Iran\'s youth national team, Karami wore an Olympic rings tattoo on the inside of his arm and trained children as a volunteer coach. An Iranian-Kurdish Yarsan from a low-income family, his father sold paper tissues on the street to fund his training. Arrested November 3, 2022, in Karaj, he was convicted in a sham trial lasting less than a week and denied the right to his chosen lawyer. He launched a dry-hunger strike in protest. His parents uploaded a video begging the state to spare him; his father said, "My son is among the karate champions of Iran." He was hanged before dawn on January 7, 2023, alongside Seyed Mohammad Hosseini, without a final family visit. The UN human rights office said the executions were based on "shoddy evidence" and forced confessions.',
-      fa: ''
-    },
-    tags: ['Woman Life Freedom', 'Karate Champion', 'Iranian Kurd', 'Yarsan', 'Sham Trial', 'January 2023'],
-    img: 'image/portrait/dissident2/portrait_karami_mohammad_mehdi.png',
-    label_data: '[ JAVID NAM — MOHAMMAD MEHDI KARAMI ]'
-  },
-  {
-    id: 'jn-hosseini',
-    era: 'WOMAN LIFE FREEDOM',
-    title: { en: 'SEYED MOHAMMAD HOSSEINI', fa: 'سید محمد حسینی' },
-    born: 'c. 1984',
-    died: 'January 7, 2023',
-    age: 39,
-    location: 'Rajai Shahr Prison, Karaj',
-    charge: 'Moharebeh — alleged killing of a Basij member during protests',
-    biography: {
-      en: 'A factory worker and volunteer children\'s coach from Karaj, Hosseini was convicted alongside Karami of killing Basij member Ruhollah Ajamian during a November 3, 2022, demonstration. Rights groups found both convictions were based on forced confessions extracted under torture with no credible physical evidence. He was 39 years old — a community figure known for mentoring youth in his neighbourhood. He was hanged before dawn. Neither man was permitted a final telephone call with their families.',
-      fa: ''
-    },
-    tags: ['Woman Life Freedom', 'Factory Worker', "Children's Coach", 'Sham Trial', 'January 2023'],
-    img: 'image/portrait/dissident2/portrait_hosseini_seyed_mohammad.png',
-    label_data: '[ JAVID NAM — SEYED MOHAMMAD HOSSEINI ]'
-  },
-  {
-    id: 'jn-kazemi-isfahan',
-    era: 'WOMAN LIFE FREEDOM',
-    title: { en: 'MAJID KAZEMI', fa: 'مجید کاظمی' },
-    born: 'c. 1993, Isfahan',
-    died: 'May 19, 2023',
-    age: 30,
-    location: 'Dastgerd Prison, Isfahan',
-    charge: 'Moharebeh — alleged armed attack killing two Basij and a police colonel',
-    biography: {
-      en: 'One of three men executed together in the Khaneh Isfahan case. Kazemi, along with Saleh Mirhashemi and Saeed Yaghoubi, was accused of killing two Basij members and a Special Unit police colonel during protests in Isfahan on November 16, 2022. Sentenced to death less than two months after arrest, the men were convicted on torture-tainted confessions in a trial Amnesty International described as bearing "no resemblance to meaningful judicial proceedings." Kazemi told his family he had been threatened with rape by a baton during interrogation. The night before the executions, hundreds of Iranians gathered outside Dastgerd Prison in protest. After Kazemi\'s execution, his brother was arrested.',
-      fa: ''
-    },
-    tags: ['Woman Life Freedom', 'Khaneh Isfahan', 'Triple Execution', 'Torture', 'May 2023'],
-    img: 'image/portrait/dissident2/portrait_kazemi_majid.png',
-    label_data: '[ JAVID NAM — MAJID KAZEMI ]'
-  },
-  {
-    id: 'jn-mirhashemi',
-    era: 'WOMAN LIFE FREEDOM',
-    title: { en: 'SALEH MIRHASHEMI', fa: 'صالح میرهاشمی' },
-    born: 'c. 1987, Isfahan',
-    died: 'May 19, 2023',
-    age: 36,
-    location: 'Dastgerd Prison, Isfahan',
-    charge: 'Moharebeh using a firearm — Khaneh Isfahan case',
-    biography: {
-      en: 'The primary defendant in the Khaneh Isfahan case. Mirhashemi was sentenced to death for "enmity against God through use of a Colt gun" — a charge whose weight rested entirely on confessions his lawyers said were beaten out of him. He was 36 years old when hanged. The three men were executed in sequence at Dastgerd Prison while protesters gathered outside. Amnesty International said the executions "must trigger a robust reaction from the international community." Their graves were placed in three separate locations under heavy security.',
-      fa: ''
-    },
-    tags: ['Woman Life Freedom', 'Khaneh Isfahan', 'Triple Execution', 'Firearms Charge', 'May 2023'],
-    img: 'image/portrait/dissident2/portrait_mirhashemi_saleh.png',
-    label_data: '[ JAVID NAM — SALEH MIRHASHEMI ]'
-  },
-  {
-    id: 'jn-yaghoubi',
-    era: 'WOMAN LIFE FREEDOM',
-    title: { en: 'SAEED YAGHOUBI', fa: 'سعید یعقوبی' },
-    born: 'c. 1986, Isfahan',
-    died: 'May 19, 2023',
-    age: 37,
-    location: 'Dastgerd Prison, Isfahan',
-    charge: 'Moharebeh using warm weapons — Khaneh Isfahan case',
-    biography: {
-      en: 'The third man hanged in the Khaneh Isfahan triple execution. Yaghoubi, Kazemi, and Mirhashemi were all arrested in November 2022, tried in December and January, and executed in May — less than six months from protest to death. Yaghoubi was 37 years old. The Supreme Court upheld the sentences despite documented procedural flaws and serious torture allegations never independently investigated. The European Union issued a statement of condemnation the same day.',
-      fa: ''
-    },
-    tags: ['Woman Life Freedom', 'Khaneh Isfahan', 'Triple Execution', 'Speed Execution', 'May 2023'],
-    img: 'image/portrait/dissident2/portrait_yaghoubi_saeed.png',
-    label_data: '[ JAVID NAM — SAEED YAGHOUBI ]'
-  },
-  {
-    id: 'jn-zohrevand',
-    era: 'WOMAN LIFE FREEDOM',
-    title: { en: 'MILAD ZOHREVAND', fa: 'میلاد زهره‌وند' },
-    born: 'c. 2002, Malayer, Hamadan Province',
-    died: 'November 23, 2023',
-    age: 21,
-    location: 'Central Prison of Hamedan',
-    charge: 'Murder of an IRGC intelligence officer during 2022 protests',
-    biography: {
-      en: 'A 21-year-old protester from Malayer arrested on October 26, 2022, during the 40th-day memorial ceremony for Mahsa Amini. He was accused of killing IRGC intelligence officer Ali Nazari. His execution was carried out in secret at dawn, without notifying his family or his lawyer. He was the eighth protester executed in connection with the Woman, Life, Freedom uprising. He became a father while in prison. His family was denied the right to bury him in his hometown of Malayer; he was interred in Hamedan\'s Bagh-e Behesht cemetery.',
-      fa: ''
-    },
-    tags: ['Woman Life Freedom', 'Secret Execution', 'New Father', '21 Years Old', 'November 2023'],
-    img: 'image/portrait/dissident2/portrait_zohrevand_milad.png',
-    label_data: '[ JAVID NAM — MILAD ZOHREVAND ]'
-  },
-  {
-    id: 'jn-toomaj',
-    era: 'LIVING PRISONER',
-    title: { en: 'TOOMAJ SALEHI', fa: 'توماج صالحی' },
-    born: 'July 6, 1990, Shahin Shahr, Isfahan Province',
-    died: null,
-    age: null,
-    location: 'Re-arrested June 19, 2025 — location unknown',
-    charge: 'Corruption on Earth (Mofsed-e-filarz) — protest songs and online activism',
-    biography: {
-      en: 'Iran\'s most famous dissident rapper. Toomaj\'s songs — including "Mouse Hole," "Turkmenchay," and "Pomegranate" — skewered corruption, poverty, and the hypocrisy of the Islamic Republic to 2.3 million followers. Arrested October 30, 2022, by twelve intelligence agents who beat him. He spent over 753 days in custody, was sentenced to death in April 2024, had the sentence overturned by the Supreme Court in June 2024, and was finally released December 2, 2024. Less than seven months later, on June 19, 2025, he was re-arrested on Kish Island. The UN Working Group on Arbitrary Detention declared his entire prior detention a violation of international law.',
-      fa: ''
-    },
-    tags: ['Woman Life Freedom', 'Rapper', 'Death Sentence Overturned', 'Living Prisoner', 'Re-arrested 2025'],
-    img: 'image/portrait/dissident2/portrait_salehi_toomaj.png',
-    label_data: '[ JAVID NAM — TOOMAJ SALEHI ]'
-  },
-  {
-    id: 'jn-narges',
-    era: 'LIVING PRISONER',
-    title: { en: 'NARGES MOHAMMADI', fa: 'نرگس محمدی' },
-    born: 'April 21, 1972, Zanjan',
-    died: null,
-    age: null,
-    location: 'Released on bail May 10, 2026 (medical emergency)',
-    charge: 'Propaganda against the state, collusion against national security, espionage',
-    biography: {
-      en: 'The 2023 Nobel Peace Prize laureate, awarded while she sat in Evin Prison. A physicist by training, Mohammadi became Iran\'s foremost human rights defender — author of White Torture documenting solitary confinement abuses, and the face of the campaign to abolish the death penalty in Iran. The regime has arrested her 13 times, convicted her 5 times, and sentenced her to a cumulative 31 years in prison and 154 lashes. Her children have not seen her since they fled Iran in 2015. Re-imprisoned December 2025 and denied medical care for 140 days, she suffered two suspected heart attacks. She was granted bail on May 10, 2026, only after her life was in immediate danger.',
-      fa: ''
-    },
-    tags: ['Nobel Peace Prize 2023', 'Living Prisoner', "Women's Rights", 'Death Penalty', 'Evin Prison'],
-    img: 'image/portrait/dissident2/portrait_mohammadi_narges.png',
-    label_data: '[ JAVID NAM — NARGES MOHAMMADI ]'
-  },
-  {
-    id: 'jn-kourkouri',
-    era: 'WOMAN LIFE FREEDOM',
-    title: { en: 'MOJAHED KOURKOURI', fa: 'مجاهد کورکور' },
-    born: 'c. 1983, Izeh, Khuzestan Province',
-    died: 'June 11, 2025',
-    age: 42,
-    location: 'Sheiban Prison, Ahvaz',
-    charge: 'Moharebeh — alleged killing of 9-year-old Kian Pirfalak',
-    biography: {
-      en: 'A Bakhtiari man forced to confess — under torture while denied a lawyer — to killing nine-year-old Kian Pirfalak. Kian\'s own family and multiple witnesses insisted the child was shot by security forces during protests in Izeh on November 17, 2022. Kourkouri\'s confession was broadcast on state television before any trial took place. Multiple witnesses testified he was not present at the protest. The Supreme Court overturned his first conviction; he was resentenced to death in December 2024. He was executed on June 11, 2025 — Kian Pirfalak\'s birthday — making him the 11th person executed in connection with the Woman, Life, Freedom uprising.',
-      fa: ''
-    },
-    tags: ['Woman Life Freedom', 'Bakhtiari', 'Kian Pirfalak', 'Forced Confession', 'Tortured', 'June 2025'],
-    img: 'image/portrait/dissident2/portrait_kourkouri_mojahed.png',
-    label_data: '[ JAVID NAM — MOJAHED KOURKOURI ]'
-  },
-  {
-    id: 'jn-rasaei',
-    era: 'WOMAN LIFE FREEDOM',
-    title: { en: 'REZA RASAEI', fa: 'رضا رصایی' },
-    born: 'c. 1990, Sahneh, Kermanshah Province',
-    died: 'August 6, 2024',
-    age: 34,
-    location: 'Dizel Abad Prison, Kermanshah',
-    charge: 'Murder of a Revolutionary Guard agent — torture-tainted confession',
-    biography: {
-      en: 'The 10th person executed in connection with the Woman, Life, Freedom uprising. A member of Iran\'s doubly marginalized Kurdish and Yarsan minorities, Rasaei joined protests in his hometown of Sahneh in November 2022. Amnesty International documented that during interrogation he was subjected to electric shocks, suffocation by plastic bag, prolonged suspension, severe beatings, and sexual violence. His conviction rested entirely on coerced confessions. He was executed in secret at 5am on August 6, 2024 — weeks after Iran\'s reformist president Masoud Pezeshkian took office. His family was given no prior notice and forced to bury him in a remote location.',
-      fa: ''
-    },
-    tags: ['Woman Life Freedom', 'Kurdish', 'Yarsan', 'Secret Execution', 'Torture', 'August 2024'],
-    img: 'image/portrait/dissident2/portrait_rasaei_reza.png',
-    label_data: '[ JAVID NAM — REZA RASAEI ]'
-  },
-  {
-    id: 'jn-bahramian',
-    era: 'WOMAN LIFE FREEDOM',
-    title: { en: 'MEHRAN BAHRAMIAN', fa: 'مهران بهرامیان' },
-    born: 'c. 1993, Semirom, Isfahan Province',
-    died: 'September 6, 2025',
-    age: 32,
-    location: 'Dastgerd Prison, Isfahan',
-    charge: 'Moharebeh — alleged attack on a security vehicle killing one officer',
-    biography: {
-      en: 'Executed on the eve of the third anniversary of Mahsa Amini\'s death — a deliberate act of regime symbolism. His brother Morad Bahramian had already been killed by security forces during the protests. He and brother Fazel Bahramian were both sentenced to death; two other brothers received 16-year sentences. The four-brother toll made the Bahramian family a symbol of the regime\'s collective punishment policy. Mehran was executed before dawn while protests marking the anniversary were being suppressed across Iran.',
-      fa: ''
-    },
-    tags: ['Woman Life Freedom', 'Family Tragedy', 'Third Anniversary', 'Collective Punishment', 'September 2025'],
-    img: 'image/portrait/dissident2/portrait_mehran_bahramian.png',
-    label_data: '[ JAVID NAM — MEHRAN BAHRAMIAN ]'
-  }
-];
+// CODEX_DATA and JAVID_NAM_DATA arrays removed - now loaded from external files
 
 // Track which screen to return to from memorial
 let memorialReturnScreen = 'screen-select';
+
+// Track if we came directly to a profile from a gravestone (skip grid on back)
+let cameFromGravestone = false;
 
 // Track which screen to return to from codex
 let codexReturnScreen = 'screen-select';
@@ -5905,6 +5303,14 @@ function showMemorialDetail(index) {
   
   audioManager.playSFX('cardSelect');
   
+  // Update back button text based on whether we came from a gravestone
+  const backBtn = document.getElementById('btn-memorial-detail-back');
+  if (cameFromGravestone) {
+    backBtn.innerHTML = '<span class="btn-en">◀ BACK TO GAME</span><span class="btn-fa">◀ بازگشت به بازی</span>';
+  } else {
+    backBtn.innerHTML = '<span class="btn-en">◀ BACK TO GRID</span><span class="btn-fa">◀ بازگشت</span>';
+  }
+  
   // Populate portrait
   const portraitEl = document.getElementById('memorial-detail-portrait');
   portraitEl.innerHTML = '';
@@ -5977,7 +5383,19 @@ function showMemorialDetail(index) {
 // Hide memorial detail, return to grid
 function hideMemorialDetail() {
   audioManager.playSFX('click');
-  document.getElementById('memorial-detail').classList.remove('active');
+  
+  // If we came from a gravestone, go back to the game without showing grid
+  if (cameFromGravestone) {
+    cameFromGravestone = false;
+    // Switch screens first while detail is still covering the grid
+    showScreen(memorialReturnScreen, true);
+    // Then hide the detail after screen transition starts
+    setTimeout(() => {
+      document.getElementById('memorial-detail').classList.remove('active');
+    }, 50);
+  } else {
+    document.getElementById('memorial-detail').classList.remove('active');
+  }
 }
 
 // Show the memorial screen
@@ -5993,63 +5411,7 @@ function hideMemorial() {
   showScreen(memorialReturnScreen, true);
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// WILDCARDS - Random events with characters that appear between turns
-// To add a new wildcard: add an object with character, name, quote, effect, apply()
-// ────────────────────────────────────────────────────────────────────────────
-
-const WILDCARDS = [
-  { character: { en: 'PAHLAVI', fa: 'پهلوی' }, 
-    name: { en: 'Address to the Nation', fa: 'خطاب به ملت' }, 
-    quote: { en: 'I do not seek a throne. I seek a free Iran.', fa: 'من تاج نمی‌خواهم. ایران آزاد می‌خواهم.' }, 
-    effect: { en: 'GRIP -5, LEV +3', fa: 'کنترل -۵، اهرم +۳' },
-    apply: (g) => { g.bars.irgc.grip -= 5; g.bars.trump.lev += 3; } },
-  { character: { en: 'NETANYAHU', fa: 'نتانیاهو' }, 
-    name: { en: 'IDF Strike on Natanz', fa: 'حمله ارتش اسرائیل به نطنز' }, 
-    quote: { en: 'Striking the head of the octopus.', fa: 'ضربه به سر اختاپوس.' }, 
-    effect: { en: 'CHEST -8, GRIP -4', fa: 'خزانه -۸، کنترل -۴' },
-    apply: (g) => { g.bars.irgc.chest -= 8; g.bars.irgc.grip -= 4; } },
-  { character: { en: 'DISSIDENT', fa: 'مخالف' }, 
-    name: { en: 'Oil Worker Strike', fa: 'اعتصاب کارگران نفت' }, 
-    quote: { en: 'When wages cannot buy bread, the regime bleeds.', fa: 'وقتی دستمزد نان نمی‌خرد، رژیم خون می‌ریزد.' }, 
-    effect: { en: 'CHEST -10, GRIP -3', fa: 'خزانه -۱۰، کنترل -۳' },
-    apply: (g) => { g.bars.irgc.chest -= 10; g.bars.irgc.grip -= 3; g.flags.STRIKE = true; } },
-  { character: { en: 'DISSIDENT', fa: 'مخالف' }, 
-    name: { en: 'Smuggled Video Viral', fa: 'ویدیوی قاچاق ویروسی شد' }, 
-    quote: { en: 'Iran is waking up.', fa: 'ایران بیدار می‌شود.' }, 
-    effect: { en: 'GRIP -4', fa: 'کنترل -۴' },
-    apply: (g) => { g.bars.irgc.grip -= 4; } },
-  { character: { en: 'DISSIDENT', fa: 'مخالف' }, 
-    name: { en: 'Basij Defection Report', fa: 'گزارش انشعاب بسیج' }, 
-    quote: { en: 'The silent underground grows.', fa: 'زیرزمین خاموش رشد می‌کند.' }, 
-    effect: { en: 'GRIP -5, LEV +3', fa: 'کنترل -۵، اهرم +۳' },
-    apply: (g) => { g.bars.irgc.grip -= 5; g.bars.trump.lev += 3; g.flags.BASIJ_DEFECT = true; } },
-  { character: { en: 'PUTIN', fa: 'پوتین' }, 
-    name: { en: 'S-400 Shipment', fa: 'محموله S-400' }, 
-    quote: { en: 'Mother Russia remembers her friends.', fa: 'مادر روسیه دوستانش را به یاد دارد.' }, 
-    effect: { en: 'GRIP +4, ALLY -4', fa: 'کنترل +۴، متحدان -۴' },
-    apply: (g) => { g.bars.irgc.grip += 4; g.bars.trump.all -= 4; } },
-  { character: { en: 'XI JINPING', fa: 'شی جین‌پینگ' }, 
-    name: { en: 'Beijing Communique', fa: 'بیانیه پکن' }, 
-    quote: { en: 'Patience is a Chinese virtue.', fa: 'صبر فضیلت چینی است.' }, 
-    effect: { en: 'CHEST +3, ALLY -2', fa: 'خزانه +۳، متحدان -۲' },
-    apply: (g) => { g.bars.irgc.chest += 3; g.bars.trump.all -= 2; } },
-  { character: { en: 'CNN', fa: 'سی‌ان‌ان' }, 
-    name: { en: 'Cardboard Mojtaba Exposed', fa: 'مقوای مجتبی افشا شد' }, 
-    quote: { en: 'The Supreme Leader is a prop.', fa: 'رهبر معظم یک مقواست.' }, 
-    effect: { en: 'GRIP -15', fa: 'کنترل -۱۵' },
-    apply: (g) => { g.bars.irgc.grip -= 15; } },
-  { character: { en: 'LINDSEY GRAHAM', fa: 'لیندسی گراهام' }, 
-    name: { en: 'Senate Floor Speech', fa: 'سخنرانی در سنا' }, 
-    quote: { en: 'It is time to finish this.', fa: 'وقت آن است که تمامش کنیم.' }, 
-    effect: { en: 'POL +5', fa: 'سیاسی +۵' },
-    apply: (g) => { g.bars.trump.pol += 5; } },
-  { character: { en: 'VAHIDI', fa: 'وحیدی' }, 
-    name: { en: 'State TV Address', fa: 'خطاب در تلویزیون دولتی' }, 
-    quote: { en: 'The enemy will drown in our sea of martyrs.', fa: 'دشمن در دریای شهدای ما غرق خواهد شد.' }, 
-    effect: { en: 'GRIP +3, PROXY +2', fa: 'کنترل +۳، نیابتی +۲' },
-    apply: (g) => { g.bars.irgc.grip += 3; g.bars.irgc.proxy += 2; } }
-];
+// WILDCARDS loaded from data/wildcards_data.js
 
 // ────────────────────────────────────────────────────────────────────────────
 // FLAGS - Board state indicators (ongoing effects)
@@ -6060,658 +5422,13 @@ const WILDCARDS = [
 const MAP_CANVAS_WIDTH = 2800;
 const MAP_CANVAS_HEIGHT = 1800;
 
-const FLAG_DATA = {
-  CARRIER_GROUP: {
-    title: { en: 'CARRIER GROUP', fa: 'ناوگان هواپیمابر' },
-    desc: { en: 'US Navy carrier strike group deployed to the Persian Gulf. Projects American power and protects allied shipping.', fa: 'ناوگان هواپیمابر آمریکا در خلیج فارس مستقر شد. قدرت آمریکا را نشان می‌دهد.' },
-    effects: [
-      { side: 'irgc', text: { en: 'PROXY -2/turn', fa: 'نیابتی -۲/نوبت' } }
-    ],
-    perTurn: { proxy: -2 },
-    position: { x: 600, y: 1350 }  // Persian Gulf (southwest)
-  },
-  BLOCKADE: {
-    title: { en: 'NAVAL BLOCKADE', fa: 'محاصره دریایی' },
-    desc: { en: 'US-led blockade of Iranian oil exports through the Strait of Hormuz. Strangles regime revenue.', fa: 'محاصره صادرات نفت ایران از تنگه هرمز. درآمد رژیم را خفه می‌کند.' },
-    effects: [
-      { side: 'irgc', text: { en: 'CHEST -4/turn', fa: 'خزانه -۴/نوبت' } },
-      { side: 'irgc', text: { en: 'Blocks SELL OIL card', fa: 'کارت فروش نفت را مسدود می‌کند' } }
-    ],
-    perTurn: { chest: -4 },
-    position: { x: 1100, y: 1400 }  // Strait of Hormuz (south)
-  },
-  INTERNET_SHUTDOWN: {
-    title: { en: 'INTERNET BLACKOUT', fa: 'قطعی اینترنت' },
-    desc: { en: 'Regime has cut internet access nationwide. Prevents coordination of protests but also blocks their own propaganda.', fa: 'رژیم اینترنت را در سراسر کشور قطع کرده است. هماهنگی اعتراضات را جلوگیری می‌کند.' },
-    effects: [
-      { side: 'irgc', text: { en: 'Halves PROTEST/BASIJ drain', fa: 'تخلیه اعتراض/بسیج را نصف می‌کند' } },
-      { side: 'neutral', text: { en: 'Negated by STARLINK', fa: 'توسط استارلینک خنثی می‌شود' } }
-    ],
-    perTurn: {},
-    position: { x: 1400, y: 550 }  // Tehran (north)
-  },
-  STARLINK: {
-    title: { en: 'STARLINK ACTIVE', fa: 'استارلینک فعال' },
-    desc: { en: 'Elon Musk has activated Starlink terminals over Iran. Protesters can coordinate despite the blackout.', fa: 'ایلان ماسک استارلینک را در ایران فعال کرده است. معترضان می‌توانند هماهنگ شوند.' },
-    effects: [
-      { side: 'irgc', text: { en: 'GRIP -2/turn', fa: 'کنترل -۲/نوبت' } },
-      { side: 'trump', text: { en: 'Negates BLACKOUT', fa: 'قطعی را خنثی می‌کند' } }
-    ],
-    perTurn: { grip: -2 },
-    position: { x: 2200, y: 500 }  // Northeast (satellite coverage)
-  },
-  IRAQI_PMF: {
-    title: { en: 'IRAQI PMF DEPLOYED', fa: 'حشد الشعبی مستقر' },
-    desc: { en: 'Iraqi Popular Mobilization Forces brought in to reinforce the regime. Foreign fighters loyal to Tehran.', fa: 'حشد الشعبی عراق برای تقویت رژیم آورده شدند. جنگجویان خارجی وفادار به تهران.' },
-    effects: [
-      { side: 'irgc', text: { en: 'GRIP +3/turn', fa: 'کنترل +۳/نوبت' } },
-      { side: 'irgc', text: { en: 'ALLY -1/turn', fa: 'متحدان -۱/نوبت' } }
-    ],
-    perTurn: { grip: +3, all: -1 },
-    position: { x: 550, y: 700 }  // Iraq border (west)
-  },
-  FATEMIYOUN: {
-    title: { en: 'FATEMIYOUN DEPLOYED', fa: 'فاطمیون مستقر' },
-    desc: { en: 'Afghan Shia militia fighters imported to suppress protests. The regime cannot trust its own forces.', fa: 'شبه‌نظامیان شیعه افغان برای سرکوب اعتراضات. رژیم به نیروهای خودش اعتماد ندارد.' },
-    effects: [
-      { side: 'irgc', text: { en: 'GRIP +2/turn', fa: 'کنترل +۲/نوبت' } }
-    ],
-    perTurn: { grip: +2 },
-    position: { x: 2250, y: 950 }  // Afghanistan border (east)
-  },
-  PROTESTS: {
-    title: { en: 'MASS PROTESTS', fa: 'اعتراضات گسترده' },
-    desc: { en: 'Major protests erupting across Iranian cities. The people are rising against the regime.', fa: 'اعتراضات بزرگ در شهرهای ایران. مردم علیه رژیم برمی‌خیزند.' },
-    effects: [
-      { side: 'irgc', text: { en: 'GRIP -3/turn', fa: 'کنترل -۳/نوبت' } }
-    ],
-    perTurn: { grip: -3 },
-    position: { x: 1400, y: 900 }  // Tehran/Major cities (center)
-  },
-  STRIKE: {
-    title: { en: 'GENERAL STRIKE', fa: 'اعتصاب عمومی' },
-    desc: { en: 'Workers across Iran have stopped working. Oil fields, factories, and bazaars stand empty.', fa: 'کارگران در سراسر ایران کار را متوقف کرده‌اند. میدان‌های نفتی، کارخانه‌ها و بازارها خالی هستند.' },
-    effects: [
-      { side: 'irgc', text: { en: 'CHEST -5/turn', fa: 'خزانه -۵/نوبت' } }
-    ],
-    perTurn: { chest: -5 },
-    position: { x: 700, y: 1050 }  // Khuzestan oil fields (southwest)
-  },
-  BASIJ_DEFECT: {
-    title: { en: 'BASIJ DEFECTIONS', fa: 'انشعاب بسیج' },
-    desc: { en: 'Basij militia members are refusing orders or switching sides. The regime\'s enforcers are cracking.', fa: 'اعضای بسیج از دستورات سرپیچی می‌کنند یا طرف عوض می‌کنند. مجریان رژیم ترک برمی‌دارند.' },
-    effects: [
-      { side: 'irgc', text: { en: 'GRIP -4/turn', fa: 'کنترل -۴/نوبت' } }
-    ],
-    perTurn: { grip: -4 },
-    position: { x: 1800, y: 1150 }  // Isfahan/Southeast
-  }
-};
+// FLAG_DATA loaded from data/flags_data.js
+
+// VOICE_MESSAGES loaded from data/voices_data.js
+// MAP_MARKERS loaded from data/elements_data.js
 
 // ────────────────────────────────────────────────────────────────────────────
-// VOICE MESSAGES - Smuggled messages from inside Iran
-// ────────────────────────────────────────────────────────────────────────────
-
-const VOICE_MESSAGES = {
-  courier_tehran: {
-    portrait: 'image/portrait/anonymous_characters/anon_courier.png',
-    character: { en: 'COURIER — TEHRAN', fa: 'پیک — تهران' },
-    transmission: { en: 'SMUGGLED RECORDING', fa: 'ضبط قاچاق شده' },
-    quote: {
-      en: 'The lists are moving. Names of Basij who turned. Safe houses. Routes out. We are not waiting to be saved.',
-      fa: 'لیست‌ها در حرکتند. نام بسیجی‌هایی که برگشتند. خانه‌های امن. راه‌های خروج. ما منتظر نجات نیستیم.'
-    },
-    position: { x: 1400, y: 650 }
-  },
-  protester_shiraz: {
-    portrait: 'image/portrait/anonymous_characters/anon_protester_wlf.png',
-    character: { en: 'PROTESTER — SHIRAZ', fa: 'معترض — شیراز' },
-    transmission: { en: 'VPN UPLINK', fa: 'اتصال VPN' },
-    quote: {
-      en: 'We were in the streets again last night. More of us than before. They cannot stop us all. Iran is waking up.',
-      fa: 'دیشب دوباره در خیابان‌ها بودیم. بیشتر از قبل. نمی‌توانند همه ما را متوقف کنند. ایران بیدار می‌شود.'
-    },
-    position: { x: 1550, y: 1150 }
-  },
-  journalist_exile: {
-    portrait: 'image/portrait/anonymous_characters/anon_journalist.png',
-    character: { en: 'JOURNALIST — IN HIDING', fa: 'روزنامه‌نگار — مخفی' },
-    transmission: { en: 'SATELLITE BROADCAST — MANOTO', fa: 'پخش ماهواره‌ای — من‌وتو' },
-    quote: {
-      en: 'I have been filing dispatches the regime wants silenced for thirty years. I intend to file thirty more.',
-      fa: 'سی سال است گزارش‌هایی می‌فرستم که رژیم می‌خواهد خاموش شوند. قصد دارم سی سال دیگر هم بفرستم.'
-    },
-    position: { x: 900, y: 750 }
-  },
-  grieving_mother: {
-    portrait: 'image/portrait/anonymous_characters/anon_grieving_mother.png',
-    character: { en: 'MOTHER — EVIN', fa: 'مادر — اوین' },
-    transmission: { en: 'SMUGGLED PHONE VIDEO', fa: 'ویدیوی قاچاق از موبایل' },
-    quote: {
-      en: 'They took my son at dawn. I have already lost everything worth hiding for. Now I have nothing left to fear.',
-      fa: 'پسرم را سحر بردند. همه چیزی که ارزش پنهان کردن داشت را از دست دادم. دیگر چیزی برای ترسیدن ندارم.'
-    },
-    position: { x: 1300, y: 550 }
-  },
-  grieving_father: {
-    portrait: 'image/portrait/anonymous_characters/anon_grieving_father.png',
-    character: { en: 'FATHER — KARAJ', fa: 'پدر — کرج' },
-    transmission: { en: 'VOICE MESSAGE — ENCRYPTED', fa: 'پیام صوتی — رمزنگاری شده' },
-    quote: {
-      en: 'My daughter was nineteen. She wanted to be a doctor. They shot her on the roof. I will stand in that street until they answer for it.',
-      fa: 'دخترم نوزده سال داشت. می‌خواست پزشک شود. روی پشت‌بام به او شلیک کردند. در آن خیابان می‌ایستم تا جواب بدهند.'
-    },
-    position: { x: 1250, y: 600 }
-  },
-  defector_artesh: {
-    portrait: 'image/portrait/anonymous_characters/anon_artesh_defector_1.png',
-    character: { en: 'DEFECTOR — ARTESH', fa: 'منشعب — ارتش' },
-    transmission: { en: 'UNDERGROUND NETWORK', fa: 'شبکه زیرزمینی' },
-    quote: {
-      en: 'I was ordered to fire on civilians. I refused. There are more of us than they know. The silent underground grows.',
-      fa: 'دستور شلیک به غیرنظامیان را داشتم. امتناع کردم. ما بیشتر از آنچه فکر می‌کنند هستیم. زیرزمین خاموش رشد می‌کند.'
-    },
-    position: { x: 750, y: 850 }
-  },
-  javidan_fighter: {
-    portrait: 'image/portrait/anonymous_characters/anon_javidan_1.png',
-    character: { en: 'JAVIDAN — IMMORTAL GUARD', fa: 'جاویدان — گارد جاویدان' },
-    transmission: { en: 'ENCRYPTED BURST', fa: 'انتقال رمزنگاری شده' },
-    quote: {
-      en: 'They trained us to kill for the regime. Now we kill for the people. The Lion stirs.',
-      fa: 'ما را آموزش دادند که برای رژیم بکشیم. حالا برای مردم می‌کشیم. شیر بیدار می‌شود.'
-    },
-    position: { x: 1700, y: 950 }
-  },
-  young_javidan: {
-    portrait: 'image/portrait/anonymous_characters/anon_javidan_2.png',
-    character: { en: 'FIGHTER — KURDISTAN', fa: 'رزمنده — کردستان' },
-    transmission: { en: 'SATELLITE PHONE', fa: 'تلفن ماهواره‌ای' },
-    quote: {
-      en: 'The weapons are coming through. Crates from the mountains. The liberated zones are holding. We will see each other in Free Iran.',
-      fa: 'سلاح‌ها دارند می‌آیند. جعبه‌ها از کوه‌ها. مناطق آزاد شده مقاومت می‌کنند. همدیگر را در ایران آزاد می‌بینیم.'
-    },
-    position: { x: 650, y: 650 }
-  },
-  veteran_defector: {
-    portrait: 'image/portrait/anonymous_characters/anon_artesh_defector_2.png',
-    character: { en: 'VETERAN — KHUZESTAN', fa: 'کهنه‌سرباز — خوزستان' },
-    transmission: { en: 'IRAN INTERNATIONAL', fa: 'ایران اینترنشنال' },
-    quote: {
-      en: 'I served forty years. I watched them hollow out everything I believed in. When the order came to fire on the oil workers, I walked away. I will not fire on my own people.',
-      fa: 'چهل سال خدمت کردم. دیدم که همه چیزی که باور داشتم را توخالی کردند. وقتی دستور شلیک به کارگران نفت آمد، رفتم. به مردم خودم شلیک نمی‌کنم.'
-    },
-    position: { x: 700, y: 1100 }
-  },
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // URBAN PROTESTERS AND ORGANIZERS
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  student_tehran: {
-    portrait: 'image/portrait/anonymous_characters2/anon_university_student.png',
-    character: { en: 'STUDENT — TEHRAN UNIVERSITY', fa: 'دانشجو — دانشگاه تهران' },
-    transmission: { en: 'MESH VPN NODE', fa: 'گره VPN مش' },
-    quote: {
-      en: 'My cousin disappeared into Evin in 2019. I keep a go-bag by the window now. A burner phone. A change of clothes. By day I study engineering. By night I keep the network alive.',
-      fa: 'پسرعموم در ۲۰۱۹ در اوین ناپدید شد. حالا یک کیف آماده کنار پنجره دارم. یک تلفن یکبار مصرف. یک لباس اضافی. روزها مهندسی می‌خوانم. شب‌ها شبکه را زنده نگه می‌دارم.'
-    },
-    position: { x: 1380, y: 620 }
-  },
-
-  graffiti_karaj: {
-    portrait: 'image/portrait/anonymous_characters2/anon_graphiti_artist.png',
-    character: { en: 'GRAFFITI ARTIST — KARAJ', fa: 'گرافیتی‌کار — کرج' },
-    transmission: { en: 'TELEGRAM UPLOAD', fa: 'آپلود تلگرام' },
-    quote: {
-      en: 'I used to draw footballers. Now I carry a stencil of a broken Basij helmet. I move at dawn, tagging over their murals with slogans the exiles send us. Every wall is a battlefield.',
-      fa: 'قبلاً فوتبالیست‌ها را می‌کشیدم. حالا شابلون کلاه شکسته بسیجی را حمل می‌کنم. سحر حرکت می‌کنم، روی نقاشی‌هایشان شعارهایی می‌زنم که تبعیدی‌ها می‌فرستند. هر دیوار یک میدان جنگ است.'
-    },
-    position: { x: 1220, y: 580 }
-  },
-
-  organizer_shiraz: {
-    portrait: 'image/portrait/anonymous_characters2/anon_chemistry_teacher.png',
-    character: { en: 'NEIGHBORHOOD ORGANIZER — SHIRAZ', fa: 'سازمان‌ده محله — شیراز' },
-    transmission: { en: 'ENCRYPTED GROUP CHAT', fa: 'گروه چت رمزنگاری شده' },
-    quote: {
-      en: 'My "study circles" teach first aid, legal rights, how to document abuses. The saline and gauze are hidden under boxes labeled "old reagents." The regime thinks I teach chemistry. I teach survival.',
-      fa: 'حلقه‌های مطالعاتی من کمک‌های اولیه، حقوق قانونی و مستندسازی سوءاستفاده‌ها را آموزش می‌دهند. سرم و گاز زیر جعبه‌های "معرف‌های قدیمی" پنهان‌اند. رژیم فکر می‌کند شیمی درس می‌دهم. من بقا درس می‌دهم.'
-    },
-    position: { x: 1480, y: 1120 }
-  },
-
-  metro_tehran: {
-    portrait: 'image/portrait/anonymous_characters2/anon_metro_worker.png',
-    character: { en: 'METRO WORKER — TEHRAN', fa: 'کارگر مترو — تهران' },
-    transmission: { en: 'INTERNAL PA BROADCAST', fa: 'پخش بلندگوی داخلی' },
-    quote: {
-      en: 'I work nights on the tracks, days coordinating walk-offs. When I announce "technical issues," the drivers know what it means. The trains stop in solidarity. The city holds its breath.',
-      fa: 'شب‌ها روی ریل کار می‌کنم، روزها اعتصاب‌ها را هماهنگ می‌کنم. وقتی "مشکل فنی" اعلام می‌کنم، راننده‌ها می‌دانند یعنی چه. قطارها در همبستگی می‌ایستند. شهر نفسش را حبس می‌کند.'
-    },
-    position: { x: 1350, y: 640 }
-  },
-
-  bazaar_esfahan: {
-    portrait: 'image/portrait/anonymous_characters2/anon_bazaar_clerk.png',
-    character: { en: 'BAZAAR CLERK — ESFAHAN', fa: 'کارمند بازار — اصفهان' },
-    transmission: { en: 'HANDWRITTEN NOTE', fa: 'یادداشت دست‌نویس' },
-    quote: {
-      en: 'I track which shopkeepers will shutter on strike days. The list is in a ledger labeled "credit customers." One betrayal could bankrupt my family and the movement. I guard it with my life.',
-      fa: 'پیگیری می‌کنم کدام مغازه‌داران روز اعتصاب می‌بندند. لیست در دفتری به نام "مشتریان اعتباری" است. یک خیانت می‌تواند خانواده‌ام و جنبش را نابود کند. با جانم از آن محافظت می‌کنم.'
-    },
-    position: { x: 1400, y: 850 }
-  },
-
-  former_basij_mashhad: {
-    portrait: 'image/portrait/anonymous_characters2/anon_former_basij.png',
-    character: { en: 'FORMER BASIJ — MASHHAD', fa: 'بسیجی سابق — مشهد' },
-    transmission: { en: 'ANONYMOUS DROP', fa: 'ارسال ناشناس' },
-    quote: {
-      en: 'They recruited me at fifteen with promises of tuition and prestige. I watched my unit beat classmates. I never went back. Now I feed their schedules and patrol routes to the resistance. My old commander will never know which lost sheep is sabotaging his orders.',
-      fa: 'پانزده ساله بودم که با وعده شهریه و اعتبار استخدامم کردند. دیدم واحدم هم‌کلاسی‌ها را می‌زند. دیگر برنگشتم. حالا برنامه‌ها و مسیرهای گشت‌شان را به مقاومت می‌دهم. فرمانده قدیمی‌ام هرگز نخواهد فهمید کدام گوسفند گمشده دستوراتش را خراب می‌کند.'
-    },
-    position: { x: 1900, y: 480 }
-  },
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // WORKERS, UNIONS, AND QUIET SABOTEURS
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  oil_khuzestan: {
-    portrait: 'image/portrait/anonymous_characters2/anon_oil_worker.png',
-    character: { en: 'OIL TECHNICIAN — KHUZESTAN', fa: 'تکنسین نفت — خوزستان' },
-    transmission: { en: 'SECURE VOICE MEMO', fa: 'پیام صوتی امن' },
-    quote: {
-      en: 'I know exactly which valves to "mis-calibrate" so output drops while safety metrics look normal. I grew up watching the war destroy my village. If history comes back, I will shape it this time.',
-      fa: 'دقیقاً می‌دانم کدام شیرها را "اشتباه تنظیم" کنم تا تولید کم شود ولی آمار ایمنی عادی باشد. بزرگ شدم و دیدم جنگ روستایم را نابود کرد. اگر تاریخ برگردد، این بار شکلش می‌دهم.'
-    },
-    position: { x: 1050, y: 980 }
-  },
-
-  nurse_ahvaz: {
-    portrait: 'image/portrait/anonymous_characters2/anon_nurse.png',
-    character: { en: 'NURSE — AHVAZ HOSPITAL', fa: 'پرستار — بیمارستان اهواز' },
-    transmission: { en: 'HIDDEN USB DRIVE', fa: 'فلش مموری پنهان' },
-    quote: {
-      en: 'I patch up protesters and plainclothes alike. But the bandages I wrap around security forces are tighter, less gentle. I keep an encrypted folder of X-rays and bullet trajectories. One day someone will use them as evidence.',
-      fa: 'معترضان و لباس‌شخصی‌ها را یکسان پانسمان می‌کنم. اما باندهایی که دور نیروهای امنیتی می‌پیچم سفت‌تر و کمتر ملایم‌اند. یک پوشه رمزنگاری شده از عکس‌های اشعه ایکس و مسیر گلوله‌ها دارم. روزی کسی از آن‌ها به عنوان مدرک استفاده خواهد کرد.'
-    },
-    position: { x: 1100, y: 950 }
-  },
-
-  engineer_tabriz: {
-    portrait: 'image/portrait/anonymous_characters2/anon_energy_worker.png',
-    character: { en: 'POWER GRID ENGINEER — TABRIZ', fa: 'مهندس شبکه برق — تبریز' },
-    transmission: { en: 'GRID CONTROL ROOM', fa: 'اتاق کنترل شبکه' },
-    quote: {
-      en: 'I oversee load balancing for a network that fails every summer. I have learned to time "maintenance outages" with protest calls. Certain neighborhoods go dark. Others stay lit for camera phones.',
-      fa: 'نظارت بر توازن بار شبکه‌ای دارم که هر تابستان خراب می‌شود. یاد گرفته‌ام "قطعی تعمیراتی" را با فراخوان اعتراض هماهنگ کنم. بعضی محله‌ها تاریک می‌شوند. بقیه برای دوربین موبایل‌ها روشن می‌مانند.'
-    },
-    position: { x: 920, y: 420 }
-  },
-
-  dispatcher_kerman: {
-    portrait: 'image/portrait/anonymous_characters2/anon_railway_dispatcher.png',
-    character: { en: 'RAILWAY DISPATCHER — KERMAN', fa: 'توزیع‌کننده راه‌آهن — کرمان' },
-    transmission: { en: 'SCHEDULE INTERCEPT', fa: 'رهگیری برنامه' },
-    quote: {
-      en: 'I control the schedules that feed troop trains and supply runs. I quietly reroute shipments to "congested" lines. A two-hour reinforcement becomes a ten-hour delay. Protesters get a night without fresh batons.',
-      fa: 'برنامه‌هایی را کنترل می‌کنم که قطارهای نیرو و تدارکات را تغذیه می‌کنند. بی‌سروصدا محموله‌ها را به خطوط "شلوغ" هدایت می‌کنم. تقویت دو ساعته می‌شود ده ساعته. معترضان یک شب بدون باتوم تازه دارند.'
-    },
-    position: { x: 1750, y: 1050 }
-  },
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // INFORMATION, MEDIA, AND DIGITAL UNDERGROUND
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  sysadmin_tehran: {
-    portrait: 'image/portrait/anonymous_characters2/anon_university_system_admin.png',
-    character: { en: 'UNIVERSITY SYSADMIN — TEHRAN', fa: 'مدیر سیستم دانشگاه — تهران' },
-    transmission: { en: 'RESEARCH PROXY', fa: 'پروکسی تحقیقاتی' },
-    quote: {
-      en: 'I keep faculty networks running, and quietly whitelist certain lab IPs when the blackouts hit. Student organizers upload footage and manifestos disguised as physics data. The regime sees numbers. I see revolution.',
-      fa: 'شبکه‌های دانشکده را نگه می‌دارم و وقتی قطعی می‌زنند، بی‌سروصدا بعضی آی‌پی‌های آزمایشگاه را سفید می‌کنم. سازمان‌دهندگان دانشجویی فیلم و بیانیه را با ظاهر داده‌های فیزیک آپلود می‌کنند. رژیم اعداد می‌بیند. من انقلاب می‌بینم.'
-    },
-    position: { x: 1320, y: 590 }
-  },
-
-  satellite_rasht: {
-    portrait: 'image/portrait/anonymous_characters2/anon_satellite_installer.png',
-    character: { en: 'SATELLITE INSTALLER — RASHT', fa: 'نصاب ماهواره — رشت' },
-    transmission: { en: 'EXILE BROADCAST RELAY', fa: 'رله پخش تبعیدی‌ها' },
-    quote: {
-      en: 'Officially I am out of work since the dish crackdown. Now I travel as a "roof repairer." Under tarps and water tanks, I hide dishes tuned to exile channels. I teach families how to camouflage them from drones.',
-      fa: 'رسماً از زمان سرکوب دیش بیکارم. حالا به عنوان "تعمیرکار سقف" سفر می‌کنم. زیر برزنت و مخزن آب، دیش‌هایی پنهان می‌کنم که روی کانال‌های تبعیدی‌ها تنظیم شده‌اند. به خانواده‌ها یاد می‌دهم چطور از پهپادها استتار کنند.'
-    },
-    position: { x: 1050, y: 430 }
-  },
-
-  teacher_yazd: {
-    portrait: 'image/portrait/anonymous_characters2/anon_history_teacher.png',
-    character: { en: 'HISTORY TEACHER — YAZD', fa: 'معلم تاریخ — یزد' },
-    transmission: { en: 'SMUGGLED PDF', fa: 'PDF قاچاق' },
-    quote: {
-      en: 'By day I teach the state-approved textbook. By night, smuggled PDFs. My students learn two timelines: one printed in bold, one traced in margins naming the dead whose photos circulate on banned channels.',
-      fa: 'روزها کتاب مورد تأیید دولت را درس می‌دهم. شب‌ها، PDF‌های قاچاق. دانش‌آموزانم دو خط زمانی یاد می‌گیرند: یکی پررنگ چاپ شده، یکی در حاشیه نوشته شده با نام کشته‌شدگانی که عکس‌هایشان در کانال‌های ممنوع می‌چرخد.'
-    },
-    position: { x: 1580, y: 880 }
-  },
-
-  podcaster_shiraz: {
-    portrait: 'image/portrait/anonymous_characters2/anon_young_podcaster.png',
-    character: { en: 'YOUNG PODCASTER — SHIRAZ', fa: 'پادکستر جوان — شیراز' },
-    transmission: { en: 'ANONYMOUS AUDIO STREAM', fa: 'استریم صوتی ناشناس' },
-    quote: {
-      en: 'I record in my cousin\'s basement, mixing coded anecdotes with music. Each "listener question" is really a report from a local cell. The story slips past keyword filters and still carries instructions.',
-      fa: 'در زیرزمین پسرعمویم ضبط می‌کنم، حکایات رمزی را با موسیقی مخلوط می‌کنم. هر "سؤال شنونده" در واقع گزارشی از یک هسته محلی است. داستان از فیلترهای کلیدواژه رد می‌شود و همچنان دستورات را حمل می‌کند.'
-    },
-    position: { x: 1520, y: 1180 }
-  },
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // SECURITY INSIDERS, DEFECTORS, AND RELUCTANT COLLABORATORS
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  conscript_border: {
-    portrait: 'image/portrait/anonymous_characters2/anon_border_conscript.png',
-    character: { en: 'CONSCRIPT — BORDER GARRISON', fa: 'سرباز وظیفه — پادگان مرزی' },
-    transmission: { en: 'FOREIGN RADIO INTERCEPT', fa: 'رهگیری رادیوی خارجی' },
-    quote: {
-      en: 'Drafted at nineteen, stationed far from home. I listen to foreign radio under my blanket. When ordered to reinforce a crackdown, I mis-load crates and misplace thermal optics. Half-ready units buy the people time.',
-      fa: 'نوزده ساله اجباری شدم، دور از خانه مستقرم. زیر پتو رادیوی خارجی گوش می‌دهم. وقتی دستور تقویت سرکوب می‌آید، جعبه‌ها را اشتباه بار می‌زنم و دوربین حرارتی گم می‌کنم. واحدهای نیمه‌آماده برای مردم وقت می‌خرند.'
-    },
-    position: { x: 680, y: 780 }
-  },
-
-  clerk_intelligence: {
-    portrait: 'image/portrait/anonymous_characters2/anon_intelligence_clerk.png',
-    character: { en: 'INTELLIGENCE CLERK — TEHRAN', fa: 'کارمند اطلاعات — تهران' },
-    transmission: { en: 'MISROUTED FILE', fa: 'پرونده اشتباه ارسال شده' },
-    quote: {
-      en: 'I sit in a gray cubicle compiling "risk profiles" of teachers, students, clerics. A single mis-typed digit sends files to harmless archive queues instead of watchlists. I buy strangers months of freedom with keystrokes.',
-      fa: 'در یک اتاقک خاکستری می‌نشینم و "پروفایل ریسک" معلمان، دانشجویان و روحانیون را تنظیم می‌کنم. یک رقم اشتباه تایپ شده پرونده‌ها را به صف آرشیو بی‌ضرر می‌فرستد به جای لیست مراقبت. با ضربات کیبورد ماه‌ها آزادی برای غریبه‌ها می‌خرم.'
-    },
-    position: { x: 1360, y: 580 }
-  },
-
-  guard_evin: {
-    portrait: 'image/portrait/anonymous_characters2/anon_prison_gaurd.png',
-    character: { en: 'PRISON GUARD — EVIN', fa: 'زندانبان — اوین' },
-    transmission: { en: 'SMUGGLED NOTE', fa: 'یادداشت قاچاق' },
-    quote: {
-      en: 'I joined for the salary and the promise of an apartment. Then I watched a teenager beaten in front of his mother. Now I smuggle notes in my lunch container. I turn the camera away for thirty extra seconds when doors open.',
-      fa: 'برای حقوق و وعده آپارتمان آمدم. بعد دیدم نوجوانی را جلوی مادرش می‌زنند. حالا یادداشت‌ها را در ظرف ناهارم قاچاق می‌کنم. وقتی درها باز می‌شوند سی ثانیه بیشتر دوربین را می‌چرخانم.'
-    },
-    position: { x: 1280, y: 560 }
-  },
-
-  cyber_qom: {
-    portrait: 'image/portrait/anonymous_characters2/anon_cyber_contractor.png',
-    character: { en: 'CYBER CONTRACTOR — QOM', fa: 'پیمانکار سایبری — قم' },
-    transmission: { en: 'DOUBLE-SCREEN LEAK', fa: 'نشت دو صفحه‌ای' },
-    quote: {
-      en: 'They hired me to troll critics and flood hashtags with regime slogans. I run two screens now: one for my quota of fake posts, one to signal the time, place, and tactics of disinformation waves to activists abroad.',
-      fa: 'استخدامم کردند که منتقدان را ترول کنم و هشتگ‌ها را با شعارهای رژیم پر کنم. حالا دو صفحه دارم: یکی برای سهمیه پست‌های جعلی، یکی برای علامت دادن زمان، مکان و تاکتیک‌های موج‌های دروغ‌پراکنی به فعالان خارج.'
-    },
-    position: { x: 1350, y: 720 }
-  },
-
-  logistics_irgc: {
-    portrait: 'image/portrait/anonymous_characters2/anon_irgc_logistics_officer.png',
-    character: { en: 'IRGC LOGISTICS OFFICER — TEHRAN', fa: 'افسر تدارکات سپاه — تهران' },
-    transmission: { en: 'SUPPLY MANIFEST LEAK', fa: 'نشت فهرست تدارکات' },
-    quote: {
-      en: 'I handle fuel and rations, not ideology. I believed the stories about defending the nation. After my nephew lost an eye in a protest, I began "losing" supplies meant for foreign militias. I redirect them to commanders who refuse to fire on crowds.',
-      fa: 'سوخت و جیره را مدیریت می‌کنم، نه ایدئولوژی. داستان‌های دفاع از کشور را باور داشتم. بعد از اینکه برادرزاده‌ام در اعتراض چشمش را از دست داد، شروع کردم تدارکات میلیشیاهای خارجی را "گم" کنم. آن‌ها را به فرماندهانی می‌دهم که حاضر نیستند به جمعیت شلیک کنند.'
-    },
-    position: { x: 1400, y: 610 }
-  },
-
-  trainer_basij: {
-    portrait: 'image/portrait/anonymous_characters2/anon_basij_trainer.png',
-    character: { en: 'BASIJ TRAINER — PROVINCIAL TOWN', fa: 'مربی بسیج — شهرستان' },
-    transmission: { en: 'DOCTRINE REVISION', fa: 'بازنگری آموزه' },
-    quote: {
-      en: 'I spent years teaching shield formations and street control. Now I alter doctrine, emphasizing "restraint" and "de-escalation." I show trusted trainees where the blind corners are—if they ever need to disappear from their unit.',
-      fa: 'سال‌ها آرایش سپر و کنترل خیابان آموزش دادم. حالا آموزه را تغییر می‌دهم، بر "خویشتن‌داری" و "تنش‌زدایی" تأکید می‌کنم. به کارآموزان مورد اعتماد نشان می‌دهم گوشه‌های کور کجاست—اگر روزی بخواهند از واحدشان ناپدید شوند.'
-    },
-    position: { x: 1150, y: 750 }
-  },
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // ADDITIONAL CHARACTERS
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  neighborhood_organizer_alt: {
-    portrait: 'image/portrait/anonymous_characters2/anon_neighborhood_organizer.png',
-    character: { en: 'STREET MEDIC — TEHRAN', fa: 'امدادگر خیابانی — تهران' },
-    transmission: { en: 'SIGNAL MESSAGE', fa: 'پیام سیگنال' },
-    quote: {
-      en: 'I carry a backpack full of gauze, tourniquets, and eye wash for tear gas. When the shooting starts, I am the one who runs toward it. They cannot arrest all of us. They cannot stop what we have become.',
-      fa: 'کوله‌پشتی پر از گاز، تورنیکت و محلول چشم‌شویی برای گاز اشک‌آور حمل می‌کنم. وقتی تیراندازی شروع می‌شود، من به سمتش می‌دوم. نمی‌توانند همه ما را دستگیر کنند. نمی‌توانند آنچه شده‌ایم را متوقف کنند.'
-    },
-    position: { x: 1420, y: 660 }
-  },
-
-  gamer_activist: {
-    portrait: 'image/portrait/anonymous_characters2/anon_gamer.png',
-    character: { en: 'DIGITAL ACTIVIST — TEHRAN', fa: 'فعال دیجیتال — تهران' },
-    transmission: { en: 'GAMING SERVER RELAY', fa: 'رله سرور بازی' },
-    quote: {
-      en: 'They think we are just playing games. But our Discord servers move more intelligence than their entire surveillance budget can track. Every kill in the game is a coded message. Every respawn is a time and place.',
-      fa: 'فکر می‌کنند فقط بازی می‌کنیم. اما سرورهای دیسکورد ما اطلاعات بیشتری جابجا می‌کنند از کل بودجه نظارتی‌شان. هر کشتن در بازی یک پیام رمزی است. هر زنده شدن یک زمان و مکان.'
-    },
-    position: { x: 1300, y: 630 }
-  },
-
-  school_teacher_alt: {
-    portrait: 'image/portrait/anonymous_characters2/anon_school_teacher.png',
-    character: { en: 'VPN SELLER — KERMANSHAH', fa: 'فروشنده VPN — کرمانشاه' },
-    transmission: { en: 'QR CODE DROP', fa: 'ارسال کد QR' },
-    quote: {
-      en: 'I run a phone repair kiosk with a side business in "software cleaning." Behind the counter I flash QR codes to vetted customers. A month of VPN access. A secure messaging app. The tool is not proof against carelessness, I warn them. But it is a start.',
-      fa: 'یک کیوسک تعمیر موبایل دارم با کار جانبی "تمیز کردن نرم‌افزار." پشت پیشخوان کدهای QR به مشتریان بررسی شده نشان می‌دهم. یک ماه VPN. یک اپ پیام‌رسان امن. ابزار در برابر بی‌احتیاطی محافظت نمی‌کند، هشدار می‌دهم. اما شروعی است.'
-    },
-    position: { x: 850, y: 720 }
-  },
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // RELIGIOUS MINORITIES AND UNDERGROUND FAITH
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  house_church_tehran: {
-    portrait: 'image/portrait/anonymous_character3/anon_house_church_leader.png',
-    character: { en: 'HOUSE CHURCH LEADER — TEHRAN', fa: 'رهبر کلیسای خانگی — تهران' },
-    transmission: { en: 'ENCRYPTED PRAYER GROUP', fa: 'گروه دعای رمزنگاری شده' },
-    quote: {
-      en: 'We meet under the cover of English practice groups. I keep a packed prison bag by the door and print Farsi New Testament pages on office copiers after hours. Faith does not require a building. It requires courage.',
-      fa: 'زیر پوشش کلاس‌های تمرین انگلیسی جمع می‌شویم. یک کیف زندان آماده کنار در دارم و بعد از ساعات کاری صفحات عهد جدید فارسی را با کپی اداره چاپ می‌کنم. ایمان به ساختمان نیاز ندارد. به شجاعت نیاز دارد.'
-    },
-    position: { x: 1370, y: 595 }
-  },
-
-  bible_courier_karaj: {
-    portrait: 'image/portrait/anonymous_character3/anon_bible_courier.png',
-    character: { en: 'BIBLE COURIER — KARAJ', fa: 'پیک کتاب مقدس — کرج' },
-    transmission: { en: 'MEMORIZED PASSAGE', fa: 'متن حفظ شده' },
-    quote: {
-      en: 'I memorize passages so I can burn the paper after each reading. My backpack hides flash drives with audio sermons under notebooks and a thermos. The Word travels in ways they cannot search.',
-      fa: 'آیات را حفظ می‌کنم تا بعد از هر خواندن کاغذ را بسوزانم. کوله‌پشتیم فلش‌های موعظه صوتی را زیر دفترها و فلاسک پنهان می‌کند. کلام به راه‌هایی سفر می‌کند که نمی‌توانند بگردند.'
-    },
-    position: { x: 1240, y: 570 }
-  },
-
-  armenian_esfahan: {
-    portrait: 'image/portrait/anonymous_character3/anon_armenian_shop_keeper.png',
-    character: { en: 'ARMENIAN SHOPKEEPER — ESFAHAN', fa: 'مغازه‌دار ارمنی — اصفهان' },
-    transmission: { en: 'BACK-ROOM WIFI', fa: 'وای‌فای اتاق پشتی' },
-    quote: {
-      en: 'Officially protected, I run my electronics shop next to the old church and pretend not to notice plainclothes visits. Trusted youth use my back-room Wi-Fi for encrypted Bible studies. I call it remote support for foreign customers.',
-      fa: 'رسماً تحت حفاظتم، مغازه الکترونیکم را کنار کلیسای قدیمی اداره می‌کنم و وانمود می‌کنم متوجه بازدیدهای لباس‌شخصی‌ها نمی‌شوم. جوانان مورد اعتماد از وای‌فای اتاق پشتی برای مطالعه کتاب مقدس رمزنگاری شده استفاده می‌کنند. اسمش را می‌گذارم پشتیبانی از راه دور برای مشتریان خارجی.'
-    },
-    position: { x: 1420, y: 870 }
-  },
-
-  assyrian_nurse_tehran: {
-    portrait: 'image/portrait/anonymous_character3/anon_assyrian_nurse.png',
-    character: { en: 'ASSYRIAN NURSE — TEHRAN', fa: 'پرستار آشوری — تهران' },
-    transmission: { en: 'WHISPERED PRAYER', fa: 'دعای زمزمه‌ای' },
-    quote: {
-      en: 'They schedule me on Sundays to keep me from worship. In quiet corners I pray in Farsi and Assyrian with families of detainees. I tell them their loved ones\' names will not be forgotten. That is my ministry now.',
-      fa: 'یکشنبه‌ها شیفتم می‌گذارند تا از عبادت دورم کنند. در گوشه‌های ساکت با خانواده‌های بازداشتی‌ها به فارسی و آشوری دعا می‌کنم. می‌گویم نام عزیزانشان فراموش نخواهد شد. این حالا خدمت من است.'
-    },
-    position: { x: 1340, y: 615 }
-  },
-
-  evangelist_shiraz: {
-    portrait: 'image/portrait/anonymous_character3/anon_christian_evangelist.png',
-    character: { en: 'UNDERGROUND EVANGELIST — SHIRAZ', fa: 'مبشر زیرزمینی — شیراز' },
-    transmission: { en: 'PARK BENCH LESSON', fa: 'درس نیمکت پارک' },
-    quote: {
-      en: 'I was once part of a hard-line student group. A secret church meeting abroad changed everything. Now I pose as an English tutor, slipping Gospel parables into role-play dialogues. Any student could be an informant. I teach anyway.',
-      fa: 'زمانی عضو یک گروه دانشجویی تندرو بودم. یک جلسه کلیسای مخفی در خارج همه چیز را عوض کرد. حالا وانمود می‌کنم معلم انگلیسی‌ام، مثل‌های انجیل را در دیالوگ‌های نقش‌آفرینی جا می‌دهم. هر دانش‌آموزی می‌تواند خبرچین باشد. باز هم درس می‌دهم.'
-    },
-    position: { x: 1490, y: 1140 }
-  },
-
-  bahai_tutor_mashhad: {
-    portrait: 'image/portrait/anonymous_character3/anon_bahai_tutor.png',
-    character: { en: 'BAHÁ\'Í TUTOR — MASHHAD', fa: 'معلم بهائی — مشهد' },
-    transmission: { en: 'LIVING-ROOM SCHOOL', fa: 'مدرسه اتاق نشیمن' },
-    quote: {
-      en: 'Barred from university, I run a living-room school for children from other banned families. My only certificate is a handwritten Bahá\'í quote about unity. It could justify a raid if discovered. I teach them anyway—they deserve to learn.',
-      fa: 'از دانشگاه محرومم، مدرسه‌ای در اتاق نشیمن برای بچه‌های خانواده‌های ممنوع دیگر اداره می‌کنم. تنها مدرکم یک نقل قول دست‌نویس بهائی درباره وحدت است. اگر کشف شود می‌تواند توجیه یورش باشد. باز هم درسشان می‌دهم—حق دارند یاد بگیرند.'
-    },
-    position: { x: 1880, y: 500 }
-  },
-
-  bahai_shop_tabriz: {
-    portrait: 'image/portrait/anonymous_character3/anon_bahai_shop_owner.png',
-    character: { en: 'BAHÁ\'Í SHOP OWNER — TABRIZ', fa: 'صاحب مغازه بهائی — تبریز' },
-    transmission: { en: 'CLOSURE ORDER ARCHIVE', fa: 'آرشیو حکم تعطیلی' },
-    quote: {
-      en: 'My business has been closed and relicensed several times under relatives\' names. I quietly employ youth expelled from university. I keep detailed records of every closure order—for a hoped-for future reckoning.',
-      fa: 'کسب‌وکارم چندین بار بسته و با نام‌ اقوام مجدداً مجوز گرفته. بی‌سروصدا جوانان اخراجی از دانشگاه را استخدام می‌کنم. سوابق دقیق هر حکم تعطیلی را نگه می‌دارم—برای حساب‌رسی آینده‌ای که امیدوارم بیاید.'
-    },
-    position: { x: 900, y: 440 }
-  },
-
-  sufi_musician_qom: {
-    portrait: 'image/portrait/anonymous_character3/anon_sufi_dervish_musician.png',
-    character: { en: 'SUFI MUSICIAN — QOM', fa: 'نوازنده صوفی — قم' },
-    transmission: { en: 'BASEMENT GATHERING', fa: 'مجلس زیرزمینی' },
-    quote: {
-      en: 'I play traditional instruments at weddings, but my real performances are basement gatherings where men and women sit together chanting. I walk with a limp from a lodge raid. The music will outlast the repression.',
-      fa: 'در عروسی‌ها ساز سنتی می‌زنم، اما اجراهای واقعی‌ام مجالس زیرزمینی است که مردان و زنان کنار هم می‌نشینند و ذکر می‌گویند. از یورش به خانقاه لنگ راه می‌روم. موسیقی از سرکوب بیشتر عمر خواهد کرد.'
-    },
-    position: { x: 1380, y: 740 }
-  },
-
-  christian_worker_rasht: {
-    portrait: 'image/portrait/anonymous_character3/anon_christian_childrens_worker.png',
-    character: { en: 'CHILDREN\'S WORKER — RASHT', fa: 'مربی کودک — رشت' },
-    transmission: { en: 'LANGUAGE CLUB', fa: 'کلاس زبان' },
-    quote: {
-      en: 'I run a language club for children at a community center. Between vocabulary games, I tell softened Bible stories about courage and justice. I teach children to question silence and fear. That is how change begins.',
-      fa: 'کلاس زبان برای بچه‌ها در مرکز محله اداره می‌کنم. بین بازی‌های لغت، داستان‌های ملایم کتاب مقدس درباره شجاعت و عدالت می‌گویم. به بچه‌ها یاد می‌دهم سکوت و ترس را زیر سؤال ببرند. تغییر اینطور شروع می‌شود.'
-    },
-    position: { x: 1070, y: 450 }
-  },
-
-  mandaean_ahvaz: {
-    portrait: 'image/portrait/anonymous_character3/anon_mandean_metalworker.png',
-    character: { en: 'MANDAEAN METALWORKER — AHVAZ', fa: 'فلزکار مندایی — اهواز' },
-    transmission: { en: 'DAWN RITUAL', fa: 'آیین سحر' },
-    quote: {
-      en: 'I work at a small shop near the river, performing quiet rituals at dawn when no one watches. I listen to exile radio on a hidden headset and pass news through my tiny community after services. We are few, but we endure.',
-      fa: 'در کارگاه کوچکی نزدیک رودخانه کار می‌کنم، سحر که کسی نگاه نمی‌کند آیین‌های ساکت انجام می‌دهم. با هدست پنهان رادیوی تبعیدی‌ها گوش می‌دهم و بعد از مراسم اخبار را در جامعه کوچکمان پخش می‌کنم. کم هستیم، اما دوام می‌آوریم.'
-    },
-    position: { x: 1080, y: 970 }
-  },
-
-  sufi_poet_kermanshah: {
-    portrait: 'image/portrait/anonymous_character3/anon_sufi_poet.png',
-    character: { en: 'SUFI POET — KERMANSHAH', fa: 'شاعر صوفی — کرمانشاه' },
-    transmission: { en: 'ONLINE VERSE', fa: 'شعر آنلاین' },
-    quote: {
-      en: 'I publish poems about love and longing that seem harmless. Locals know the metaphors point toward spiritual resistance—a God beyond the regime\'s version. Security has warned me twice. I keep writing.',
-      fa: 'شعرهایی درباره عشق و اشتیاق منتشر می‌کنم که بی‌ضرر به نظر می‌رسند. محلی‌ها می‌دانند استعاره‌ها به مقاومت معنوی اشاره می‌کنند—خدایی فراتر از نسخه رژیم. امنیتی‌ها دوبار هشدار داده‌اند. به نوشتن ادامه می‌دهم.'
-    },
-    position: { x: 870, y: 740 }
-  },
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // LGBTQ AND NONBELIEVERS
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  gay_student_tehran: {
-    portrait: 'image/portrait/anonymous_character3/anon_closeted_gay_student.png',
-    character: { en: 'STUDENT — TEHRAN', fa: 'دانشجو — تهران' },
-    transmission: { en: 'ANONYMOUS MIRROR', fa: 'آینه ناشناس' },
-    quote: {
-      en: 'I share a dorm with regime loyalists. I maintain VPNs and anonymous mirrors for protest channels. A routine laptop check could expose my politics and my private chats both. I live in constant fear. I keep working.',
-      fa: 'با وفاداران رژیم هم‌اتاقم. VPN و آینه‌های ناشناس برای کانال‌های اعتراضی نگهداری می‌کنم. یک بررسی معمولی لپ‌تاپ می‌تواند هم سیاستم را لو بدهد هم چت‌های خصوصی‌ام را. در ترس دائم زندگی می‌کنم. به کار ادامه می‌دهم.'
-    },
-    position: { x: 1360, y: 605 }
-  },
-
-  photographer_shiraz: {
-    portrait: 'image/portrait/anonymous_character3/anon_lesbian_photographer.png',
-    character: { en: 'PHOTOGRAPHER — SHIRAZ', fa: 'عکاس — شیراز' },
-    transmission: { en: 'OFFSHORE BACKUP', fa: 'پشتیبان خارجی' },
-    quote: {
-      en: 'Officially I shoot weddings and tourist sites. Unofficially, protests, bruises, and funerals. My partner appears only as a close friend. I back up all risky images to a server abroad before wiping my drives each night.',
-      fa: 'رسماً از عروسی و جاذبه‌های توریستی عکس می‌گیرم. غیررسمی، از اعتراض، کبودی و تشییع. شریکم فقط به عنوان دوست صمیمی ظاهر می‌شود. هر شب قبل از پاک کردن درایوها، تمام عکس‌های خطرناک را به سرور خارج پشتیبان می‌گیرم.'
-    },
-    position: { x: 1510, y: 1160 }
-  },
-
-  stylist_esfahan: {
-    portrait: 'image/portrait/anonymous_character3/anon_trans_hair_stylist.png',
-    character: { en: 'HAIR STYLIST — ESFAHAN', fa: 'آرایشگر — اصفهان' },
-    transmission: { en: 'SIDE ALLEY SALON', fa: 'سالن کوچه فرعی' },
-    quote: {
-      en: 'My salon runs under my birth name and old ID. I alter protesters\' looks before marches—new haircuts, shaved beards, dye jobs. Behind the mirror, a jar labeled henna powder hides something else entirely. We help each other survive.',
-      fa: 'سالنم با نام تولد و شناسنامه قدیمی کار می‌کند. قبل از راهپیمایی ظاهر معترضان را عوض می‌کنم—مدل موی جدید، ریش تراشیده، رنگ مو. پشت آینه، شیشه‌ای با برچسب پودر حنا چیز کاملاً دیگری پنهان کرده. به هم کمک می‌کنیم زنده بمانیم.'
-    },
-    position: { x: 1440, y: 860 }
-  },
-
-  seminary_dropout: {
-    portrait: 'image/portrait/anonymous_character3/anon_ex_seminary_dropout.png',
-    character: { en: 'EX-SEMINARIAN — TEHRAN', fa: 'طلبه سابق — تهران' },
-    transmission: { en: 'FOREIGN LIT SECTION', fa: 'بخش ادبیات خارجی' },
-    quote: {
-      en: 'They told me doubt was a sin. Then I saw what certainty looks like with a gun in its hand. I chose doubt. Now I slip critical philosophy into the foreign literature section. No one who demands fear for God\'s sake speaks for anything holy.',
-      fa: 'گفتند شک گناه است. بعد دیدم یقین با اسلحه در دست چه شکلی است. شک را انتخاب کردم. حالا فلسفه انتقادی را در بخش ادبیات خارجی جا می‌دهم. کسی که به نام خدا ترس می‌خواهد، نماینده هیچ چیز مقدسی نیست.'
-    },
-    position: { x: 1330, y: 625 }
-  },
-
-  disillusioned_student: {
-    portrait: 'image/portrait/anonymous_character3/anon_disillusioned_student.png',
-    character: { en: 'DISILLUSIONED STUDENT — TEHRAN', fa: 'دانشجوی سرخورده — تهران' },
-    transmission: { en: 'CAMPUS READING GROUP', fa: 'گروه مطالعه دانشگاه' },
-    quote: {
-      en: 'They wrapped their power in God\'s name so we would be afraid to question it. I dropped the fear. The questions stayed. I organize reading groups around banned books now. They cannot silence what we have already read.',
-      fa: 'قدرتشان را به نام خدا پیچیدند تا از سؤال کردن بترسیم. ترس را رها کردم. سؤال‌ها ماندند. حالا گروه‌های مطالعه کتاب‌های ممنوع برگزار می‌کنم. نمی‌توانند آنچه را خوانده‌ایم خاموش کنند.'
-    },
-    position: { x: 1390, y: 635 }
-  },
-
-  underground_blogger: {
-    portrait: 'image/portrait/anonymous_character3/anon_underground_blogger.png',
-    character: { en: 'UNDERGROUND BLOGGER — MASHHAD', fa: 'بلاگر زیرزمینی — مشهد' },
-    transmission: { en: 'MIRRORED ABROAD', fa: 'آینه شده در خارج' },
-    quote: {
-      en: 'They say without faith we have no moral compass. Funny—mine started working the day I stopped excusing their crimes as tests. I run an anonymous blog mirrored outside Iran. Humor and logic against compulsory religion.',
-      fa: 'می‌گویند بدون ایمان قطب‌نمای اخلاقی نداریم. جالب است—مال من روزی شروع به کار کرد که دیگر جنایاتشان را به عنوان امتحان توجیه نکردم. بلاگ ناشناسی دارم که در خارج آینه شده. طنز و منطق علیه دین اجباری.'
-    },
-    position: { x: 1860, y: 520 }
-  }
-};
+// GRAVESTONE MARKERS - Loaded from data/gravestones_data.js
 
 // ────────────────────────────────────────────────────────────────────────────
 // ENDINGS - Victory/defeat scenarios
@@ -6857,129 +5574,7 @@ const MONTHS = [
   { en: 'DEC', fa: 'دسامبر' }
 ];
 
-// ────────────────────────────────────────────────────────────────────────────
-// DAILY BRIEFINGS - Theme, theatre, narrative, and voice line refs per day
-// ────────────────────────────────────────────────────────────────────────────
-
-const DAILY_BRIEFINGS = [
-  {
-    day: 1,
-    theme: "Day 1 — Strait Under Threat",
-    theatre: "SEA",
-    brief: "U.S. issues Hormuz ultimatum; IRGC surface units visible in the strait; drone footage confirms escort operations underway.",
-    potus: "potus_01",
-    state: "state_01",
-    intel: "intel_01"
-  },
-  {
-    day: 2,
-    theme: "Day 2 — First Strikes Land",
-    theatre: "AIR",
-    brief: "Natanz struck overnight; regime state media claims glorious defense while satellite confirms crater at enrichment hall.",
-    potus: "potus_02",
-    state: "state_07",
-    intel: "intel_03"
-  },
-  {
-    day: 3,
-    theme: "Day 3 — Grid Goes Dark",
-    theatre: "AIR",
-    brief: "Power plants and key bridges targeted; IRIB broadcasts uninterrupted 'victory' footage as blackouts roll across twelve provinces.",
-    potus: "potus_03",
-    state: "state_06",
-    intel: "intel_04"
-  },
-  {
-    day: 4,
-    theme: "Day 4 — Red Lines Crossed",
-    theatre: "WORLD",
-    brief: "Nuclear red line invoked; IRGC chain of command showing first fractures; fuel prices spike as Qaani threatens regional retaliation.",
-    potus: "potus_04",
-    state: "state_04",
-    intel: "intel_09"
-  },
-  {
-    day: 5,
-    theme: "Day 5 — Economy in Freefall",
-    theatre: "STREET",
-    brief: "Rial collapses further; paychecks stopped in three provinces; smuggled audio captures a woman broadcasting from a Tehran rooftop.",
-    potus: "potus_05",
-    state: "state_05",
-    intel: "intel_05"
-  },
-  {
-    day: 6,
-    theme: "Day 6 — South Pars Silent",
-    theatre: "SEA",
-    brief: "South Pars refinery workers confirm full strike; drone footage shows no flare stacks burning; oil output effectively zero.",
-    potus: "potus_09",
-    state: "state_17",
-    intel: "intel_06"
-  },
-  {
-    day: 7,
-    theme: "Day 7 — The Blackout Falls",
-    theatre: "STREET",
-    brief: "Internet cut nationwide as street protests surge; Basij conscripts recorded refusing orders in intercepted call.",
-    potus: "potus_07",
-    state: "state_09",
-    intel: "intel_07"
-  },
-  {
-    day: 8,
-    theme: "Day 8 — Swarm Destroyed",
-    theatre: "SEA",
-    brief: "IRGC speedboat swarm engaged and destroyed in the Gulf; Bandar Abbas naval base burning visible on satellite imagery.",
-    potus: "potus_20",
-    state: "state_15",
-    intel: "intel_21"
-  },
-  {
-    day: 9,
-    theme: "Day 9 — Proxies at the Gate",
-    theatre: "STREET",
-    brief: "Iraqi PMF convoy crosses Iran border at Mehran; foreign enforcer deployment confirms regime cannot rely on domestic conscripts.",
-    potus: "potus_11",
-    state: "state_23",
-    intel: "intel_11"
-  },
-  {
-    day: 10,
-    theme: "Day 10 — Rooftops at Dawn",
-    theatre: "STREET",
-    brief: "Smuggled rooftop video from central Tehran shows empty streets held by Afghan militias, not IRGC; regime narrative collapsing.",
-    potus: "potus_13",
-    state: "state_08",
-    intel: "intel_10"
-  },
-  {
-    day: 11,
-    theme: "Day 11 — F-22s Over Tehran",
-    theatre: "AIR",
-    brief: "U.S. fighter sweep over Tehran airspace unopposed; senior IRGC general detected crossing to Turkish border under false papers.",
-    potus: "potus_23",
-    state: "state_16",
-    intel: "intel_22"
-  },
-  {
-    day: 12,
-    theme: "Day 12 — The Lion Rises",
-    theatre: "WORLD",
-    brief: "Pahlavi addresses diaspora; Westwood rally confirmed at 40,000; central bank panic intercept suggests regime has days, not weeks.",
-    potus: "potus_14",
-    state: "state_10",
-    intel: "intel_19"
-  },
-  {
-    day: 60,
-    theme: "Day 60 — Surrender or Stand",
-    theatre: "STREET",
-    brief: "Evin Prison gates breached; white rose footage smuggled out; SIGINT confirms regime officials drafting surrender language.",
-    potus: "potus_25",
-    state: "state_25",
-    intel: "intel_25"
-  }
-];
+// DAILY_BRIEFINGS is now loaded from data/daily_briefings_data.js
 
 // ════════════════════════════════════════════════════════════════════════════
 // SECTION 4: GAME LOGIC
@@ -7097,6 +5692,16 @@ const mapController = {
     this.canvas.addEventListener('touchstart', (e) => this.startDrag(e), { passive: false });
     document.addEventListener('touchmove', (e) => this.onDrag(e), { passive: false });
     document.addEventListener('touchend', () => this.endDrag());
+    
+    // Track mouse over map area for patrol pausing
+    this.viewport.addEventListener('mouseenter', () => {
+      this.mouseOverMap = true;
+      this.updatePatrolPause();
+    });
+    this.viewport.addEventListener('mouseleave', () => {
+      this.mouseOverMap = false;
+      this.updatePatrolPause();
+    });
   },
   
   startDrag(e) {
@@ -7359,6 +5964,8 @@ const mapController = {
   
   patrolActive: false,
   patrolAborted: false,
+  patrolPaused: false,
+  mouseOverMap: false,
   patrolIndex: 0,
   
   // Get list of all points of interest (active voices + active flags)
@@ -7398,12 +6005,21 @@ const mapController = {
     this.patrolAborted = false;
     this.patrolIndex = 0;
     
+    // Check if we should start paused based on current state
+    this.patrolPaused = this.mouseOverMap || this.hasFocusedElement();
+    
     // Zoom out for patrol view
     if (this.zoom > 1.0) {
       await this.zoomTo(1.0, 1200);
     }
     
     while (this.patrolActive && !this.patrolAborted) {
+      // Wait while paused
+      while (this.patrolPaused && !this.patrolAborted) {
+        await this.pause(100);
+      }
+      if (this.patrolAborted) break;
+      
       const target = targets[this.patrolIndex];
       console.log('[MapController] Patrol visiting', target.type, target.key, '(' + (this.patrolIndex + 1) + '/' + targets.length + ')');
       
@@ -7412,8 +6028,14 @@ const mapController = {
       
       if (this.patrolAborted) break;
       
-      // Hold for 5 seconds
-      await this.pause(5000);
+      // Hold for 5 seconds (checking pause/abort periodically)
+      for (let i = 0; i < 50 && !this.patrolAborted; i++) {
+        while (this.patrolPaused && !this.patrolAborted) {
+          await this.pause(100);
+        }
+        if (this.patrolAborted) break;
+        await this.pause(100);
+      }
       
       if (this.patrolAborted) break;
       
@@ -7425,12 +6047,32 @@ const mapController = {
     console.log('[MapController] Patrol ended, aborted:', this.patrolAborted);
   },
   
-  // Stop the patrol loop
+  // Check if anything is focused/pinned
+  hasFocusedElement() {
+    return document.querySelector('.flag.focused') !== null || 
+           document.querySelector('.voice-marker.pinned') !== null;
+  },
+  
+  // Update patrol pause state based on mouse position and focus
+  // Patrol only runs when: nothing focused AND mouse not over map
+  updatePatrolPause() {
+    const shouldPause = this.mouseOverMap || this.hasFocusedElement();
+    if (shouldPause && !this.patrolPaused) {
+      console.log('[MapController] Pausing patrol');
+      this.patrolPaused = true;
+    } else if (!shouldPause && this.patrolPaused) {
+      console.log('[MapController] Resuming patrol');
+      this.patrolPaused = false;
+    }
+  },
+  
+  // Stop the patrol loop completely
   stopPatrol() {
     if (this.patrolActive) {
       console.log('[MapController] Stopping patrol');
       this.patrolAborted = true;
       this.patrolActive = false;
+      this.patrolPaused = false;
     }
   }
 };
@@ -7467,13 +6109,96 @@ const game = {
   currentWildcard: null,
   activeVoices: [],  // Which voice markers to show this day (2-3 random)
 
+  // Minimum pixel distance between voice markers to prevent overlap
+  VOICE_MIN_DISTANCE: 120,
+
+  // Get the list of voices that have been shown (persists across games)
+  getShownVoices() {
+    try {
+      const stored = localStorage.getItem('shownVoices');
+      return stored ? JSON.parse(stored) : [];
+    } catch (e) {
+      return [];
+    }
+  },
+
+  // Save the list of shown voices to localStorage
+  saveShownVoices(voices) {
+    try {
+      localStorage.setItem('shownVoices', JSON.stringify(voices));
+    } catch (e) {
+      console.warn('[Game] Could not save shown voices to localStorage');
+    }
+  },
+
+  // Calculate distance between two voice positions
+  getVoiceDistance(voiceA, voiceB) {
+    const posA = VOICE_MESSAGES[voiceA]?.position;
+    const posB = VOICE_MESSAGES[voiceB]?.position;
+    if (!posA || !posB) return Infinity;
+    const dx = posA.x - posB.x;
+    const dy = posA.y - posB.y;
+    return Math.sqrt(dx * dx + dy * dy);
+  },
+
+  // Check if a voice is far enough from already-selected voices
+  isVoiceFarEnough(candidate, selectedVoices) {
+    for (const selected of selectedVoices) {
+      if (this.getVoiceDistance(candidate, selected) < this.VOICE_MIN_DISTANCE) {
+        return false;
+      }
+    }
+    return true;
+  },
+
   // Select 2-3 random voice markers for the current day
+  // Cycles through all voices before repeating, and ensures they don't overlap
   selectActiveVoices() {
     const allVoices = Object.keys(VOICE_MESSAGES);
-    const shuffled = allVoices.sort(() => Math.random() - 0.5);
+    let shownVoices = this.getShownVoices();
+    
+    // If all voices have been shown, reset the cycle
+    if (shownVoices.length >= allVoices.length) {
+      console.log('[Game] All voices shown, resetting cycle');
+      shownVoices = [];
+    }
+    
+    // Get voices that haven't been shown yet
+    const unseenVoices = allVoices.filter(v => !shownVoices.includes(v));
+    
+    // Shuffle the unseen voices
+    const shuffled = unseenVoices.sort(() => Math.random() - 0.5);
+    
+    // Try to select 2-3 voices that are far enough apart
     const count = 2 + Math.floor(Math.random() * 2); // 2 or 3
-    this.activeVoices = shuffled.slice(0, count);
+    const selected = [];
+    
+    for (const voice of shuffled) {
+      if (selected.length >= count) break;
+      if (this.isVoiceFarEnough(voice, selected)) {
+        selected.push(voice);
+      }
+    }
+    
+    // If we couldn't find enough spaced-out voices, fall back to just picking from unseen
+    // (better to show some voices than none, even if slightly close)
+    if (selected.length < 2 && shuffled.length >= 2) {
+      console.log('[Game] Could not find enough spaced voices, relaxing distance constraint');
+      for (const voice of shuffled) {
+        if (selected.length >= count) break;
+        if (!selected.includes(voice)) {
+          selected.push(voice);
+        }
+      }
+    }
+    
+    // Mark these voices as shown
+    shownVoices.push(...selected);
+    this.saveShownVoices(shownVoices);
+    
+    this.activeVoices = selected;
     console.log('[Game] Active voices for day', this.day, ':', this.activeVoices);
+    console.log('[Game] Total voices shown so far:', shownVoices.length, '/', allVoices.length);
   },
 
   reset() {
@@ -8048,6 +6773,8 @@ function renderFlags() {
     if (data.position) {
       el.style.left = data.position.x + 'px';
       el.style.top = data.position.y + 'px';
+      // Y-based depth sorting: higher Y = closer to viewer = higher z-index
+      el.style.zIndex = Math.floor(data.position.y);
     }
     
     // Build effects HTML using t() for bilingual text
@@ -8065,25 +6792,14 @@ function renderFlags() {
       </div>
     `;
     
-    // Hover on flag: stop patrol (but don't pan)
-    el.addEventListener('mouseenter', () => {
-      mapController.stopPatrol();
-    });
-    
-    // Leave flag: resume patrol (unless user clicked to focus)
-    el.addEventListener('mouseleave', () => {
-      if (!el.classList.contains('focused')) {
-        mapController.startPatrol();
-      }
-    });
-    
-    // Click on flag: stop patrol, mark as focused, and pan to this flag
+    // Click on flag: mark as focused and pan to this flag
     el.addEventListener('click', (e) => {
       e.stopPropagation();
-      // Unfocus all other flags
+      // Unfocus all other flags and unpin voices
       document.querySelectorAll('.flag.focused').forEach(f => f.classList.remove('focused'));
+      document.querySelectorAll('.voice-marker.pinned').forEach(m => m.classList.remove('pinned'));
       el.classList.add('focused');
-      mapController.stopPatrol();
+      mapController.updatePatrolPause();
       mapController.panToFlag(flagKey, 800);
     });
     
@@ -8118,6 +6834,8 @@ function renderVoiceMarkers() {
     if (data.position) {
       el.style.left = data.position.x + 'px';
       el.style.top = data.position.y + 'px';
+      // Y-based depth sorting: higher Y = closer to viewer = higher z-index
+      el.style.zIndex = Math.floor(data.position.y);
     }
     
     // Add bubble-left class for markers near right edge
@@ -8128,11 +6846,16 @@ function renderVoiceMarkers() {
     // Store the full quote for typewriter effect
     const fullQuote = `"${t(data.quote)}"`;
     
+    // Support both old format (character has location in it) and new format (separate location field)
+    const charText = t(data.character);
+    const locText = data.location ? t(data.location) : '';
+    const displayChar = locText ? `${charText} — ${locText}` : charText;
+    
     el.innerHTML = `
-      <img class="portrait-img" src="${data.portrait}" alt="${t(data.character)}">
+      <img class="portrait-img" src="${data.portrait}" alt="${displayChar}">
       <div class="voice-bubble">
+        <div class="vb-character">${charText}</div>
         <div class="vb-header">${t(data.transmission)}</div>
-        <div class="vb-character">${t(data.character)}</div>
         <div class="vb-quote"></div>
       </div>
     `;
@@ -8165,36 +6888,30 @@ function renderVoiceMarkers() {
       typeChar();
     }
     
-    // Click handler to toggle pin, stop patrol, and pan to this marker
+    // Click handler to toggle pin and pan to this marker
     el.addEventListener('click', (e) => {
       e.stopPropagation();
       const wasPinned = el.classList.contains('pinned');
-      // Unpin all others
+      // Unpin all others and unfocus flags
       document.querySelectorAll('.voice-marker.pinned').forEach(m => m.classList.remove('pinned'));
+      document.querySelectorAll('.flag.focused').forEach(f => f.classList.remove('focused'));
       // Toggle this one
       if (!wasPinned) {
         el.classList.add('pinned');
         typeVoiceQuote();
-        // Stop patrol and pan to this voice marker
-        mapController.stopPatrol();
+        mapController.updatePatrolPause();
         mapController.panToVoice(voiceKey, 800);
+      } else {
+        mapController.updatePatrolPause();
       }
     });
     
-    // Hover triggers typewriter, unpins others, and stops patrol (but does NOT pan)
+    // Hover triggers typewriter and unpins others
     el.addEventListener('mouseenter', () => {
-      mapController.stopPatrol();
       document.querySelectorAll('.voice-marker.pinned').forEach(m => {
         if (m !== el) m.classList.remove('pinned');
       });
       typeVoiceQuote();
-    });
-    
-    // Leave voice marker: resume patrol (unless pinned)
-    el.addEventListener('mouseleave', () => {
-      if (!el.classList.contains('pinned')) {
-        mapController.startPatrol();
-      }
     });
     
     container.appendChild(el);
@@ -8208,10 +6925,104 @@ function setupVoiceMarkerCloseHandler() {
     if (!e.target.closest('.voice-marker') && !e.target.closest('.flag')) {
       document.querySelectorAll('.voice-marker.pinned').forEach(m => m.classList.remove('pinned'));
       document.querySelectorAll('.flag.focused').forEach(f => f.classList.remove('focused'));
-      // Resume patrol when clicking on empty map
-      mapController.startPatrol();
+      // Update patrol pause state (will resume when mouse leaves map)
+      mapController.updatePatrolPause();
     }
   });
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// MAP MARKERS - Render cities, ports, oil fields, nuclear sites
+// ────────────────────────────────────────────────────────────────────────────
+
+function renderMapMarkers() {
+  const container = document.getElementById('map-markers-container');
+  container.innerHTML = '';
+  
+  for (const marker of MAP_MARKERS) {
+    const el = document.createElement('div');
+    el.className = 'map-marker';
+    el.dataset.type = marker.type;
+    
+    // Position marker
+    el.style.left = marker.position.x + 'px';
+    el.style.top = marker.position.y + 'px';
+    // Y-based depth sorting: higher Y = closer to viewer = higher z-index
+    el.style.zIndex = Math.floor(marker.position.y);
+    
+    // Icon
+    const icon = document.createElement('img');
+    icon.className = 'map-marker-icon';
+    icon.src = `image/map_elements/map_element_${marker.type}.png`;
+    icon.alt = t(marker.name);
+    el.appendChild(icon);
+    
+    // Tooltip with name
+    const tooltip = document.createElement('div');
+    tooltip.className = 'map-marker-tooltip';
+    tooltip.textContent = t(marker.name);
+    el.appendChild(tooltip);
+    
+    container.appendChild(el);
+  }
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// GRAVESTONE MARKERS - Render Javid Nam memorial markers
+// ────────────────────────────────────────────────────────────────────────────
+
+function renderGravestoneMarkers() {
+  const container = document.getElementById('gravestones-container');
+  container.innerHTML = '';
+  
+  for (const marker of GRAVESTONE_MARKERS) {
+    // Find the corresponding JAVID_NAM_DATA entry
+    const javidNamIndex = JAVID_NAM_DATA.findIndex(entry => entry.id === marker.javidNamId);
+    if (javidNamIndex === -1) continue;
+    
+    const javidNamEntry = JAVID_NAM_DATA[javidNamIndex];
+    
+    const el = document.createElement('div');
+    el.className = 'gravestone-marker';
+    el.dataset.javidNamId = marker.javidNamId;
+    el.dataset.javidNamIndex = javidNamIndex;
+    
+    // Position marker
+    el.style.left = marker.position.x + 'px';
+    el.style.top = marker.position.y + 'px';
+    // Y-based depth sorting: higher Y = closer to viewer = higher z-index
+    el.style.zIndex = Math.floor(marker.position.y);
+    
+    // Gravestone icon
+    const icon = document.createElement('img');
+    icon.className = 'gravestone-icon';
+    icon.src = 'image/map_elements/map_element_gravestone.png';
+    icon.alt = t(javidNamEntry.title);
+    el.appendChild(icon);
+    
+    // Tooltip with name and hint
+    const tooltip = document.createElement('div');
+    tooltip.className = 'gravestone-tooltip';
+    tooltip.innerHTML = `
+      <span class="gs-name">${t(javidNamEntry.title)}</span>
+      <span class="gs-hint">${t({ en: 'CLICK TO REMEMBER', fa: 'کلیک کنید برای یادآوری' })}</span>
+    `;
+    el.appendChild(tooltip);
+    
+    // Click handler to show memorial detail
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      audioManager.playSFX('cardSelect');
+      cameFromGravestone = true;  // Mark that we came from a gravestone
+      showMemorial('screen-game');
+      // Small delay to let the memorial screen render before showing detail
+      setTimeout(() => {
+        showMemorialDetail(javidNamIndex);
+      }, 100);
+    });
+    
+    container.appendChild(el);
+  }
 }
 
 function renderRosters() {
@@ -8539,7 +7350,14 @@ function hideConsequences() {
 
 function showWildcard(wc) {
   document.getElementById('wc-character').textContent = t(wc.character);
-  document.getElementById('wc-portrait').textContent = `[${t(wc.character)}]`;
+  const portraitImg = document.getElementById('wc-portrait-img');
+  if (wc.portrait) {
+    portraitImg.src = wc.portrait;
+    portraitImg.alt = t(wc.character);
+    portraitImg.style.display = 'block';
+  } else {
+    portraitImg.style.display = 'none';
+  }
   document.getElementById('wc-quote').textContent = `"${t(wc.quote)}"`;
   document.getElementById('wc-effect').textContent = t(wc.effect);
   const wildcardEl = document.getElementById('wildcard');
@@ -8742,6 +7560,8 @@ function startGame() {
   renderFlags();
   game.selectActiveVoices();  // Pick 2-3 random voices for this day
   renderVoiceMarkers();
+  renderMapMarkers();       // Cities, ports, oil, nuclear sites
+  renderGravestoneMarkers(); // Javid Nam memorial markers
   updateFlags();
   clearRevealSlots();
   hideConsequences();
@@ -9155,6 +7975,8 @@ function setLanguage(lang) {
     updateBars(false); // No animation on language switch
     renderFlags();
     renderVoiceMarkers();
+    renderMapMarkers();
+    renderGravestoneMarkers();
     renderRosters();
     updateSelectInstruction(game.phase === 'select');
     updateDateDisplay();
