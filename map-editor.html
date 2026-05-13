@@ -1,0 +1,2164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Map Editor — Crouching Lion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Vazirmatn:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0c10;
+  --panel: #12151c;
+  --border: rgba(82,255,143,.3);
+  --grn: #52ff8f;
+  --gold: #ffd24a;
+  --red: #ff5a67;
+  --txt: #fafff7;
+  --dim: rgba(180,255,210,.65);
+  --vt: 'VT323', monospace;
+  --fa: 'Vazirmatn', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100vw; height: 100vh; overflow: hidden;
+  background: var(--bg); color: var(--txt);
+  font-family: var(--vt);
+  font-size: 16px;
+}
+
+img, .map-canvas {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  -ms-interpolation-mode: nearest-neighbor;
+}
+
+/* Layout */
+.app {
+  display: flex;
+  width: 100%; height: 100%;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 280px;
+  background: var(--panel);
+  border-right: 2px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sidebar-header {
+  padding: 12px 16px;
+  background: rgba(82,255,143,.1);
+  border-bottom: 1px solid var(--border);
+}
+
+.sidebar-header h1 {
+  font-size: 18px;
+  color: var(--grn);
+  font-weight: normal;
+  letter-spacing: 0.05em;
+}
+
+.sidebar-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+}
+
+.sidebar-tab {
+  flex: 1;
+  padding: 8px 4px;
+  background: transparent;
+  border: none;
+  color: var(--dim);
+  font-family: var(--vt);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.sidebar-tab:hover {
+  color: var(--txt);
+  background: rgba(82,255,143,.05);
+}
+
+.sidebar-tab.active {
+  color: var(--grn);
+  background: rgba(82,255,143,.15);
+  border-bottom: 2px solid var(--grn);
+}
+
+/* Layer visibility controls */
+.layer-controls {
+  display: flex;
+  gap: 4px;
+  padding: 6px 8px;
+  background: rgba(0,0,0,.3);
+  border-bottom: 1px solid var(--border);
+}
+
+.layer-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: rgba(82,255,143,.05);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: var(--vt);
+  font-size: 11px;
+  color: var(--dim);
+  transition: all 0.15s;
+}
+
+.layer-toggle:hover {
+  background: rgba(82,255,143,.1);
+  color: var(--txt);
+}
+
+.layer-toggle.visible {
+  background: rgba(82,255,143,.2);
+  border-color: var(--grn);
+  color: var(--grn);
+}
+
+.layer-toggle .eye-icon {
+  font-size: 12px;
+  opacity: 0.5;
+}
+
+.layer-toggle.visible .eye-icon {
+  opacity: 1;
+}
+
+.sidebar-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.asset-section {
+  margin-bottom: 16px;
+}
+
+.asset-section-title {
+  font-size: 12px;
+  color: var(--gold);
+  letter-spacing: 0.1em;
+  padding: 4px 8px;
+  margin-bottom: 4px;
+}
+
+.asset-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: 1px solid transparent;
+}
+
+.asset-item:hover {
+  background: rgba(82,255,143,.1);
+}
+
+.asset-item.selected {
+  background: rgba(82,255,143,.2);
+  border-color: var(--grn);
+}
+
+.asset-item.placed {
+  opacity: 0.5;
+}
+
+.asset-icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.asset-icon.portrait {
+  border-radius: 50%;
+  border: 1px solid var(--border);
+}
+
+.asset-name {
+  font-size: 14px;
+  color: var(--txt);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.asset-coords {
+  font-size: 11px;
+  color: var(--dim);
+  margin-left: auto;
+}
+
+.asset-era {
+  font-size: 9px;
+  color: var(--gold);
+  margin-left: auto;
+  opacity: 0.7;
+}
+
+.asset-empty {
+  padding: 12px;
+  color: var(--dim);
+  font-size: 12px;
+  text-align: center;
+  font-style: italic;
+}
+
+.asset-item.selectable {
+  cursor: pointer;
+  border-left: 2px solid transparent;
+}
+
+.asset-item.selectable:hover {
+  border-left-color: var(--gold);
+}
+
+.danger-btn {
+  width: 100%;
+  padding: 10px;
+  background: rgba(255, 60, 60, 0.2);
+  border: 1px solid rgba(255, 60, 60, 0.4);
+  color: #ff6b6b;
+  font-family: var(--px);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.danger-btn:hover {
+  background: rgba(255, 60, 60, 0.3);
+  border-color: rgba(255, 60, 60, 0.6);
+}
+
+.asset-visibility {
+  padding: 2px 6px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  opacity: 0.4;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+
+.asset-visibility:hover {
+  opacity: 0.7;
+}
+
+.asset-visibility.visible {
+  opacity: 1;
+}
+
+.asset-item.hidden-marker {
+  opacity: 0.4;
+}
+
+.asset-item.hidden-marker .asset-name {
+  text-decoration: line-through;
+  flex-shrink: 0;
+}
+
+/* Main area */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Toolbar */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 16px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+
+.toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toolbar-label {
+  font-size: 13px;
+  color: var(--dim);
+}
+
+.toolbar-value {
+  font-size: 14px;
+  color: var(--grn);
+  min-width: 120px;
+}
+
+.toolbar-value.has-selection {
+  color: var(--gold);
+  font-weight: bold;
+}
+
+.toolbar-btn {
+  padding: 6px 12px;
+  background: rgba(82,255,143,.15);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--grn);
+  font-family: var(--vt);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.toolbar-btn:hover {
+  background: rgba(82,255,143,.25);
+}
+
+.toolbar-btn.danger {
+  background: rgba(255,90,103,.15);
+  border-color: rgba(255,90,103,.3);
+  color: var(--red);
+}
+
+.toolbar-btn.danger:hover {
+  background: rgba(255,90,103,.25);
+}
+
+.toolbar-select {
+  padding: 6px 28px 6px 10px;
+  background: rgba(82,255,143,.15);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--grn);
+  font-family: var(--vt);
+  font-size: 14px;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2352ff8f' d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+}
+
+.toolbar-select:hover {
+  background-color: rgba(82,255,143,.25);
+}
+
+.toolbar-select:focus {
+  outline: none;
+  border-color: var(--grn);
+}
+
+/* Map viewport */
+.map-viewport {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  cursor: crosshair;
+}
+
+.map-canvas {
+  position: absolute;
+  width: 2800px;
+  height: 1800px;
+  background: url('image/map_background/satellitemap.png') no-repeat;
+  background-size: cover;
+  background-position: center;
+  transform-origin: 0 0;
+}
+
+.map-canvas.dragging {
+  cursor: grabbing;
+}
+
+/* Placed markers on map */
+.placed-marker {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  cursor: grab;
+}
+
+.placed-marker:active,
+.placed-marker.dragging {
+  cursor: grabbing;
+  z-index: 200;
+}
+
+.placed-marker:hover {
+  z-index: 9000 !important;
+}
+
+/* Brighten element markers on hover, not voice markers */
+.placed-marker.element:hover {
+  transform: translate(-50%, -50%);
+}
+
+.placed-marker.selected {
+  z-index: 9001 !important;
+}
+
+.placed-marker.selected::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border: 3px solid var(--gold);
+  border-radius: 8px;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.1); }
+}
+
+/* Base image styles for all markers */
+.placed-marker img {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* Map element icons - matches game.html .map-marker-icon */
+.placed-marker.element img {
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  transition: filter 0.2s ease;
+}
+
+.placed-marker.element:hover img {
+  filter: brightness(1.2);
+}
+
+/* Voice marker portraits - scaled down for editor overview */
+.placed-marker.voice {
+  width: 19px;
+  height: 19px;
+}
+
+.placed-marker.voice img {
+  width: 100%;
+  height: 100%;
+  border: 1px solid var(--gold);
+  background: var(--bg);
+  object-fit: cover;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  transition: box-shadow 0.2s ease;
+}
+
+.placed-marker.voice:hover img {
+  box-shadow: 0 0 4px rgba(255,210,74,.5), 0 0 8px rgba(255,210,74,.25);
+}
+
+/* Flag markers - simplified representation for editor */
+.placed-marker.flag {
+  padding: 8px 12px;
+  background: rgba(6,8,12,.8);
+  border: 2px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.placed-marker.flag.active {
+  opacity: 1;
+  border-color: var(--gold);
+  background: rgba(6,8,12,.95);
+  box-shadow: 0 0 12px rgba(255,210,74,.3);
+}
+
+.placed-marker.flag img {
+  display: none;
+}
+
+.placed-marker.flag .flag-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.placed-marker.flag .flag-name {
+  font-family: var(--vt);
+  font-size: 9px;
+  color: var(--dim);
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* Gravestone markers - matches game.html .gravestone-icon */
+.placed-marker.gravestone img {
+  width: 72px;
+  height: 72px;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  transition: filter 0.2s ease;
+}
+
+.placed-marker.gravestone:hover img {
+  filter: drop-shadow(0 0 6px rgba(250,255,247,.5));
+}
+
+.marker-label {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 12px;
+  color: var(--txt);
+  background: rgba(0,0,0,.9);
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin-bottom: 4px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+  border: 1px solid var(--border);
+  z-index: 10000;
+}
+
+.placed-marker:hover .marker-label {
+  opacity: 1;
+}
+
+/* Voice labels always visible since markers are small */
+.placed-marker.voice .marker-label {
+  opacity: 0.8;
+  font-size: 10px;
+  padding: 2px 6px;
+}
+
+.placed-marker.voice:hover .marker-label {
+  opacity: 1;
+}
+
+/* Output panel */
+.output-panel {
+  height: 200px;
+  background: var(--panel);
+  border-top: 2px solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
+
+.output-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.output-title {
+  font-size: 14px;
+  color: var(--gold);
+  letter-spacing: 0.05em;
+}
+
+.output-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.output-content {
+  flex: 1;
+  overflow: auto;
+  padding: 8px 16px;
+}
+
+.output-code {
+  font-family: 'Monaco', 'Consolas', monospace;
+  font-size: 12px;
+  color: var(--grn);
+  white-space: pre;
+  line-height: 1.4;
+}
+
+/* Zoom indicator */
+.zoom-indicator {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  background: rgba(0,0,0,.8);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--dim);
+  pointer-events: none;
+}
+
+/* Instructions overlay */
+.instructions {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,.9);
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--dim);
+  pointer-events: none;
+  z-index: 50;
+}
+
+.instructions strong {
+  color: var(--grn);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(82,255,143,.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(82,255,143,.5);
+}
+
+/* Form field styles */
+.field-group {
+  margin-bottom: 16px;
+}
+
+.field-label {
+  display: block;
+  font-size: 11px;
+  color: var(--gold);
+  letter-spacing: 0.1em;
+  margin-bottom: 4px;
+}
+
+.field-input {
+  width: 100%;
+  padding: 8px 10px;
+  background: rgba(0,0,0,.4);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--txt);
+  font-family: var(--vt);
+  font-size: 14px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.field-input:focus {
+  outline: none;
+  border-color: var(--grn);
+  box-shadow: 0 0 8px rgba(82,255,143,.2);
+}
+
+.field-input.input-fa {
+  direction: rtl;
+  font-family: var(--fa);
+  font-size: 14px;
+  text-align: right;
+}
+
+.field-textarea {
+  min-height: 80px;
+  resize: vertical;
+  line-height: 1.4;
+}
+
+.field-textarea.input-fa {
+  min-height: 100px;
+}
+
+.field-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2352ff8f' d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 32px;
+  cursor: pointer;
+}
+
+/* Row layout for position inputs */
+.field-row {
+  display: flex;
+  gap: 12px;
+}
+
+.field-row .field-group {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+/* Section divider */
+.content-section {
+  border-top: 1px solid var(--border);
+  margin-top: 16px;
+  padding-top: 16px;
+}
+
+.content-section:first-child {
+  border-top: none;
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.content-section-title {
+  font-size: 12px;
+  color: var(--grn);
+  letter-spacing: 0.08em;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.content-section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* Effects list for flags */
+.effects-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.effect-item {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.effect-side {
+  width: 70px;
+  flex-shrink: 0;
+}
+
+.effect-text {
+  flex: 1;
+}
+
+/* Portrait preview */
+.portrait-preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.portrait-preview img {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 2px solid var(--gold);
+  background: var(--bg);
+  object-fit: cover;
+}
+
+.portrait-path-wrapper {
+  flex: 1;
+}
+
+/* Save notification */
+.save-notification {
+  position: fixed;
+  bottom: 220px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(0,0,0,.95);
+  border: 2px solid var(--grn);
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-family: var(--vt);
+  font-size: 16px;
+  color: var(--grn);
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
+}
+
+.save-notification.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.save-notification.warning {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.save-notification.error {
+  border-color: var(--red);
+  color: var(--red);
+}
+</style>
+
+<!-- Load external data files -->
+<script src="data/voices_data.js"></script>
+<script src="data/flags_data.js"></script>
+<script src="data/elements_data.js"></script>
+<script src="data/gravestones_data.js"></script>
+<script src="data/javid_nam_data.js"></script>
+</head>
+<body>
+
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h1>MAP EDITOR</h1>
+      <div style="font-size: 10px; color: var(--dim); margin-top: 4px;">Position markers only — use content-editor.html for text</div>
+    </div>
+    
+    <div class="sidebar-tabs">
+      <button class="sidebar-tab active" data-tab="elements">ELEMENTS</button>
+      <button class="sidebar-tab" data-tab="voices">VOICES</button>
+      <button class="sidebar-tab" data-tab="flags">FLAGS</button>
+      <button class="sidebar-tab" data-tab="gravestones">GRAVESTONES</button>
+    </div>
+    
+    <div class="layer-controls">
+      <button class="layer-toggle visible" data-layer="element"><span class="eye-icon">👁</span> Elements</button>
+      <button class="layer-toggle visible" data-layer="voice"><span class="eye-icon">👁</span> Voices</button>
+      <button class="layer-toggle visible" data-layer="flag"><span class="eye-icon">👁</span> Flags</button>
+      <button class="layer-toggle visible" data-layer="gravestone"><span class="eye-icon">👁</span> Gravestones</button>
+    </div>
+    
+    <div class="sidebar-content" id="sidebar-content">
+      <!-- Populated by JS -->
+    </div>
+  </aside>
+  
+  <!-- Main area -->
+  <main class="main">
+    <div class="toolbar">
+      <div class="toolbar-group">
+        <span class="toolbar-label">MOUSE:</span>
+        <span class="toolbar-value" id="mouse-coords">—</span>
+      </div>
+      <div class="toolbar-group">
+        <span class="toolbar-label">SELECTED:</span>
+        <span class="toolbar-value" id="selected-info">None</span>
+      </div>
+      <div class="toolbar-group">
+        <span class="toolbar-label">MAP:</span>
+        <select class="toolbar-select" id="map-bg-select">
+          <option value="satellitemap.png">Original</option>
+          <option value="satellitemap_google.png">Google (with cities)</option>
+        </select>
+      </div>
+      <div class="toolbar-group" style="margin-left: auto;">
+        <button class="toolbar-btn" id="btn-reset-view">RESET VIEW</button>
+        <button class="toolbar-btn danger" id="btn-clear-all">CLEAR ALL</button>
+      </div>
+    </div>
+    
+    <div class="map-viewport" id="map-viewport">
+      <div class="map-canvas" id="map-canvas">
+        <!-- Markers rendered here -->
+      </div>
+      
+      
+      <div class="instructions">
+        <strong>Drag markers</strong> to move | <strong>Scroll</strong> to zoom | <strong>Drag background</strong> to pan
+      </div>
+      
+      <div class="zoom-indicator" id="zoom-indicator">100%</div>
+    </div>
+    
+    <div class="output-panel">
+      <div class="output-header">
+        <span class="output-title">CODE OUTPUT</span>
+        <div class="output-actions">
+          <button class="toolbar-btn" id="btn-load" title="Load all data files from folder">📂 LOAD ALL</button>
+          <button class="toolbar-btn" id="btn-save" title="Ctrl+S / Cmd+S - Save all data files">💾 SAVE ALL</button>
+          <button class="toolbar-btn" id="btn-copy-selected">COPY SELECTED</button>
+          <button class="toolbar-btn" id="btn-copy-all">COPY ALL</button>
+        </div>
+        <input type="file" id="folder-input" webkitdirectory style="display: none;">
+      </div>
+      <div class="output-content">
+        <code class="output-code" id="output-code">Select an asset and click on the map to place it.</code>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════════════════
+// DATA DEFINITIONS - Full structures with all text content
+// ════════════════════════════════════════════════════════════════════════════
+
+const MAP_ELEMENT_TYPES = [
+  { id: 'large_city', name: 'Large City', icon: 'image/map_elements/map_element_large_city.png' },
+  { id: 'small_city', name: 'Small City', icon: 'image/map_elements/map_element_small_city.png' },
+  { id: 'town', name: 'Town', icon: 'image/map_elements/map_element_town.png' },
+  { id: 'port', name: 'Port', icon: 'image/map_elements/map_element_port.png' },
+  { id: 'oil', name: 'Oil/Gas', icon: 'image/map_elements/map_element_oil.png' },
+  { id: 'nuclear_site', name: 'Nuclear Site', icon: 'image/map_elements/map_element_nuclear_site.png' }
+];
+
+// ────────────────────────────────────────────────────────────────────────────
+// FLAG ICONS - For sidebar display (data loaded from flags_data.js)
+// ────────────────────────────────────────────────────────────────────────────
+
+const FLAG_ICONS = {
+  CARRIER_GROUP: '🚢',
+  BLOCKADE: '⚓',
+  INTERNET_SHUTDOWN: '📡',
+  STARLINK: '🛰',
+  IRAQI_PMF: '👥',
+  FATEMIYOUN: '⚔',
+  PROTESTS: '✊',
+  STRIKE: '🔧',
+  BASIJ_DEFECT: '💔'
+};
+
+// Data loaded from external files via script tags in head:
+// - VOICE_MESSAGES from data/voices_data.js
+// - FLAG_DATA from data/flags_data.js  
+// - MAP_MARKERS from data/elements_data.js
+// - JAVID_NAM_DATA from data/javid_nam_data.js
+// - GRAVESTONE_MARKERS from data/gravestones_data.js
+// ════════════════════════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════════════════════════
+
+const state = {
+  currentTab: 'elements',
+  selectedMarker: null,
+  placedMarkers: [],
+  visibleLayers: new Set(['element', 'voice', 'flag', 'gravestone']),
+  
+  // Map view state
+  zoom: 0.5,
+  pan: { x: -400, y: -200 },
+  isDragging: false,
+  dragStart: { x: 0, y: 0 },
+  panStart: { x: 0, y: 0 },
+  
+  // Marker dragging - store reference to actual marker object
+  draggingMarker: null,
+  markerDragOffset: { x: 0, y: 0 },
+  dragStartPos: { x: 0, y: 0 },
+  wasDragging: false
+};
+
+// ════════════════════════════════════════════════════════════════════════════
+// DOM REFERENCES
+// ════════════════════════════════════════════════════════════════════════════
+
+const dom = {
+  sidebarContent: document.getElementById('sidebar-content'),
+  mapViewport: document.getElementById('map-viewport'),
+  mapCanvas: document.getElementById('map-canvas'),
+  mouseCoords: document.getElementById('mouse-coords'),
+  selectedInfo: document.getElementById('selected-info'),
+  zoomIndicator: document.getElementById('zoom-indicator'),
+  outputCode: document.getElementById('output-code'),
+  mapBgSelect: document.getElementById('map-bg-select')
+};
+
+// ════════════════════════════════════════════════════════════════════════════
+// SIDEBAR RENDERING
+// ════════════════════════════════════════════════════════════════════════════
+
+function renderSidebar() {
+  dom.sidebarContent.innerHTML = '';
+  
+  if (state.currentTab === 'elements') {
+    renderElementsSidebar();
+  } else if (state.currentTab === 'voices') {
+    renderVoicesSidebar();
+  } else if (state.currentTab === 'flags') {
+    renderFlagsSidebar();
+  } else if (state.currentTab === 'gravestones') {
+    renderGravestonesSidebar();
+  }
+}
+
+function renderElementsSidebar() {
+  const section = document.createElement('div');
+  section.className = 'asset-section';
+  section.innerHTML = '<div class="asset-section-title">MAP ELEMENTS (click to pan)</div>';
+  
+  // Show markers from state (which can be edited)
+  const elementMarkers = state.placedMarkers.filter(m => m.assetType === 'element');
+  
+  for (let i = 0; i < elementMarkers.length; i++) {
+    const marker = elementMarkers[i];
+    const globalIndex = state.placedMarkers.indexOf(marker);
+    const typeInfo = MAP_ELEMENT_TYPES.find(t => t.id === marker.assetId);
+    const item = document.createElement('div');
+    item.className = 'asset-item';
+    if (state.selectedMarker === globalIndex) {
+      item.classList.add('selected');
+    }
+    item.innerHTML = `
+      <img class="asset-icon" src="${typeInfo?.icon || ''}" alt="${marker.assetId}">
+      <span class="asset-name">${marker.name}</span>
+      <span class="asset-coords">${marker.x}, ${marker.y}</span>
+    `;
+    item.addEventListener('click', () => {
+      state.selectedMarker = globalIndex;
+      panToPosition(marker.x, marker.y);
+      renderPlacedMarkers();
+      renderSidebar();
+    });
+    section.appendChild(item);
+  }
+  
+  dom.sidebarContent.appendChild(section);
+}
+
+function renderVoicesSidebar() {
+  const section = document.createElement('div');
+  section.className = 'asset-section';
+  section.innerHTML = '<div class="asset-section-title">VOICE CHARACTERS (click to pan)</div>';
+  
+  const voiceMarkers = state.placedMarkers.filter(m => m.assetType === 'voice');
+  
+  for (let i = 0; i < voiceMarkers.length; i++) {
+    const marker = voiceMarkers[i];
+    const globalIndex = state.placedMarkers.indexOf(marker);
+    const item = document.createElement('div');
+    item.className = 'asset-item';
+    if (state.selectedMarker === globalIndex) {
+      item.classList.add('selected');
+    }
+    if (marker.hidden) {
+      item.classList.add('hidden-marker');
+    }
+    
+    item.innerHTML = `
+      <button class="asset-visibility ${marker.hidden ? '' : 'visible'}" title="Toggle visibility">👁</button>
+      <img class="asset-icon portrait" src="${marker.icon}" alt="${marker.name}">
+      <span class="asset-name">${marker.name}</span>
+      <span class="asset-coords">${marker.x}, ${marker.y}</span>
+    `;
+    
+    const visBtn = item.querySelector('.asset-visibility');
+    visBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      marker.hidden = !marker.hidden;
+      renderPlacedMarkers();
+      renderSidebar();
+    });
+    
+    item.addEventListener('click', () => {
+      state.selectedMarker = globalIndex;
+      panToPosition(marker.x, marker.y);
+      renderPlacedMarkers();
+      renderSidebar();
+    });
+    section.appendChild(item);
+  }
+  
+  dom.sidebarContent.appendChild(section);
+}
+
+function renderFlagsSidebar() {
+  const section = document.createElement('div');
+  section.className = 'asset-section';
+  section.innerHTML = '<div class="asset-section-title">STATUS FLAGS (click to pan)</div>';
+  
+  const flagMarkers = state.placedMarkers.filter(m => m.assetType === 'flag');
+  
+  for (let i = 0; i < flagMarkers.length; i++) {
+    const marker = flagMarkers[i];
+    const globalIndex = state.placedMarkers.indexOf(marker);
+    const item = document.createElement('div');
+    item.className = 'asset-item';
+    if (state.selectedMarker === globalIndex) {
+      item.classList.add('selected');
+    }
+    
+    item.innerHTML = `
+      <span class="asset-name">${marker.name}</span>
+      <span class="asset-coords">${marker.x}, ${marker.y}</span>
+    `;
+    
+    item.addEventListener('click', () => {
+      state.selectedMarker = globalIndex;
+      panToPosition(marker.x, marker.y);
+      renderPlacedMarkers();
+      renderSidebar();
+    });
+    section.appendChild(item);
+  }
+  
+  dom.sidebarContent.appendChild(section);
+}
+
+function renderGravestonesSidebar() {
+  // Section 1: Unplaced Javid Nam entries (available to place)
+  const unplacedSection = document.createElement('div');
+  unplacedSection.className = 'asset-section';
+  unplacedSection.innerHTML = '<div class="asset-section-title">AVAILABLE JAVID NAM (click to place)</div>';
+  
+  const placedIds = state.placedMarkers
+    .filter(m => m.assetType === 'gravestone')
+    .map(m => m.assetId);
+  
+  const unplaced = JAVID_NAM_DATA.filter(jn => !placedIds.includes(jn.id));
+  
+  for (const jn of unplaced) {
+    const item = document.createElement('div');
+    item.className = 'asset-item selectable';
+    item.innerHTML = `
+      <img class="asset-icon" src="image/map_elements/map_element_gravestone.png" alt="Gravestone">
+      <span class="asset-name">${jn.title.en}</span>
+      <span class="asset-era">${jn.era}</span>
+    `;
+    item.addEventListener('click', () => {
+      // Place a new gravestone at the center of the current view
+      const viewportRect = dom.mapViewport.getBoundingClientRect();
+      const centerX = Math.round((viewportRect.width / 2 - state.pan.x) / state.zoom);
+      const centerY = Math.round((viewportRect.height / 2 - state.pan.y) / state.zoom);
+      
+      state.placedMarkers.push({
+        assetType: 'gravestone',
+        assetId: jn.id,
+        icon: 'image/map_elements/map_element_gravestone.png',
+        name: jn.title.en,
+        nameFa: jn.title.fa,
+        era: jn.era,
+        x: centerX,
+        y: centerY,
+        fullData: { javidNamId: jn.id, position: { x: centerX, y: centerY } }
+      });
+      
+      state.selectedMarker = state.placedMarkers.length - 1;
+      renderPlacedMarkers();
+      renderSidebar();
+      updateOutput();
+    });
+    unplacedSection.appendChild(item);
+  }
+  
+  if (unplaced.length === 0) {
+    unplacedSection.innerHTML += '<div class="asset-empty">All Javid Nam entries placed</div>';
+  }
+  
+  dom.sidebarContent.appendChild(unplacedSection);
+  
+  // Section 2: Placed gravestones (click to pan/select)
+  const placedSection = document.createElement('div');
+  placedSection.className = 'asset-section';
+  placedSection.innerHTML = '<div class="asset-section-title">PLACED GRAVESTONES (click to pan)</div>';
+  
+  const gravestoneMarkers = state.placedMarkers.filter(m => m.assetType === 'gravestone');
+  
+  for (let i = 0; i < gravestoneMarkers.length; i++) {
+    const marker = gravestoneMarkers[i];
+    const globalIndex = state.placedMarkers.indexOf(marker);
+    const item = document.createElement('div');
+    item.className = 'asset-item';
+    if (state.selectedMarker === globalIndex) {
+      item.classList.add('selected');
+    }
+    
+    item.innerHTML = `
+      <img class="asset-icon" src="${marker.icon}" alt="Gravestone">
+      <span class="asset-name">${marker.name}</span>
+      <span class="asset-coords">${marker.x}, ${marker.y}</span>
+    `;
+    
+    item.addEventListener('click', () => {
+      state.selectedMarker = globalIndex;
+      panToPosition(marker.x, marker.y);
+      renderPlacedMarkers();
+      renderSidebar();
+    });
+    placedSection.appendChild(item);
+  }
+  
+  if (gravestoneMarkers.length === 0) {
+    placedSection.innerHTML += '<div class="asset-empty">No gravestones placed yet</div>';
+  }
+  
+  dom.sidebarContent.appendChild(placedSection);
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// MARKER DELETION
+// ════════════════════════════════════════════════════════════════════════════
+
+function deleteSelectedMarker() {
+  if (state.selectedMarker !== null) {
+    state.placedMarkers.splice(state.selectedMarker, 1);
+    state.selectedMarker = null;
+    renderSidebar();
+    renderMarkers();
+    updateOutput();
+  }
+}
+
+function updateMarkerField(marker, fieldPath, value, markerType) {
+  // Handle position fields specially
+  if (fieldPath === 'position.x') {
+    marker.x = value;
+    if (marker.fullData) marker.fullData.position = { ...marker.fullData.position, x: value };
+    return;
+  }
+  if (fieldPath === 'position.y') {
+    marker.y = value;
+    if (marker.fullData) marker.fullData.position = { ...marker.fullData.position, y: value };
+    return;
+  }
+  
+  // Initialize fullData if needed
+  if (!marker.fullData) {
+    marker.fullData = {};
+  }
+  
+  // Parse nested field path (e.g., "character.en" or "effects.0.text.en")
+  const parts = fieldPath.split('.');
+  let obj = marker.fullData;
+  
+  for (let i = 0; i < parts.length - 1; i++) {
+    const part = parts[i];
+    const nextPart = parts[i + 1];
+    
+    // Check if next part is a number (array index)
+    if (!isNaN(parseInt(nextPart))) {
+      if (!obj[part]) obj[part] = [];
+    } else {
+      if (!obj[part]) obj[part] = {};
+    }
+    obj = obj[part];
+  }
+  
+  obj[parts[parts.length - 1]] = value;
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// MAP RENDERING
+// ════════════════════════════════════════════════════════════════════════════
+
+function updateMapTransform() {
+  dom.mapCanvas.style.transform = `translate(${state.pan.x}px, ${state.pan.y}px) scale(${state.zoom})`;
+  dom.zoomIndicator.textContent = `${Math.round(state.zoom * 100)}%`;
+}
+
+function renderPlacedMarkers() {
+  // Remove existing placed markers
+  dom.mapCanvas.querySelectorAll('.placed-marker').forEach(el => el.remove());
+
+  // Map tab names to asset types
+  const tabToType = {
+    'elements': 'element',
+    'voices': 'voice',
+    'flags': 'flag',
+    'gravestones': 'gravestone'
+  };
+  const activeType = tabToType[state.currentTab];
+
+  for (let i = 0; i < state.placedMarkers.length; i++) {
+    const marker = state.placedMarkers[i];
+    
+    // Only show markers from visible layers, and skip individually hidden markers
+    if (!state.visibleLayers.has(marker.assetType)) continue;
+    if (marker.hidden) continue;
+    
+    const el = document.createElement('div');
+    el.className = `placed-marker ${marker.assetType}`;
+    if (marker.assetType === 'gravestone') {
+      el.classList.add('gravestone');
+    }
+    if (state.selectedMarker === i) {
+      el.classList.add('selected');
+    }
+    el.style.left = `${marker.x}px`;
+    el.style.top = `${marker.y}px`;
+    // Y-based depth sorting with type-based layering:
+    // voices on top, then flags, then gravestones, then elements
+    let typeZOffset = 0;
+    if (marker.assetType === 'voice') typeZOffset = 3000;
+    else if (marker.assetType === 'flag') typeZOffset = 2000;
+    else if (marker.assetType === 'gravestone') typeZOffset = 1000;
+    el.style.zIndex = typeZOffset + Math.floor(marker.y);
+    el.dataset.index = i;
+    
+    let iconSrc = marker.icon;
+    
+    if (marker.assetType === 'flag') {
+      const flagIcon = FLAG_ICONS[marker.assetId] || '🚩';
+      el.innerHTML = `
+        <span class="flag-icon">${flagIcon}</span>
+        <span class="flag-name">${marker.name}</span>
+        <span class="marker-label">${marker.name} (${marker.x}, ${marker.y})</span>
+      `;
+    } else if (marker.assetType === 'voice') {
+      const locationText = marker.fullData?.location?.en || '';
+      el.innerHTML = `
+        <img src="${iconSrc || ''}" alt="${marker.name}">
+        <span class="marker-label">${marker.name}${locationText ? ' — ' + locationText : ''} (${marker.x}, ${marker.y})</span>
+      `;
+    } else if (marker.assetType === 'gravestone') {
+      el.innerHTML = `
+        <img src="${iconSrc || ''}" alt="${marker.name}">
+        <span class="marker-label">${marker.name} (${marker.x}, ${marker.y})</span>
+      `;
+    } else {
+      el.innerHTML = `
+        <img src="${iconSrc || ''}" alt="${marker.name}">
+        <span class="marker-label">${marker.name} (${marker.x}, ${marker.y})</span>
+      `;
+    }
+    
+    // Click to select
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      // Only handle click if we weren't dragging
+      if (!state.wasDragging) {
+        state.selectedMarker = i;
+        dom.selectedInfo.textContent = `${marker.name} @ ${marker.x}, ${marker.y}`;
+        dom.selectedInfo.classList.add('has-selection');
+        
+        // Switch tab to match marker type
+        const typeToTab = { 'element': 'elements', 'voice': 'voices', 'flag': 'flags' };
+        const targetTab = typeToTab[marker.assetType];
+        if (state.currentTab !== targetTab) {
+          state.currentTab = targetTab;
+          document.querySelectorAll('.sidebar-tab').forEach(t => {
+            t.classList.toggle('active', t.dataset.tab === targetTab);
+          });
+          updateOutput();
+        }
+        
+        renderPlacedMarkers();
+        renderSidebar();
+      }
+      state.wasDragging = false;
+    });
+    
+    // Drag to reposition - mousedown starts drag
+    el.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) return;
+      e.preventDefault();
+      e.stopPropagation();
+      
+      state.draggingMarker = marker;
+      state.selectedMarker = i;
+      state.dragStartPos = { x: marker.x, y: marker.y };
+      el.classList.add('dragging');
+      
+      const rect = dom.mapCanvas.getBoundingClientRect();
+      state.markerDragOffset.x = (e.clientX - rect.left) / state.zoom - marker.x;
+      state.markerDragOffset.y = (e.clientY - rect.top) / state.zoom - marker.y;
+      
+      dom.selectedInfo.textContent = `${marker.name} @ ${marker.x}, ${marker.y}`;
+      dom.selectedInfo.classList.add('has-selection');
+      renderSidebar();
+    });
+    
+    el.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      state.placedMarkers.splice(i, 1);
+      if (state.selectedMarker === i) {
+        state.selectedMarker = null;
+        dom.selectedInfo.textContent = 'None';
+        dom.selectedInfo.classList.remove('has-selection');
+      } else if (state.selectedMarker > i) {
+        state.selectedMarker--;
+      }
+      renderPlacedMarkers();
+      updateOutput();
+    });
+    
+    dom.mapCanvas.appendChild(el);
+  }
+}
+
+function panToPosition(x, y) {
+  const viewportRect = dom.mapViewport.getBoundingClientRect();
+  state.pan.x = viewportRect.width / 2 - x * state.zoom;
+  state.pan.y = viewportRect.height / 2 - y * state.zoom;
+  updateMapTransform();
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// EVENT HANDLERS
+// ════════════════════════════════════════════════════════════════════════════
+
+// Tab switching
+document.querySelectorAll('.sidebar-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    state.currentTab = tab.dataset.tab;
+    state.selectedMarker = null;
+    dom.selectedInfo.textContent = 'None';
+    dom.selectedInfo.classList.remove('has-selection');
+    renderSidebar();
+    renderPlacedMarkers();
+    updateOutput();
+  });
+});
+
+// Layer visibility toggles
+document.querySelectorAll('.layer-toggle').forEach(toggle => {
+  toggle.addEventListener('click', () => {
+    const layer = toggle.dataset.layer;
+    if (state.visibleLayers.has(layer)) {
+      state.visibleLayers.delete(layer);
+      toggle.classList.remove('visible');
+    } else {
+      state.visibleLayers.add(layer);
+      toggle.classList.add('visible');
+    }
+    renderPlacedMarkers();
+  });
+});
+
+// Map background toggle
+dom.mapBgSelect.addEventListener('change', () => {
+  const selectedMap = dom.mapBgSelect.value;
+  dom.mapCanvas.style.backgroundImage = `url('image/map_background/${selectedMap}')`;
+});
+
+// Mouse tracking for coordinates
+dom.mapViewport.addEventListener('mousemove', (e) => {
+  const rect = dom.mapCanvas.getBoundingClientRect();
+  const x = Math.round((e.clientX - rect.left) / state.zoom);
+  const y = Math.round((e.clientY - rect.top) / state.zoom);
+  
+  dom.mouseCoords.textContent = `${x}, ${y}`;
+});
+
+// Click on empty space deselects
+dom.mapCanvas.addEventListener('click', (e) => {
+  if (state.isDragging || state.draggingMarker) return;
+  if (e.target.closest('.placed-marker')) return;
+  
+  state.selectedMarker = null;
+  dom.selectedInfo.textContent = 'None';
+  dom.selectedInfo.classList.remove('has-selection');
+  renderPlacedMarkers();
+  renderSidebar();
+});
+
+// Pan with drag
+dom.mapViewport.addEventListener('mousedown', (e) => {
+  if (e.button === 0 && !e.target.closest('.placed-marker')) {
+    state.isDragging = true;
+    state.dragStart = { x: e.clientX, y: e.clientY };
+    state.panStart = { ...state.pan };
+    dom.mapCanvas.classList.add('dragging');
+  }
+});
+
+document.addEventListener('mousemove', (e) => {
+  // Handle marker dragging - only while mouse is down (draggingMarker is set)
+  if (state.draggingMarker) {
+    const marker = state.draggingMarker;
+    const rect = dom.mapCanvas.getBoundingClientRect();
+    marker.x = Math.round((e.clientX - rect.left) / state.zoom - state.markerDragOffset.x);
+    marker.y = Math.round((e.clientY - rect.top) / state.zoom - state.markerDragOffset.y);
+    
+    // Find and update the DOM element
+    const markerIndex = state.placedMarkers.indexOf(marker);
+    const el = dom.mapCanvas.querySelector(`[data-index="${markerIndex}"]`);
+    if (el) {
+      el.style.left = `${marker.x}px`;
+      el.style.top = `${marker.y}px`;
+      const label = el.querySelector('.marker-label');
+      if (label) {
+        const locationText = marker.assetType === 'voice' && marker.fullData?.location?.en ? ' — ' + marker.fullData.location.en : '';
+        label.textContent = `${marker.name}${locationText} (${marker.x}, ${marker.y})`;
+      }
+    }
+    dom.selectedInfo.textContent = `${marker.name} @ ${marker.x}, ${marker.y}`;
+    return;
+  }
+  
+  // Handle map panning
+  if (state.isDragging) {
+    state.pan.x = state.panStart.x + (e.clientX - state.dragStart.x);
+    state.pan.y = state.panStart.y + (e.clientY - state.dragStart.y);
+    updateMapTransform();
+  }
+});
+
+document.addEventListener('mouseup', () => {
+  // End marker dragging
+  if (state.draggingMarker) {
+    const marker = state.draggingMarker;
+    
+    // Check if marker actually moved (to distinguish click from drag)
+    const movedX = Math.abs(marker.x - state.dragStartPos.x) > 2;
+    const movedY = Math.abs(marker.y - state.dragStartPos.y) > 2;
+    state.wasDragging = movedX || movedY;
+    
+    // Remove dragging class from all markers
+    dom.mapCanvas.querySelectorAll('.placed-marker.dragging').forEach(el => {
+      el.classList.remove('dragging');
+    });
+    state.draggingMarker = null;
+    renderSidebar();
+    updateOutput();
+  }
+  
+  // End map panning
+  if (state.isDragging) {
+    setTimeout(() => { state.isDragging = false; }, 10);
+    dom.mapCanvas.classList.remove('dragging');
+  }
+});
+
+// Zoom with scroll
+dom.mapViewport.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  
+  const rect = dom.mapViewport.getBoundingClientRect();
+  const mouseX = e.clientX - rect.left;
+  const mouseY = e.clientY - rect.top;
+  
+  const oldZoom = state.zoom;
+  const zoomDelta = e.deltaY > 0 ? 0.9 : 1.1;
+  state.zoom = Math.max(0.2, Math.min(3, state.zoom * zoomDelta));
+  
+  // Zoom toward mouse position
+  const zoomRatio = state.zoom / oldZoom;
+  state.pan.x = mouseX - (mouseX - state.pan.x) * zoomRatio;
+  state.pan.y = mouseY - (mouseY - state.pan.y) * zoomRatio;
+  
+  updateMapTransform();
+}, { passive: false });
+
+// ════════════════════════════════════════════════════════════════════════════
+// SAVE FUNCTIONALITY (Ctrl+S / Cmd+S)
+// ════════════════════════════════════════════════════════════════════════════
+
+let folderHandle = null; // Store folder handle for save/load
+
+// Generate output content for a specific tab type
+function generateOutputForType(type) {
+  const tabToAssetType = { 'elements': 'element', 'voices': 'voice', 'flags': 'flag', 'gravestones': 'gravestone' };
+  const assetType = tabToAssetType[type];
+  const markers = state.placedMarkers.filter(m => m.assetType === assetType);
+  
+  if (type === 'elements') {
+    if (markers.length === 0) return 'const MAP_MARKERS = [];';
+    const lines = markers.map(m => generateMarkerOutput(m));
+    return `const MAP_MARKERS = [\n${lines.join(',\n')}\n];`;
+  } else if (type === 'voices') {
+    if (markers.length === 0) return 'const VOICE_MESSAGES = {};';
+    const lines = markers.map(m => generateMarkerOutput(m));
+    return `const VOICE_MESSAGES = {\n${lines.join(',\n')}\n};`;
+  } else if (type === 'flags') {
+    if (markers.length === 0) return 'const FLAG_DATA = {};';
+    const lines = markers.map(m => generateMarkerOutput(m));
+    return `const FLAG_DATA = {\n${lines.join(',\n')}\n};`;
+  } else if (type === 'gravestones') {
+    if (markers.length === 0) return 'const GRAVESTONE_MARKERS = [];';
+    const lines = markers.map(m => generateMarkerOutput(m));
+    return `const GRAVESTONE_MARKERS = [\n${lines.join(',\n')}\n];`;
+  }
+  return '';
+}
+
+async function saveAllData() {
+  const totalMarkers = state.placedMarkers.length;
+  if (totalMarkers === 0) {
+    showSaveNotification('Nothing to save', 'warning');
+    return;
+  }
+  
+  // Try File System Access API first (Chrome/Edge)
+  if ('showDirectoryPicker' in window) {
+    try {
+      // Reuse existing folder handle or show picker
+      if (!folderHandle) {
+        folderHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+      }
+      
+      const files = [
+        { name: 'elements_data.js', content: generateOutputForType('elements') },
+        { name: 'voices_data.js', content: generateOutputForType('voices') },
+        { name: 'flags_data.js', content: generateOutputForType('flags') },
+        { name: 'gravestones_data.js', content: generateOutputForType('gravestones') }
+      ];
+      
+      let savedCount = 0;
+      for (const file of files) {
+        const fileHandle = await folderHandle.getFileHandle(file.name, { create: true });
+        const writable = await fileHandle.createWritable();
+        await writable.write(file.content);
+        await writable.close();
+        savedCount++;
+      }
+      
+      showSaveNotification(`Saved all 4 data files to ${folderHandle.name}/`, 'success');
+      return;
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        return; // User cancelled
+      }
+      console.warn('File System Access API failed, falling back to download:', err);
+      folderHandle = null;
+    }
+  }
+  
+  // Fallback: Download files individually
+  const files = [
+    { name: 'elements_data.js', content: generateOutputForType('elements') },
+    { name: 'voices_data.js', content: generateOutputForType('voices') },
+    { name: 'flags_data.js', content: generateOutputForType('flags') },
+    { name: 'gravestones_data.js', content: generateOutputForType('gravestones') }
+  ];
+  
+  for (const file of files) {
+    const blob = new Blob([file.content], { type: 'text/javascript' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = file.name;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+  showSaveNotification('Downloaded all 4 data files', 'success');
+}
+
+function showSaveNotification(message, type = 'success') {
+  // Remove existing notification
+  const existing = document.querySelector('.save-notification');
+  if (existing) existing.remove();
+  
+  const notification = document.createElement('div');
+  notification.className = `save-notification ${type}`;
+  notification.textContent = message;
+  document.body.appendChild(notification);
+  
+  // Animate in
+  requestAnimationFrame(() => notification.classList.add('visible'));
+  
+  // Remove after delay
+  setTimeout(() => {
+    notification.classList.remove('visible');
+    setTimeout(() => notification.remove(), 300);
+  }, 2000);
+}
+
+// Global keyboard shortcut for save
+document.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+    e.preventDefault();
+    saveAllData();
+  }
+});
+
+// Arrow keys to nudge selected marker
+document.addEventListener('keydown', (e) => {
+  // Skip if typing in an input field
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+    return;
+  }
+  
+  if (state.selectedMarker !== null) {
+    const marker = state.placedMarkers[state.selectedMarker];
+    const step = e.shiftKey ? 10 : 1;
+    
+    switch (e.key) {
+      case 'ArrowUp':
+        e.preventDefault();
+        marker.y -= step;
+        if (marker.fullData) marker.fullData.position = { ...marker.fullData.position, y: marker.y };
+        break;
+      case 'ArrowDown':
+        e.preventDefault();
+        marker.y += step;
+        if (marker.fullData) marker.fullData.position = { ...marker.fullData.position, y: marker.y };
+        break;
+      case 'ArrowLeft':
+        e.preventDefault();
+        marker.x -= step;
+        if (marker.fullData) marker.fullData.position = { ...marker.fullData.position, x: marker.x };
+        break;
+      case 'ArrowRight':
+        e.preventDefault();
+        marker.x += step;
+        if (marker.fullData) marker.fullData.position = { ...marker.fullData.position, x: marker.x };
+        break;
+      case 'Delete':
+      case 'Backspace':
+        e.preventDefault();
+        state.placedMarkers.splice(state.selectedMarker, 1);
+        state.selectedMarker = null;
+        dom.selectedInfo.textContent = 'None';
+        dom.selectedInfo.classList.remove('has-selection');
+        break;
+      default:
+        return;
+    }
+    
+    dom.selectedInfo.textContent = `${marker.name} @ ${marker.x}, ${marker.y}`;
+    renderPlacedMarkers();
+    renderSidebar();
+    updateOutput();
+  }
+});
+
+// Toolbar buttons
+document.getElementById('btn-reset-view').addEventListener('click', () => {
+  state.zoom = 0.5;
+  state.pan = { x: -400, y: -200 };
+  updateMapTransform();
+});
+
+document.getElementById('btn-clear-all').addEventListener('click', () => {
+  if (confirm('Clear all placed markers?')) {
+    state.placedMarkers = [];
+    state.selectedMarker = null;
+    dom.selectedInfo.textContent = 'None';
+    dom.selectedInfo.classList.remove('has-selection');
+    renderPlacedMarkers();
+    updateOutput();
+  }
+});
+
+document.getElementById('btn-copy-selected').addEventListener('click', () => {
+  if (state.selectedMarker !== null) {
+    const marker = state.placedMarkers[state.selectedMarker];
+    const output = generateMarkerOutput(marker);
+    navigator.clipboard.writeText(output);
+    showSaveNotification('Copied selected marker to clipboard!', 'success');
+  } else {
+    showSaveNotification('No marker selected', 'warning');
+  }
+});
+
+document.getElementById('btn-copy-all').addEventListener('click', () => {
+  const output = state.placedMarkers.map(m => generateMarkerOutput(m)).join('\n\n');
+  if (output) {
+    navigator.clipboard.writeText(output);
+    showSaveNotification('Copied all markers to clipboard!', 'success');
+  }
+});
+
+document.getElementById('btn-save').addEventListener('click', () => {
+  saveAllData();
+});
+
+// Load functionality - load all data files from a folder
+document.getElementById('btn-load').addEventListener('click', async () => {
+  // Try File System Access API first (Chrome/Edge)
+  if ('showDirectoryPicker' in window) {
+    try {
+      folderHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+      await loadAllDataFromFolder(folderHandle);
+      return;
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        return; // User cancelled
+      }
+      console.warn('File System Access API failed, falling back to folder input:', err);
+    }
+  }
+  
+  // Fallback: Use folder input
+  document.getElementById('folder-input').click();
+});
+
+document.getElementById('folder-input').addEventListener('change', async (e) => {
+  const files = Array.from(e.target.files);
+  if (files.length === 0) return;
+  
+  try {
+    await loadAllDataFromFiles(files);
+  } catch (err) {
+    console.error('Error loading files:', err);
+    showSaveNotification('Error loading files', 'error');
+  }
+  
+  // Reset input so same folder can be loaded again
+  e.target.value = '';
+});
+
+async function loadAllDataFromFolder(dirHandle) {
+  const fileMap = {};
+  const expectedFiles = ['elements_data.js', 'voices_data.js', 'flags_data.js', 'gravestones_data.js'];
+  
+  for await (const entry of dirHandle.values()) {
+    if (entry.kind === 'file' && expectedFiles.includes(entry.name)) {
+      const file = await entry.getFile();
+      fileMap[entry.name] = await file.text();
+    }
+  }
+  
+  const loadedTypes = [];
+  
+  if (fileMap['elements_data.js']) {
+    loadDataForType('elements', fileMap['elements_data.js']);
+    loadedTypes.push('elements');
+  }
+  if (fileMap['voices_data.js']) {
+    loadDataForType('voices', fileMap['voices_data.js']);
+    loadedTypes.push('voices');
+  }
+  if (fileMap['flags_data.js']) {
+    loadDataForType('flags', fileMap['flags_data.js']);
+    loadedTypes.push('flags');
+  }
+  if (fileMap['gravestones_data.js']) {
+    loadDataForType('gravestones', fileMap['gravestones_data.js']);
+    loadedTypes.push('gravestones');
+  }
+  
+  if (loadedTypes.length === 0) {
+    showSaveNotification('No data files found in folder', 'warning');
+  } else {
+    showSaveNotification(`Loaded ${loadedTypes.length} data file(s) from ${dirHandle.name}/`, 'success');
+  }
+  
+  // Re-render
+  state.selectedMarker = null;
+  renderSidebar();
+  renderPlacedMarkers();
+  updateOutput();
+}
+
+async function loadAllDataFromFiles(files) {
+  const fileMap = {};
+  
+  for (const file of files) {
+    const name = file.name;
+    if (name === 'elements_data.js' || name === 'voices_data.js' || name === 'flags_data.js' || name === 'gravestones_data.js') {
+      fileMap[name] = await file.text();
+    }
+  }
+  
+  const loadedTypes = [];
+  
+  if (fileMap['elements_data.js']) {
+    loadDataForType('elements', fileMap['elements_data.js']);
+    loadedTypes.push('elements');
+  }
+  if (fileMap['voices_data.js']) {
+    loadDataForType('voices', fileMap['voices_data.js']);
+    loadedTypes.push('voices');
+  }
+  if (fileMap['flags_data.js']) {
+    loadDataForType('flags', fileMap['flags_data.js']);
+    loadedTypes.push('flags');
+  }
+  if (fileMap['gravestones_data.js']) {
+    loadDataForType('gravestones', fileMap['gravestones_data.js']);
+    loadedTypes.push('gravestones');
+  }
+  
+  if (loadedTypes.length === 0) {
+    showSaveNotification('No data files found in folder', 'warning');
+  } else {
+    showSaveNotification(`Loaded ${loadedTypes.length} data file(s)`, 'success');
+  }
+  
+  // Re-render
+  state.selectedMarker = null;
+  renderSidebar();
+  renderPlacedMarkers();
+  updateOutput();
+}
+
+function loadDataForType(type, content) {
+  const tabToAssetType = { 'elements': 'element', 'voices': 'voice', 'flags': 'flag', 'gravestones': 'gravestone' };
+  const assetType = tabToAssetType[type];
+  
+  try {
+    let data = null;
+    
+    if (type === 'elements') {
+      const match = content.match(/(?:const\s+MAP_MARKERS\s*=\s*)?\[[\s\S]*\]/);
+      if (match) {
+        data = new Function('return ' + match[0].replace(/^const\s+MAP_MARKERS\s*=\s*/, ''))();
+      }
+    } else if (type === 'voices') {
+      const match = content.match(/(?:const\s+VOICE_MESSAGES\s*=\s*)?\{[\s\S]*\}/);
+      if (match) {
+        data = new Function('return ' + match[0].replace(/^const\s+VOICE_MESSAGES\s*=\s*/, ''))();
+      }
+    } else if (type === 'flags') {
+      const match = content.match(/(?:const\s+FLAG_DATA\s*=\s*)?\{[\s\S]*\}/);
+      if (match) {
+        data = new Function('return ' + match[0].replace(/^const\s+FLAG_DATA\s*=\s*/, ''))();
+      }
+    } else if (type === 'gravestones') {
+      const match = content.match(/(?:const\s+GRAVESTONE_MARKERS\s*=\s*)?\[[\s\S]*\]/);
+      if (match) {
+        data = new Function('return ' + match[0].replace(/^const\s+GRAVESTONE_MARKERS\s*=\s*/, ''))();
+      }
+    }
+    
+    if (!data) {
+      console.warn(`Could not parse ${type}_data.js`);
+      return;
+    }
+    
+    // Remove existing markers of this type
+    state.placedMarkers = state.placedMarkers.filter(m => m.assetType !== assetType);
+    
+    // Add loaded markers
+    if (type === 'elements' && Array.isArray(data)) {
+      for (const marker of data) {
+        const typeInfo = MAP_ELEMENT_TYPES.find(t => t.id === marker.type);
+        state.placedMarkers.push({
+          assetType: 'element',
+          assetId: marker.type,
+          icon: typeInfo?.icon,
+          name: marker.name?.en || marker.name || '',
+          nameEn: marker.name?.en || marker.name || '',
+          nameFa: marker.name?.fa || '',
+          x: marker.position?.x || 0,
+          y: marker.position?.y || 0,
+          fullData: { ...marker }
+        });
+      }
+    } else if (type === 'voices' && typeof data === 'object') {
+      for (const [id, voice] of Object.entries(data)) {
+        state.placedMarkers.push({
+          assetType: 'voice',
+          assetId: id,
+          icon: voice.portrait,
+          name: voice.character?.en || voice.character || '',
+          x: voice.position?.x || 0,
+          y: voice.position?.y || 0,
+          fullData: { ...voice }
+        });
+      }
+    } else if (type === 'flags' && typeof data === 'object') {
+      for (const [id, flag] of Object.entries(data)) {
+        state.placedMarkers.push({
+          assetType: 'flag',
+          assetId: id,
+          icon: null,
+          name: flag.title?.en || flag.title || '',
+          x: flag.position?.x || 0,
+          y: flag.position?.y || 0,
+          fullData: { ...flag }
+        });
+      }
+    } else if (type === 'gravestones' && Array.isArray(data)) {
+      for (const marker of data) {
+        const javidNamEntry = JAVID_NAM_DATA.find(jn => jn.id === marker.javidNamId);
+        state.placedMarkers.push({
+          assetType: 'gravestone',
+          assetId: marker.javidNamId,
+          icon: 'image/map_elements/map_element_gravestone.png',
+          name: javidNamEntry?.title?.en || marker.javidNamId,
+          nameFa: javidNamEntry?.title?.fa || '',
+          era: javidNamEntry?.era || '',
+          x: marker.position?.x || 0,
+          y: marker.position?.y || 0,
+          fullData: { ...marker }
+        });
+      }
+    }
+    
+  } catch (err) {
+    console.error(`Error parsing ${type}_data.js:`, err);
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// OUTPUT GENERATION
+// ════════════════════════════════════════════════════════════════════════════
+
+function escapeString(str) {
+  if (!str) return '';
+  return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n');
+}
+
+function generateMarkerOutput(marker) {
+  if (marker.assetType === 'element') {
+    const data = marker.fullData || {};
+    const nameEn = escapeString(data.name?.en || marker.nameEn || marker.name || '');
+    const nameFa = escapeString(data.name?.fa || marker.nameFa || '');
+    return `  { name: { en: '${nameEn}', fa: '${nameFa}' }, type: '${marker.assetId}', position: { x: ${marker.x}, y: ${marker.y} } }`;
+  } else if (marker.assetType === 'voice') {
+    const data = marker.fullData || {};
+    const lines = [];
+    lines.push(`  ${marker.assetId}: {`);
+    lines.push(`    portrait: '${escapeString(data.portrait || '')}',`);
+    lines.push(`    character: { en: '${escapeString(data.character?.en || '')}', fa: '${escapeString(data.character?.fa || '')}' },`);
+    lines.push(`    location: { en: '${escapeString(data.location?.en || '')}', fa: '${escapeString(data.location?.fa || '')}' },`);
+    lines.push(`    transmission: { en: '${escapeString(data.transmission?.en || '')}', fa: '${escapeString(data.transmission?.fa || '')}' },`);
+    lines.push(`    quote: {`);
+    lines.push(`      en: '${escapeString(data.quote?.en || '')}',`);
+    lines.push(`      fa: '${escapeString(data.quote?.fa || '')}'`);
+    lines.push(`    },`);
+    lines.push(`    position: { x: ${marker.x}, y: ${marker.y} }`);
+    lines.push(`  }`);
+    return lines.join('\n');
+  } else if (marker.assetType === 'flag') {
+    const data = marker.fullData || {};
+    const lines = [];
+    lines.push(`  ${marker.assetId}: {`);
+    lines.push(`    title: { en: '${escapeString(data.title?.en || '')}', fa: '${escapeString(data.title?.fa || '')}' },`);
+    lines.push(`    desc: { en: '${escapeString(data.desc?.en || '')}', fa: '${escapeString(data.desc?.fa || '')}' },`);
+    
+    // Effects array
+    if (data.effects && data.effects.length > 0) {
+      lines.push(`    effects: [`);
+      for (let i = 0; i < data.effects.length; i++) {
+        const eff = data.effects[i];
+        const comma = i < data.effects.length - 1 ? ',' : '';
+        lines.push(`      { side: '${eff.side || 'neutral'}', text: { en: '${escapeString(eff.text?.en || '')}', fa: '${escapeString(eff.text?.fa || '')}' } }${comma}`);
+      }
+      lines.push(`    ],`);
+    } else {
+      lines.push(`    effects: [],`);
+    }
+    
+    // perTurn object
+    if (data.perTurn && Object.keys(data.perTurn).length > 0) {
+      const perTurnParts = Object.entries(data.perTurn).map(([k, v]) => `${k}: ${v}`);
+      lines.push(`    perTurn: { ${perTurnParts.join(', ')} },`);
+    } else {
+      lines.push(`    perTurn: {},`);
+    }
+    
+    lines.push(`    position: { x: ${marker.x}, y: ${marker.y} }`);
+    lines.push(`  }`);
+    return lines.join('\n');
+  } else if (marker.assetType === 'gravestone') {
+    return `  { javidNamId: '${marker.assetId}', position: { x: ${marker.x}, y: ${marker.y} } }`;
+  }
+  return `position: { x: ${marker.x}, y: ${marker.y} }`;
+}
+
+function updateOutput() {
+  // Map tab names to asset types
+  const tabToType = {
+    'elements': 'element',
+    'voices': 'voice',
+    'flags': 'flag',
+    'gravestones': 'gravestone'
+  };
+  const activeType = tabToType[state.currentTab];
+  
+  // Filter to current tab's markers
+  const markers = state.placedMarkers.filter(m => m.assetType === activeType);
+  
+  if (markers.length === 0) {
+    dom.outputCode.textContent = 'No markers for this category.';
+    return;
+  }
+  
+  const lines = [];
+  
+  if (activeType === 'element') {
+    lines.push('const MAP_MARKERS = [');
+    for (let i = 0; i < markers.length; i++) {
+      const comma = i < markers.length - 1 ? ',' : '';
+      lines.push(generateMarkerOutput(markers[i]) + comma);
+    }
+    lines.push('];');
+  } else if (activeType === 'voice') {
+    lines.push('const VOICE_MESSAGES = {');
+    for (let i = 0; i < markers.length; i++) {
+      const comma = i < markers.length - 1 ? ',' : '';
+      lines.push(generateMarkerOutput(markers[i]) + comma);
+    }
+    lines.push('};');
+  } else if (activeType === 'flag') {
+    lines.push('const FLAG_DATA = {');
+    for (let i = 0; i < markers.length; i++) {
+      const comma = i < markers.length - 1 ? ',' : '';
+      lines.push(generateMarkerOutput(markers[i]) + comma);
+    }
+    lines.push('};');
+  }
+  
+  dom.outputCode.textContent = lines.join('\n');
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// INITIALIZATION
+// ════════════════════════════════════════════════════════════════════════════
+
+function init() {
+  renderSidebar();
+  updateMapTransform();
+
+  // Load existing map markers with full data
+  for (const marker of MAP_MARKERS) {
+    const typeInfo = MAP_ELEMENT_TYPES.find(t => t.id === marker.type);
+    state.placedMarkers.push({
+      assetType: 'element',
+      assetId: marker.type,
+      icon: typeInfo?.icon,
+      name: marker.name.en,
+      nameEn: marker.name.en,
+      nameFa: marker.name.fa,
+      x: marker.position.x,
+      y: marker.position.y,
+      fullData: { ...marker }
+    });
+  }
+  
+  // Load existing voice markers with full data
+  for (const [id, voice] of Object.entries(VOICE_MESSAGES)) {
+    state.placedMarkers.push({
+      assetType: 'voice',
+      assetId: id,
+      icon: voice.portrait,
+      name: voice.character.en,
+      x: voice.position.x,
+      y: voice.position.y,
+      fullData: { ...voice }
+    });
+  }
+  
+  // Load existing flag markers with full data
+  for (const [id, flag] of Object.entries(FLAG_DATA)) {
+    state.placedMarkers.push({
+      assetType: 'flag',
+      assetId: id,
+      icon: null,
+      name: flag.title.en,
+      x: flag.position.x,
+      y: flag.position.y,
+      fullData: { ...flag }
+    });
+  }
+
+  renderPlacedMarkers();
+}
+
+init();
+</script>
+
+</body>
+</html>

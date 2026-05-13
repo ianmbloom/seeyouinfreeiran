@@ -1,0 +1,2153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Content Editor — Crouching Lion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Vazirmatn:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0c10;
+  --panel: #12151c;
+  --border: rgba(255,210,74,.3);
+  --grn: #52ff8f;
+  --gold: #ffd24a;
+  --red: #ff5a67;
+  --txt: #fafff7;
+  --dim: rgba(255,230,180,.65);
+  --vt: 'VT323', monospace;
+  --fa: 'Vazirmatn', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100vw; height: 100vh; overflow: hidden;
+  background: var(--bg); color: var(--txt);
+  font-family: var(--vt);
+  font-size: 16px;
+}
+
+img { image-rendering: pixelated; image-rendering: crisp-edges; }
+
+/* Layout - Three columns */
+.app {
+  display: flex;
+  width: 100%; height: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SIDEBAR - Left column with tabs and entry list
+   ═══════════════════════════════════════════════════════════════════════════ */
+.sidebar {
+  width: 260px;
+  background: var(--panel);
+  border-right: 2px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.sidebar-header {
+  padding: 12px 16px;
+  background: rgba(255,210,74,.1);
+  border-bottom: 1px solid var(--border);
+}
+
+.sidebar-header h1 {
+  font-size: 16px;
+  color: var(--gold);
+  font-weight: normal;
+  letter-spacing: 0.05em;
+}
+
+.sidebar-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--border);
+}
+
+.sidebar-tab {
+  flex: 1 1 33%;
+  padding: 8px 4px;
+  background: transparent;
+  border: none;
+  color: var(--dim);
+  font-family: var(--vt);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  min-width: 80px;
+}
+
+.sidebar-tab:hover {
+  color: var(--txt);
+  background: rgba(255,210,74,.05);
+}
+
+.sidebar-tab.active {
+  color: var(--gold);
+  background: rgba(255,210,74,.15);
+  border-bottom: 2px solid var(--gold);
+}
+
+.sidebar-actions {
+  display: flex;
+  gap: 4px;
+  padding: 8px;
+  background: rgba(0,0,0,.3);
+  border-bottom: 1px solid var(--border);
+}
+
+.action-btn {
+  flex: 1;
+  padding: 6px 8px;
+  background: rgba(255,210,74,.1);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--gold);
+  font-family: var(--vt);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.action-btn:hover {
+  background: rgba(255,210,74,.2);
+}
+
+.action-btn.primary {
+  background: rgba(255,210,74,.2);
+  border-color: var(--gold);
+}
+
+.search-box {
+  padding: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.search-input {
+  width: 100%;
+  padding: 6px 10px;
+  background: rgba(0,0,0,.4);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--txt);
+  font-family: var(--vt);
+  font-size: 14px;
+}
+
+.search-input::placeholder {
+  color: var(--dim);
+}
+
+.entry-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.entry-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: 1px solid transparent;
+  margin-bottom: 4px;
+}
+
+.entry-item:hover {
+  background: rgba(255,210,74,.1);
+}
+
+.entry-item.selected {
+  background: rgba(255,210,74,.2);
+  border-color: var(--gold);
+}
+
+.entry-thumb {
+  width: 36px;
+  height: 36px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+  background: rgba(0,0,0,.4);
+}
+
+.entry-thumb.portrait {
+  border-radius: 50%;
+}
+
+.entry-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.entry-title {
+  font-size: 13px;
+  color: var(--txt);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.entry-subtitle {
+  font-size: 11px;
+  color: var(--dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   EDIT PANEL - Center column with form fields
+   ═══════════════════════════════════════════════════════════════════════════ */
+.edit-panel {
+  width: 420px;
+  background: var(--panel);
+  border-right: 2px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.edit-header {
+  padding: 12px 16px;
+  background: rgba(255,210,74,.1);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.edit-header h2 {
+  font-size: 14px;
+  color: var(--gold);
+  font-weight: normal;
+  letter-spacing: 0.05em;
+}
+
+.unsaved-indicator {
+  font-size: 11px;
+  color: var(--red);
+  padding: 2px 8px;
+  background: rgba(255,90,103,.15);
+  border-radius: 4px;
+  display: none;
+}
+
+.unsaved-indicator.visible {
+  display: block;
+}
+
+.edit-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.edit-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--dim);
+  font-size: 14px;
+  text-align: center;
+  padding: 20px;
+}
+
+.field-section {
+  margin-bottom: 20px;
+}
+
+.field-section-title {
+  font-size: 11px;
+  color: var(--gold);
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(255,210,74,.2);
+}
+
+.field-group {
+  margin-bottom: 12px;
+}
+
+.field-label {
+  display: block;
+  font-size: 11px;
+  color: var(--dim);
+  margin-bottom: 4px;
+  letter-spacing: 0.05em;
+}
+
+.field-input {
+  width: 100%;
+  padding: 8px 10px;
+  background: rgba(0,0,0,.4);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--txt);
+  font-family: var(--vt);
+  font-size: 14px;
+  transition: border-color 0.15s;
+}
+
+.field-input:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+
+.field-input.input-fa {
+  font-family: var(--fa);
+  direction: rtl;
+  text-align: right;
+}
+
+.field-textarea {
+  min-height: 80px;
+  resize: vertical;
+  line-height: 1.4;
+}
+
+.field-textarea.tall {
+  min-height: 120px;
+}
+
+.portrait-preview {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.portrait-img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid var(--border);
+  background: rgba(0,0,0,.4);
+}
+
+.portrait-img.circle {
+  border-radius: 50%;
+}
+
+.portrait-path {
+  flex: 1;
+}
+
+/* Tags/bullets array editor */
+.array-editor {
+  background: rgba(0,0,0,.2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 8px;
+}
+
+.array-item {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.array-item input {
+  flex: 1;
+}
+
+.array-item-remove {
+  padding: 4px 8px;
+  background: rgba(255,90,103,.2);
+  border: 1px solid var(--red);
+  border-radius: 4px;
+  color: var(--red);
+  font-family: var(--vt);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.array-add {
+  padding: 6px 12px;
+  background: rgba(255,210,74,.1);
+  border: 1px dashed var(--border);
+  border-radius: 4px;
+  color: var(--gold);
+  font-family: var(--vt);
+  font-size: 12px;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 6px;
+}
+
+.array-add:hover {
+  background: rgba(255,210,74,.2);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MAP PREVIEW - Right column with read-only map view
+   ═══════════════════════════════════════════════════════════════════════════ */
+.map-preview {
+  flex: 1;
+  background: #060810;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.preview-header {
+  padding: 8px 16px;
+  background: rgba(255,210,74,.1);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.preview-header h3 {
+  font-size: 12px;
+  color: var(--gold);
+  font-weight: normal;
+  letter-spacing: 0.05em;
+}
+
+.preview-info {
+  font-size: 11px;
+  color: var(--dim);
+}
+
+.map-viewport {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  cursor: grab;
+}
+
+.map-viewport:active {
+  cursor: grabbing;
+}
+
+.map-container {
+  position: absolute;
+  transform-origin: 0 0;
+  /* Match game's fixed map canvas size */
+  width: 2800px;
+  height: 1800px;
+}
+
+.map-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  user-select: none;
+  -webkit-user-drag: none;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  filter: brightness(0.9) contrast(0.85);
+}
+
+.map-elements-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Map element markers (cities, ports, etc.) - match game sizing */
+.map-element-marker {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+}
+
+.map-element-icon {
+  width: 96px;
+  height: 96px;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.map-element-label {
+  font-size: 11px;
+  font-family: 'VT323', monospace;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0,0,0,.9), 0 0 6px rgba(0,0,0,.5);
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Gravestone markers - match game sizing */
+.map-gravestone-marker {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  pointer-events: none;
+}
+
+.map-gravestone-icon {
+  width: 64px;
+  height: auto;
+  opacity: 0.85;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* Voice markers on map - match game sizing (96px portraits) */
+.map-voice-marker {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 50;
+  width: 96px;
+  height: 96px;
+}
+
+.map-voice-marker.selected {
+  z-index: 150;
+}
+
+.map-voice-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgba(255,210,74,.6);
+  border: 2px solid rgba(255,210,74,.9);
+  box-shadow: 0 0 12px rgba(255,210,74,.5);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.map-voice-marker.selected .map-voice-dot {
+  display: none;
+}
+
+.map-voice-portrait {
+  width: 96px;
+  height: 96px;
+  border: 2px solid var(--gold);
+  background: var(--bg);
+  object-fit: cover;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  box-shadow: 0 0 12px rgba(255,210,74,.5), 0 0 24px rgba(255,210,74,.25);
+}
+
+/* Voice bubble - matches game styling */
+.map-voice-bubble {
+  position: absolute;
+  left: 104px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 280px;
+  padding: 12px 14px;
+  background: rgba(6,8,12,.95);
+  border: 2px solid var(--gold);
+  z-index: 10000;
+}
+
+/* Talk bubble arrow */
+.map-voice-bubble::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-right: 12px solid var(--gold);
+}
+.map-voice-bubble::after {
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-right: 10px solid rgba(6,8,12,.95);
+}
+
+.map-voice-bubble .vb-character {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  color: var(--dim);
+  letter-spacing: .1em;
+  margin-bottom: 2px;
+}
+
+.map-voice-bubble .vb-header {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  color: var(--gold);
+  letter-spacing: .15em;
+  margin-bottom: 6px;
+  text-shadow: 0 0 8px rgba(255,210,74,.4);
+}
+
+.map-voice-bubble .vb-location {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  color: var(--gold);
+  letter-spacing: .08em;
+  margin-bottom: 8px;
+  opacity: 0.8;
+}
+
+.map-voice-bubble .vb-quote {
+  font-family: 'VT323', monospace;
+  font-size: 16px;
+  color: var(--txt);
+  line-height: 1.4;
+  font-style: italic;
+}
+
+/* Voice marker on map */
+.preview-voice-marker {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 100;
+}
+
+.preview-voice-portrait {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 3px solid var(--gold);
+  box-shadow: 0 0 20px rgba(255,210,74,.4);
+}
+
+.preview-voice-quote {
+  position: absolute;
+  left: 60px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 280px;
+  background: rgba(10,12,16,.95);
+  border: 2px solid var(--gold);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.preview-voice-char {
+  font-size: 11px;
+  color: var(--gold);
+  letter-spacing: 0.1em;
+  margin-bottom: 4px;
+}
+
+.preview-voice-text {
+  font-size: 14px;
+  color: var(--txt);
+  line-height: 1.4;
+}
+
+/* Gravestone marker on map */
+.preview-gravestone-marker {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  pointer-events: none;
+  z-index: 100;
+}
+
+.preview-gravestone-img {
+  width: 32px;
+  height: auto;
+}
+
+/* Card preview overlay (for wildcards, codex, daily briefings) */
+.card-preview-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10,12,16,.85);
+  z-index: 200;
+}
+
+.card-preview {
+  max-width: 500px;
+  width: 90%;
+  background: rgba(18,21,28,.98);
+  border: 2px solid var(--gold);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.card-preview-img {
+  width: 100%;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+  background: rgba(0,0,0,.4);
+}
+
+.card-preview-body {
+  padding: 20px;
+}
+
+.card-preview-tag {
+  font-size: 10px;
+  color: var(--gold);
+  letter-spacing: 0.15em;
+  margin-bottom: 4px;
+}
+
+.card-preview-title {
+  font-size: 18px;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+
+.card-preview-text {
+  font-size: 14px;
+  color: var(--txt);
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.card-preview-bullets {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.card-preview-bullet {
+  font-size: 12px;
+  color: var(--dim);
+  padding-left: 12px;
+  position: relative;
+}
+
+.card-preview-bullet::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: var(--gold);
+}
+
+/* Wildcard card specific */
+.wildcard-preview {
+  text-align: center;
+  padding: 30px;
+}
+
+.wildcard-portrait {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 3px solid var(--gold);
+  margin: 0 auto 16px;
+}
+
+.wildcard-character {
+  font-size: 12px;
+  color: var(--gold);
+  letter-spacing: 0.15em;
+  margin-bottom: 4px;
+}
+
+.wildcard-name {
+  font-size: 20px;
+  color: var(--txt);
+  margin-bottom: 16px;
+}
+
+.wildcard-quote {
+  font-size: 16px;
+  color: var(--dim);
+  font-style: italic;
+  margin-bottom: 16px;
+}
+
+.wildcard-effect {
+  font-size: 14px;
+  color: var(--grn);
+  padding: 8px 16px;
+  background: rgba(82,255,143,.1);
+  border-radius: 4px;
+  display: inline-block;
+}
+
+/* Daily briefing PDB style */
+.pdb-preview {
+  background: linear-gradient(180deg, #1a1510 0%, #0d0a08 100%);
+  border-color: rgba(255,210,74,.6);
+}
+
+.pdb-header {
+  background: rgba(255,210,74,.15);
+  padding: 12px 20px;
+  border-bottom: 2px solid rgba(255,210,74,.3);
+  text-align: center;
+}
+
+.pdb-classification {
+  font-size: 10px;
+  color: var(--red);
+  letter-spacing: 0.2em;
+}
+
+.pdb-title {
+  font-size: 14px;
+  color: var(--gold);
+  letter-spacing: 0.1em;
+  margin-top: 4px;
+}
+
+.pdb-body {
+  padding: 20px;
+}
+
+.pdb-theme {
+  font-size: 16px;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+
+.pdb-brief {
+  font-size: 14px;
+  color: var(--txt);
+  line-height: 1.6;
+}
+
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0,0,0,.3);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gold);
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- Sidebar - Entry List -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h1>CONTENT EDITOR</h1>
+    </div>
+
+    <div class="sidebar-tabs">
+      <button class="sidebar-tab active" data-tab="voices">VOICES</button>
+      <button class="sidebar-tab" data-tab="wildcards">WILDCARDS</button>
+      <button class="sidebar-tab" data-tab="javidnam">JAVID NAM</button>
+      <button class="sidebar-tab" data-tab="codex">BRIEFING</button>
+      <button class="sidebar-tab" data-tab="daily">DAILY</button>
+    </div>
+
+    <div class="sidebar-actions">
+      <button class="action-btn" id="btn-load">LOAD</button>
+      <button class="action-btn primary" id="btn-save">SAVE</button>
+      <button class="action-btn" id="btn-add">+ NEW</button>
+    </div>
+
+    <div class="search-box">
+      <input type="text" class="search-input" id="search-input" placeholder="Search entries...">
+    </div>
+
+    <div class="entry-list" id="entry-list">
+      <!-- Entries populated by JavaScript -->
+    </div>
+  </aside>
+
+  <!-- Edit Panel - Form Fields -->
+  <main class="edit-panel">
+    <div class="edit-header">
+      <h2>EDIT ENTRY</h2>
+      <span class="unsaved-indicator" id="unsaved-indicator">UNSAVED</span>
+    </div>
+
+    <div class="edit-content" id="edit-content">
+      <div class="edit-empty">Select an entry from the list to edit</div>
+    </div>
+  </main>
+
+  <!-- Map Preview - Read-only -->
+  <section class="map-preview">
+    <div class="preview-header">
+      <h3>PREVIEW</h3>
+      <span class="preview-info" id="preview-info">Select an entry to preview</span>
+    </div>
+
+    <div class="map-viewport" id="map-viewport">
+      <div class="map-container" id="map-container">
+        <img src="image/map_background/satellitemap.png" class="map-image" id="map-image" draggable="false">
+        <!-- Map elements layer -->
+        <div class="map-elements-layer" id="map-elements-layer"></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Load external data files -->
+<script src="data/voices_data.js"></script>
+<script src="data/wildcards_data.js"></script>
+<script src="data/codex_data.js"></script>
+<script src="data/javid_nam_data.js"></script>
+<script src="data/daily_briefings_data.js"></script>
+<script src="data/gravestones_data.js"></script>
+<script src="data/elements_data.js"></script>
+
+<script>
+// ════════════════════════════════════════════════════════════════════════════
+// CONTENT EDITOR - State Management
+// ════════════════════════════════════════════════════════════════════════════
+
+const state = {
+  currentTab: 'voices',
+  selectedIndex: null,
+  hasUnsavedChanges: false,
+  searchQuery: '',
+  
+  // Stored directory handle for save operations
+  savedDirHandle: null,
+  
+  // Map pan/zoom - start centered on Iran at reasonable zoom
+  zoom: 0.35,
+  panX: -350,  // Center horizontally (adjusted for typical viewport)
+  panY: -200,  // Center vertically
+  isPanning: false,
+  lastMouseX: 0,
+  lastMouseY: 0,
+  
+  // Local copies of data for editing
+  data: {
+    voices: {},
+    wildcards: [],
+    javidnam: [],
+    codex: [],
+    daily: []
+  }
+};
+
+// Initialize data from loaded scripts
+function initData() {
+  if (typeof VOICE_MESSAGES !== 'undefined') {
+    state.data.voices = JSON.parse(JSON.stringify(VOICE_MESSAGES));
+  }
+  if (typeof WILDCARDS !== 'undefined') {
+    state.data.wildcards = JSON.parse(JSON.stringify(WILDCARDS));
+  }
+  if (typeof JAVID_NAM_DATA !== 'undefined') {
+    state.data.javidnam = JSON.parse(JSON.stringify(JAVID_NAM_DATA));
+  }
+  if (typeof CODEX_DATA !== 'undefined') {
+    state.data.codex = JSON.parse(JSON.stringify(CODEX_DATA));
+  }
+  if (typeof DAILY_BRIEFINGS !== 'undefined') {
+    state.data.daily = JSON.parse(JSON.stringify(DAILY_BRIEFINGS));
+  }
+}
+
+// DOM references
+const dom = {
+  entryList: document.getElementById('entry-list'),
+  editContent: document.getElementById('edit-content'),
+  unsavedIndicator: document.getElementById('unsaved-indicator'),
+  previewInfo: document.getElementById('preview-info'),
+  mapViewport: document.getElementById('map-viewport'),
+  mapContainer: document.getElementById('map-container'),
+  mapImage: document.getElementById('map-image'),
+  mapElementsLayer: document.getElementById('map-elements-layer'),
+  searchInput: document.getElementById('search-input')
+};
+
+// ════════════════════════════════════════════════════════════════════════════
+// ENTRY LIST RENDERING
+// ════════════════════════════════════════════════════════════════════════════
+
+function getEntriesForTab(tab) {
+  switch (tab) {
+    case 'voices':
+      return Object.entries(state.data.voices).map(([key, val]) => ({
+        key,
+        title: val.character?.en || key,
+        subtitle: val.location?.en || '',
+        img: val.portrait,
+        isPortrait: true
+      }));
+    case 'wildcards':
+      return state.data.wildcards.map((w, i) => ({
+        key: i,
+        title: w.name?.en || `Wildcard ${i}`,
+        subtitle: w.character?.en || '',
+        img: w.portrait,
+        isPortrait: true
+      }));
+    case 'javidnam':
+      return state.data.javidnam.map((j, i) => ({
+        key: i,
+        title: j.title?.en || j.id,
+        subtitle: j.era || '',
+        img: j.img,
+        isPortrait: false
+      }));
+    case 'codex':
+      return state.data.codex.map((c, i) => ({
+        key: i,
+        title: c.title?.en || c.id,
+        subtitle: c.tag || '',
+        img: c.img,
+        isPortrait: false
+      }));
+    case 'daily':
+      return state.data.daily.map((d, i) => ({
+        key: i,
+        title: d.theme || `Day ${d.day}`,
+        subtitle: `Day ${d.day}`,
+        img: null,
+        isPortrait: false
+      }));
+    default:
+      return [];
+  }
+}
+
+function renderEntryList() {
+  const entries = getEntriesForTab(state.currentTab);
+  const query = state.searchQuery.toLowerCase();
+  
+  const filtered = entries.filter(e => 
+    e.title.toLowerCase().includes(query) || 
+    e.subtitle.toLowerCase().includes(query)
+  );
+  
+  dom.entryList.innerHTML = filtered.map((entry, idx) => {
+    const isSelected = state.selectedIndex === entry.key;
+    const thumbClass = entry.isPortrait ? 'entry-thumb portrait' : 'entry-thumb';
+    const hasThumb = entry.img && entry.img.trim() !== '';
+    
+    return `
+      <div class="entry-item ${isSelected ? 'selected' : ''}" data-key="${entry.key}">
+        ${hasThumb 
+          ? `<img src="${entry.img}" class="${thumbClass}" onerror="this.style.display='none'">`
+          : `<div class="${thumbClass}" style="display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:18px;">?</div>`
+        }
+        <div class="entry-info">
+          <div class="entry-title">${entry.title}</div>
+          <div class="entry-subtitle">${entry.subtitle}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+  
+  // Add click handlers
+  dom.entryList.querySelectorAll('.entry-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const key = el.dataset.key;
+      state.selectedIndex = state.currentTab === 'voices' ? key : parseInt(key);
+      renderEntryList();
+      renderEditPanel();
+      renderPreview();
+    });
+  });
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// EDIT PANEL RENDERING
+// ════════════════════════════════════════════════════════════════════════════
+
+function renderEditPanel() {
+  if (state.selectedIndex === null) {
+    dom.editContent.innerHTML = '<div class="edit-empty">Select an entry from the list to edit</div>';
+    return;
+  }
+  
+  switch (state.currentTab) {
+    case 'voices':
+      renderVoiceEditor();
+      break;
+    case 'wildcards':
+      renderWildcardEditor();
+      break;
+    case 'javidnam':
+      renderJavidNamEditor();
+      break;
+    case 'codex':
+      renderCodexEditor();
+      break;
+    case 'daily':
+      renderDailyEditor();
+      break;
+  }
+}
+
+function renderVoiceEditor() {
+  const voice = state.data.voices[state.selectedIndex];
+  if (!voice) return;
+  
+  dom.editContent.innerHTML = `
+    <div class="field-section">
+      <div class="field-section-title">PORTRAIT</div>
+      <div class="portrait-preview">
+        <img src="${voice.portrait || ''}" class="portrait-img circle" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22/>'">
+        <div class="portrait-path">
+          <label class="field-label">IMAGE PATH</label>
+          <input type="text" class="field-input" value="${voice.portrait || ''}" data-field="portrait">
+        </div>
+      </div>
+    </div>
+    
+    <div class="field-section">
+      <div class="field-section-title">CHARACTER</div>
+      <div class="field-group">
+        <label class="field-label">ENGLISH</label>
+        <input type="text" class="field-input" value="${voice.character?.en || ''}" data-field="character.en">
+      </div>
+      <div class="field-group">
+        <label class="field-label">فارسی (FARSI)</label>
+        <input type="text" class="field-input input-fa" value="${voice.character?.fa || ''}" data-field="character.fa">
+      </div>
+    </div>
+    
+    <div class="field-section">
+      <div class="field-section-title">LOCATION</div>
+      <div class="field-group">
+        <label class="field-label">ENGLISH</label>
+        <input type="text" class="field-input" value="${voice.location?.en || ''}" data-field="location.en">
+      </div>
+      <div class="field-group">
+        <label class="field-label">فارسی (FARSI)</label>
+        <input type="text" class="field-input input-fa" value="${voice.location?.fa || ''}" data-field="location.fa">
+      </div>
+    </div>
+    
+    <div class="field-section">
+      <div class="field-section-title">TRANSMISSION</div>
+      <div class="field-group">
+        <label class="field-label">ENGLISH</label>
+        <input type="text" class="field-input" value="${voice.transmission?.en || ''}" data-field="transmission.en">
+      </div>
+      <div class="field-group">
+        <label class="field-label">فارسی (FARSI)</label>
+        <input type="text" class="field-input input-fa" value="${voice.transmission?.fa || ''}" data-field="transmission.fa">
+      </div>
+    </div>
+    
+    <div class="field-section">
+      <div class="field-section-title">QUOTE</div>
+      <div class="field-group">
+        <label class="field-label">ENGLISH</label>
+        <textarea class="field-input field-textarea tall" data-field="quote.en">${voice.quote?.en || ''}</textarea>
+      </div>
+      <div class="field-group">
+        <label class="field-label">فارسی (FARSI)</label>
+        <textarea class="field-input field-textarea tall input-fa" data-field="quote.fa">${voice.quote?.fa || ''}</textarea>
+      </div>
+    </div>
+    
+    <div class="field-section">
+      <div class="field-section-title">POSITION (read-only)</div>
+      <div class="field-group">
+        <label class="field-label">X: ${voice.position?.x || 0}, Y: ${voice.position?.y || 0}</label>
+      </div>
+    </div>
+  `;
+  
+  attachInputListeners('voices', state.selectedIndex);
+}
+
+function renderWildcardEditor() {
+  const wc = state.data.wildcards[state.selectedIndex];
+  if (!wc) return;
+  
+  dom.editContent.innerHTML = `
+    <div class="field-section">
+      <div class="field-section-title">PORTRAIT</div>
+      <div class="portrait-preview">
+        <img src="${wc.portrait || ''}" class="portrait-img circle" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22/>'">
+        <div class="portrait-path">
+          <label class="field-label">IMAGE PATH</label>
+          <input type="text" class="field-input" value="${wc.portrait || ''}" data-field="portrait">
+        </div>
+      </div>
+    </div>
+    
+    <div class="field-section">
+      <div class="field-section-title">CHARACTER</div>
+      <div class="field-group">
+        <label class="field-label">ENGLISH</label>
+        <input type="text" class="field-input" value="${wc.character?.en || ''}" data-field="character.en">
+      </div>
+      <div class="field-group">
+        <label class="field-label">فارسی (FARSI)</label>
+        <input type="text" class="field-input input-fa" value="${wc.character?.fa || ''}" data-field="character.fa">
+      </div>
+    </div>
+    
+    <div class="field-section">
+      <div class="field-section-title">EVENT NAME</div>
+      <div class="field-group">
+        <label class="field-label">ENGLISH</label>
+        <input type="text" class="field-input" value="${wc.name?.en || ''}" data-field="name.en">
+      </div>
+      <div class="field-group">
+        <label class="field-label">فارسی (FARSI)</label>
+        <input type="text" class="field-input input-fa" value="${wc.name?.fa || ''}" data-field="name.fa">
+      </div>
+    </div>
+    
+    <div class="field-section">
+      <div class="field-section-title">QUOTE</div>
+      <div class="field-group">
+        <label class="field-label">ENGLISH</label>
+        <textarea class="field-input field-textarea" data-field="quote.en">${wc.quote?.en || ''}</textarea>
+      </div>
+      <div class="field-group">
+        <label class="field-label">فارسی (FARSI)</label>
+        <textarea class="field-input field-textarea input-fa" data-field="quote.fa">${wc.quote?.fa || ''}</textarea>
+      </div>
+    </div>
+    
+    <div class="field-section">
+      <div class="field-section-title">EFFECT DESCRIPTION</div>
+      <div class="field-group">
+        <label class="field-label">ENGLISH</label>
+        <input type="text" class="field-input" value="${wc.effect?.en || ''}" data-field="effect.en">
+      </div>
+      <div class="field-group">
+        <label class="field-label">فارسی (FARSI)</label>
+        <input type="text" class="field-input input-fa" value="${wc.effect?.fa || ''}" data-field="effect.fa">
+      </div>
+    </div>
+  `;
+  
+  attachInputListeners('wildcards', state.selectedIndex);
+}
+
+function renderJavidNamEditor() {
+  const jn = state.data.javidnam[state.selectedIndex];
+  if (!jn) return;
+  
+  dom.editContent.innerHTML = `
+    <div class="field-section">
+      <div class="field-section-title">IMAGE</div>
+      <div class="portrait-preview">
+        <img src="${jn.img || ''}" class="portrait-img" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22/>'">
+        <div class="portrait-path">
+          <label class="field-label">IMAGE PATH</label>
+          <input type="text" class="field-input" value="${jn.img || ''}" data-field="img">
+        </div>
+      </div>
+    </div>
+    
+    <div class="field-section">
+      <div class="field-section-title">IDENTITY</div>
+      <div class="field-group">
+        <label class="field-label">ID</label>
+        <input type="text" class="field-input" value="${jn.id || ''}" data-field="id">
+      </div>
+      <div class="field-group">
+        <label class="field-label">ERA</label>
+        <input type="text" class="field-input" value="${jn.era || ''}" data-field="era">
+      </div>
+    </div>
+    
+    <div class="field-section">
+      <div class="field-section-title">NAME</div>
+      <div class="field-group">
+        <label class="field-label">ENGLISH</label>
+        <input type="text" class="field-input" value="${jn.title?.en || ''}" data-field="title.en">
+      </div>
+      <div class="field-group">
+        <label class="field-label">فارسی (FARSI)</label>
+        <input type="text" class="field-input input-fa" value="${jn.title?.fa || ''}" data-field="title.fa">
+      </div>
+    </div>
+    
+    <div class="field-section">
+      <div class="field-section-title">DETAILS</div>
+      <div class="field-group">
+        <label class="field-label">BORN</label>
+        <input type="text" class="field-input" value="${jn.born || ''}" data-field="born">
+      </div>
+      <div class="field-group">
+        <label class="field-label">DIED</label>
+        <input type="text" class="field-input" value="${jn.died || ''}" data-field="died">
+      </div>
+      <div class="field-group">
+        <label class="field-label">AGE</label>
+        <input type="number" class="field-input" value="${jn.age || ''}" data-field="age">
+      </div>
+      <div class="field-group">
+        <label class="field-label">LOCATION</label>
+        <input type="text" class="field-input" value="${jn.location || ''}" data-field="location">
+      </div>
+      <div class="field-group">
+        <label class="field-label">CHARGE</label>
+        <input type="text" class="field-input" value="${jn.charge || ''}" data-field="charge">
+      </div>
+    </div>
+    
+    <div class="field-section">
+      <div class="field-section-title">BIOGRAPHY</div>
+      <div class="field-group">
+        <label class="field-label">ENGLISH</label>
+        <textarea class="field-input field-textarea tall" data-field="biography.en">${jn.biography?.en || ''}</textarea>
+      </div>
+      <div class="field-group">
+        <label class="field-label">فارسی (FARSI)</label>
+        <textarea class="field-input field-textarea tall input-fa" data-field="biography.fa">${jn.biography?.fa || ''}</textarea>
+      </div>
+    </div>
+    
+    <div class="field-section">
+      <div class="field-section-title">TAGS</div>
+      <div class="array-editor" id="tags-editor">
+        ${(jn.tags || []).map((tag, i) => `
+          <div class="array-item">
+            <input type="text" class="field-input" value="${tag}" data-array="tags" data-index="${i}">
+            <button class="array-item-remove" data-array="tags" data-index="${i}">×</button>
+          </div>
+        `).join('')}
+        <button class="array-add" data-array="tags">+ Add Tag</button>
+      </div>
+    </div>
+  `;
+  
+  attachInputListeners('javidnam', state.selectedIndex);
+  attachArrayListeners('javidnam', state.selectedIndex);
+}
+
+function renderCodexEditor() {
+  const cx = state.data.codex[state.selectedIndex];
+  if (!cx) return;
+  
+  dom.editContent.innerHTML = `
+    <div class="field-section">
+      <div class="field-section-title">IMAGE</div>
+      <div class="portrait-preview">
+        <img src="${cx.img || ''}" class="portrait-img" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22/>'">
+        <div class="portrait-path">
+          <label class="field-label">IMAGE PATH</label>
+          <input type="text" class="field-input" value="${cx.img || ''}" data-field="img">
+        </div>
+      </div>
+    </div>
+    
+    <div class="field-section">
+      <div class="field-section-title">IDENTITY</div>
+      <div class="field-group">
+        <label class="field-label">ID</label>
+        <input type="text" class="field-input" value="${cx.id || ''}" data-field="id">
+      </div>
+      <div class="field-group">
+        <label class="field-label">TAG</label>
+        <input type="text" class="field-input" value="${cx.tag || ''}" data-field="tag">
+      </div>
+    </div>
+    
+    <div class="field-section">
+      <div class="field-section-title">TITLE</div>
+      <div class="field-group">
+        <label class="field-label">ENGLISH</label>
+        <input type="text" class="field-input" value="${cx.title?.en || ''}" data-field="title.en">
+      </div>
+      <div class="field-group">
+        <label class="field-label">فارسی (FARSI)</label>
+        <input type="text" class="field-input input-fa" value="${cx.title?.fa || ''}" data-field="title.fa">
+      </div>
+    </div>
+    
+    <div class="field-section">
+      <div class="field-section-title">BODY</div>
+      <div class="field-group">
+        <label class="field-label">ENGLISH</label>
+        <textarea class="field-input field-textarea tall" data-field="body.en">${cx.body?.en || ''}</textarea>
+      </div>
+      <div class="field-group">
+        <label class="field-label">فارسی (FARSI)</label>
+        <textarea class="field-input field-textarea tall input-fa" data-field="body.fa">${cx.body?.fa || ''}</textarea>
+      </div>
+    </div>
+    
+    <div class="field-section">
+      <div class="field-section-title">BULLET POINTS</div>
+      <div class="array-editor" id="bullets-editor">
+        ${(cx.bullets || []).map((bullet, i) => `
+          <div class="array-item">
+            <input type="text" class="field-input" value="${bullet}" data-array="bullets" data-index="${i}">
+            <button class="array-item-remove" data-array="bullets" data-index="${i}">×</button>
+          </div>
+        `).join('')}
+        <button class="array-add" data-array="bullets">+ Add Bullet</button>
+      </div>
+    </div>
+  `;
+  
+  attachInputListeners('codex', state.selectedIndex);
+  attachArrayListeners('codex', state.selectedIndex);
+}
+
+function renderDailyEditor() {
+  const db = state.data.daily[state.selectedIndex];
+  if (!db) return;
+  
+  dom.editContent.innerHTML = `
+    <div class="field-section">
+      <div class="field-section-title">DAY INFO</div>
+      <div class="field-group">
+        <label class="field-label">DAY NUMBER</label>
+        <input type="number" class="field-input" value="${db.day || ''}" data-field="day">
+      </div>
+    </div>
+    
+    <div class="field-section">
+      <div class="field-section-title">THEME</div>
+      <div class="field-group">
+        <label class="field-label">THEME HEADLINE</label>
+        <input type="text" class="field-input" value="${db.theme || ''}" data-field="theme">
+      </div>
+    </div>
+    
+    <div class="field-section">
+      <div class="field-section-title">BRIEF</div>
+      <div class="field-group">
+        <label class="field-label">SITUATION BRIEF</label>
+        <textarea class="field-input field-textarea tall" data-field="brief">${db.brief || ''}</textarea>
+      </div>
+    </div>
+  `;
+  
+  attachInputListeners('daily', state.selectedIndex);
+}
+
+function attachInputListeners(dataType, key) {
+  dom.editContent.querySelectorAll('[data-field]').forEach(input => {
+    input.addEventListener('input', () => {
+      const field = input.dataset.field;
+      const value = input.type === 'number' ? parseInt(input.value) || null : input.value;
+      updateDataField(dataType, key, field, value);
+      markUnsaved();
+      renderPreview();
+    });
+  });
+}
+
+function attachArrayListeners(dataType, key) {
+  dom.editContent.querySelectorAll('.array-item-remove').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const arrayName = btn.dataset.array;
+      const index = parseInt(btn.dataset.index);
+      removeArrayItem(dataType, key, arrayName, index);
+      renderEditPanel();
+      renderPreview();
+    });
+  });
+  
+  dom.editContent.querySelectorAll('.array-add').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const arrayName = btn.dataset.array;
+      addArrayItem(dataType, key, arrayName);
+      renderEditPanel();
+      renderPreview();
+    });
+  });
+  
+  dom.editContent.querySelectorAll('[data-array]').forEach(input => {
+    if (input.tagName === 'INPUT') {
+      input.addEventListener('input', () => {
+        const arrayName = input.dataset.array;
+        const index = parseInt(input.dataset.index);
+        updateArrayItem(dataType, key, arrayName, index, input.value);
+        markUnsaved();
+        renderPreview();
+      });
+    }
+  });
+}
+
+function updateDataField(dataType, key, field, value) {
+  let target;
+  if (dataType === 'voices') {
+    target = state.data.voices[key];
+  } else {
+    target = state.data[dataType][key];
+  }
+  
+  if (!target) return;
+  
+  const parts = field.split('.');
+  if (parts.length === 2) {
+    if (!target[parts[0]]) target[parts[0]] = {};
+    target[parts[0]][parts[1]] = value;
+  } else {
+    target[field] = value;
+  }
+}
+
+function removeArrayItem(dataType, key, arrayName, index) {
+  let target = dataType === 'voices' ? state.data.voices[key] : state.data[dataType][key];
+  if (target && target[arrayName]) {
+    target[arrayName].splice(index, 1);
+    markUnsaved();
+  }
+}
+
+function addArrayItem(dataType, key, arrayName) {
+  let target = dataType === 'voices' ? state.data.voices[key] : state.data[dataType][key];
+  if (target) {
+    if (!target[arrayName]) target[arrayName] = [];
+    target[arrayName].push('');
+    markUnsaved();
+  }
+}
+
+function updateArrayItem(dataType, key, arrayName, index, value) {
+  let target = dataType === 'voices' ? state.data.voices[key] : state.data[dataType][key];
+  if (target && target[arrayName]) {
+    target[arrayName][index] = value;
+  }
+}
+
+function markUnsaved() {
+  state.hasUnsavedChanges = true;
+  dom.unsavedIndicator.classList.add('visible');
+}
+
+function markSaved() {
+  state.hasUnsavedChanges = false;
+  dom.unsavedIndicator.classList.remove('visible');
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// MAP PREVIEW RENDERING
+// ════════════════════════════════════════════════════════════════════════════
+
+function renderPreview() {
+  if (state.selectedIndex === null) {
+    dom.previewInfo.textContent = 'Select an entry to preview';
+    clearMapMarkers();
+    return;
+  }
+  
+  switch (state.currentTab) {
+    case 'voices':
+      renderVoicePreview();
+      break;
+    case 'wildcards':
+      renderWildcardPreview();
+      break;
+    case 'javidnam':
+      renderJavidNamPreview();
+      break;
+    case 'codex':
+      renderCodexPreview();
+      break;
+    case 'daily':
+      renderDailyPreview();
+      break;
+  }
+}
+
+function clearMapMarkers() {
+  dom.mapContainer.querySelectorAll('.preview-voice-marker, .preview-gravestone-marker, .card-preview-overlay').forEach(el => el.remove());
+}
+
+function renderVoicePreview() {
+  const voiceKey = state.selectedIndex;
+  const voice = state.data.voices[voiceKey];
+  if (!voice) return;
+  
+  clearMapMarkers();
+  
+  // Re-render map elements with selected voice highlighted
+  renderMapElements(voiceKey);
+  
+  dom.previewInfo.textContent = `${voice.character?.en || ''} — ${voice.location?.en || ''}`;
+  
+  if (voice.position) {
+    // Center map on the voice position
+    requestAnimationFrame(() => {
+      centerMapOn(voice.position.x, voice.position.y);
+    });
+  }
+}
+
+function renderWildcardPreview() {
+  const wc = state.data.wildcards[state.selectedIndex];
+  if (!wc) return;
+  
+  clearMapMarkers();
+  renderMapElements(); // Re-render map elements without voice selection
+  
+  dom.previewInfo.textContent = wc.name?.en || 'Wildcard';
+  
+  const overlay = document.createElement('div');
+  overlay.className = 'card-preview-overlay';
+  overlay.innerHTML = `
+    <div class="card-preview wildcard-preview">
+      <img src="${wc.portrait || ''}" class="wildcard-portrait" onerror="this.style.display='none'">
+      <div class="wildcard-character">${wc.character?.en || ''}</div>
+      <div class="wildcard-name">${wc.name?.en || ''}</div>
+      <div class="wildcard-quote">"${wc.quote?.en || ''}"</div>
+      <div class="wildcard-effect">${wc.effect?.en || ''}</div>
+    </div>
+  `;
+  dom.mapContainer.appendChild(overlay);
+}
+
+function renderJavidNamPreview() {
+  const jn = state.data.javidnam[state.selectedIndex];
+  if (!jn) return;
+  
+  clearMapMarkers();
+  renderMapElements(); // Re-render map elements without voice selection
+  
+  dom.previewInfo.textContent = jn.title?.en || 'Memorial';
+  
+  const overlay = document.createElement('div');
+  overlay.className = 'card-preview-overlay';
+  overlay.innerHTML = `
+    <div class="card-preview">
+      <img src="${jn.img || ''}" class="card-preview-img" onerror="this.style.display='none'">
+      <div class="card-preview-body">
+        <div class="card-preview-tag">${jn.era || ''}</div>
+        <div class="card-preview-title">${jn.title?.en || ''}</div>
+        <div class="card-preview-text">${(jn.biography?.en || '').substring(0, 300)}${(jn.biography?.en || '').length > 300 ? '...' : ''}</div>
+        <div class="card-preview-bullets">
+          ${(jn.tags || []).slice(0, 4).map(t => `<div class="card-preview-bullet">${t}</div>`).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+  dom.mapContainer.appendChild(overlay);
+}
+
+function renderCodexPreview() {
+  const cx = state.data.codex[state.selectedIndex];
+  if (!cx) return;
+  
+  clearMapMarkers();
+  renderMapElements(); // Re-render map elements without voice selection
+  
+  dom.previewInfo.textContent = cx.title?.en || 'Briefing';
+  
+  const overlay = document.createElement('div');
+  overlay.className = 'card-preview-overlay';
+  overlay.innerHTML = `
+    <div class="card-preview">
+      <img src="${cx.img || ''}" class="card-preview-img" onerror="this.style.display='none'">
+      <div class="card-preview-body">
+        <div class="card-preview-tag">${cx.tag || ''}</div>
+        <div class="card-preview-title">${cx.title?.en || ''}</div>
+        <div class="card-preview-text">${cx.body?.en || ''}</div>
+        <div class="card-preview-bullets">
+          ${(cx.bullets || []).slice(0, 4).map(b => `<div class="card-preview-bullet">${b}</div>`).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+  dom.mapContainer.appendChild(overlay);
+}
+
+function renderDailyPreview() {
+  const db = state.data.daily[state.selectedIndex];
+  if (!db) return;
+  
+  clearMapMarkers();
+  renderMapElements(); // Re-render map elements without voice selection
+  
+  dom.previewInfo.textContent = db.theme || 'Daily Briefing';
+  
+  const overlay = document.createElement('div');
+  overlay.className = 'card-preview-overlay';
+  overlay.innerHTML = `
+    <div class="card-preview pdb-preview">
+      <div class="pdb-header">
+        <div class="pdb-classification">TOP SECRET // NOFORN // ORCON</div>
+        <div class="pdb-title">PRESIDENT'S DAILY BRIEF</div>
+      </div>
+      <div class="pdb-body">
+        <div class="pdb-theme">${db.theme || ''}</div>
+        <div class="pdb-brief">${db.brief || ''}</div>
+      </div>
+    </div>
+  `;
+  dom.mapContainer.appendChild(overlay);
+}
+
+function centerMapOn(x, y) {
+  const viewportRect = dom.mapViewport.getBoundingClientRect();
+  state.panX = (viewportRect.width / 2) - (x * state.zoom);
+  state.panY = (viewportRect.height / 2) - (y * state.zoom);
+  updateMapTransform();
+}
+
+function updateMapTransform() {
+  dom.mapContainer.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.zoom})`;
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// MAP PAN/ZOOM
+// ════════════════════════════════════════════════════════════════════════════
+
+function initMapControls() {
+  dom.mapViewport.addEventListener('mousedown', (e) => {
+    state.isPanning = true;
+    state.lastMouseX = e.clientX;
+    state.lastMouseY = e.clientY;
+    dom.mapViewport.style.cursor = 'grabbing';
+  });
+  
+  window.addEventListener('mousemove', (e) => {
+    if (!state.isPanning) return;
+    const dx = e.clientX - state.lastMouseX;
+    const dy = e.clientY - state.lastMouseY;
+    state.panX += dx;
+    state.panY += dy;
+    state.lastMouseX = e.clientX;
+    state.lastMouseY = e.clientY;
+    updateMapTransform();
+  });
+  
+  window.addEventListener('mouseup', () => {
+    state.isPanning = false;
+    dom.mapViewport.style.cursor = 'grab';
+  });
+  
+  dom.mapViewport.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const rect = dom.mapViewport.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    
+    const delta = e.deltaY > 0 ? 0.9 : 1.1;
+    const newZoom = Math.min(Math.max(state.zoom * delta, 0.1), 2);
+    
+    const mapX = (mouseX - state.panX) / state.zoom;
+    const mapY = (mouseY - state.panY) / state.zoom;
+    
+    state.zoom = newZoom;
+    state.panX = mouseX - mapX * state.zoom;
+    state.panY = mouseY - mapY * state.zoom;
+    
+    updateMapTransform();
+  });
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// TAB SWITCHING
+// ════════════════════════════════════════════════════════════════════════════
+
+function initTabs() {
+  document.querySelectorAll('.sidebar-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const newTab = tab.dataset.tab;
+      if (newTab === state.currentTab) return;
+      
+      document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      
+      state.currentTab = newTab;
+      state.selectedIndex = null;
+      renderEntryList();
+      renderEditPanel();
+      renderPreview();
+    });
+  });
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// SEARCH
+// ════════════════════════════════════════════════════════════════════════════
+
+function initSearch() {
+  dom.searchInput.addEventListener('input', () => {
+    state.searchQuery = dom.searchInput.value;
+    renderEntryList();
+  });
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// FILE OPERATIONS
+// ════════════════════════════════════════════════════════════════════════════
+
+async function loadData() {
+  try {
+    if (!window.showDirectoryPicker) {
+      alert('File System Access API not supported. Please use Chrome or Edge.');
+      return;
+    }
+
+    const dirHandle = await window.showDirectoryPicker();
+    
+    // Store the handle for future save operations
+    state.savedDirHandle = dirHandle;
+
+    const fileMap = {};
+    const expectedFiles = ['voices_data.js', 'wildcards_data.js', 'codex_data.js', 'javid_nam_data.js', 'daily_briefings_data.js'];
+    
+    for await (const entry of dirHandle.values()) {
+      if (entry.kind === 'file' && expectedFiles.includes(entry.name)) {
+        const file = await entry.getFile();
+        fileMap[entry.name] = await file.text();
+      }
+    }
+    
+    // Parse and load each file
+    if (fileMap['voices_data.js']) {
+      const match = fileMap['voices_data.js'].match(/const VOICE_MESSAGES\s*=\s*(\{[\s\S]*\});?\s*$/);
+      if (match) {
+        state.data.voices = eval('(' + match[1] + ')');
+      }
+    }
+    
+    if (fileMap['wildcards_data.js']) {
+      const match = fileMap['wildcards_data.js'].match(/const WILDCARDS\s*=\s*(\[[\s\S]*\]);?\s*$/);
+      if (match) {
+        state.data.wildcards = eval(match[1]);
+      }
+    }
+    
+    if (fileMap['codex_data.js']) {
+      const match = fileMap['codex_data.js'].match(/const CODEX_DATA\s*=\s*(\[[\s\S]*\]);?\s*$/);
+      if (match) {
+        state.data.codex = eval(match[1]);
+      }
+    }
+    
+    if (fileMap['javid_nam_data.js']) {
+      const match = fileMap['javid_nam_data.js'].match(/const JAVID_NAM_DATA\s*=\s*(\[[\s\S]*\]);?\s*$/);
+      if (match) {
+        state.data.javidnam = eval(match[1]);
+      }
+    }
+    
+    if (fileMap['daily_briefings_data.js']) {
+      const match = fileMap['daily_briefings_data.js'].match(/const DAILY_BRIEFINGS\s*=\s*(\[[\s\S]*\]);?\s*$/);
+      if (match) {
+        state.data.daily = eval(match[1]);
+      }
+    }
+    
+    renderEntryList();
+    alert('Data loaded successfully!');
+    
+  } catch (err) {
+    if (err.name !== 'AbortError') {
+      console.error('Load error:', err);
+      alert('Error loading data: ' + err.message);
+    }
+  }
+}
+
+async function saveData(forcePickFolder = false) {
+  try {
+    if (!window.showDirectoryPicker) {
+      // Fallback: copy to clipboard
+      const output = generateAllOutput();
+      await navigator.clipboard.writeText(output);
+      alert('File System API not supported. Output copied to clipboard.');
+      return;
+    }
+
+    let dirHandle = state.savedDirHandle;
+    
+    // If no stored handle or user wants to pick a new folder, prompt for selection
+    if (!dirHandle || forcePickFolder) {
+      dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+      state.savedDirHandle = dirHandle;
+    }
+
+    // Save each file
+    await saveFile(dirHandle, 'voices_data.js', generateVoicesOutput());
+    await saveFile(dirHandle, 'wildcards_data.js', generateWildcardsOutput());
+    await saveFile(dirHandle, 'codex_data.js', generateCodexOutput());
+    await saveFile(dirHandle, 'javid_nam_data.js', generateJavidNamOutput());
+    await saveFile(dirHandle, 'daily_briefings_data.js', generateDailyOutput());
+
+    markSaved();
+    alert('All files saved successfully!');
+
+  } catch (err) {
+    if (err.name !== 'AbortError') {
+      console.error('Save error:', err);
+      alert('Error saving: ' + err.message);
+    }
+  }
+}
+
+async function saveFile(dirHandle, filename, content) {
+  const fileHandle = await dirHandle.getFileHandle(filename, { create: true });
+  const writable = await fileHandle.createWritable();
+  await writable.write(content);
+  await writable.close();
+}
+
+function generateVoicesOutput() {
+  const entries = Object.entries(state.data.voices).map(([key, val]) => {
+    return `  ${key}: ${JSON.stringify(val, null, 4).replace(/\n/g, '\n  ')}`;
+  });
+  return `const VOICE_MESSAGES = {\n${entries.join(',\n')}\n};`;
+}
+
+function generateWildcardsOutput() {
+  const entries = state.data.wildcards.map(w => {
+    const obj = { ...w };
+    delete obj.apply; // Remove function
+    return '  ' + JSON.stringify(obj, null, 4).replace(/\n/g, '\n  ');
+  });
+  return `const WILDCARDS = [\n${entries.join(',\n')}\n];`;
+}
+
+function generateCodexOutput() {
+  const header = `// ════════════════════════════════════════════════════════════════════════════
+// FREE IRAN BRIEFING (CODEX) — Educational entries about the Iranian situation
+// Structure: id, title{en,fa}, body{en,fa}, bullets[], img, label_data
+// ════════════════════════════════════════════════════════════════════════════
+
+`;
+  const entries = state.data.codex.map(c => '  ' + JSON.stringify(c, null, 4).replace(/\n/g, '\n  '));
+  return header + `const CODEX_DATA = [\n${entries.join(',\n')}\n];`;
+}
+
+function generateJavidNamOutput() {
+  const header = `// ════════════════════════════════════════════════════════════════════════════
+// JAVID NAM (جاوید نام) — ETERNAL NAMES MEMORIAL
+// Profiles of Iranian dissidents executed or killed by the Islamic Republic
+// "Javid Nam" reclaims martyrdom from state religious framing as eternal heroes
+// ════════════════════════════════════════════════════════════════════════════
+
+`;
+  const entries = state.data.javidnam.map(j => '  ' + JSON.stringify(j, null, 4).replace(/\n/g, '\n  '));
+  return header + `const JAVID_NAM_DATA = [\n${entries.join(',\n')}\n];`;
+}
+
+function generateDailyOutput() {
+  const header = `// ────────────────────────────────────────────────────────────────────────────
+// DAILY BRIEFINGS - Theme and narrative per day
+// ────────────────────────────────────────────────────────────────────────────
+
+`;
+  const entries = state.data.daily.map(d => '  ' + JSON.stringify(d, null, 4).replace(/\n/g, '\n  '));
+  return header + `const DAILY_BRIEFINGS = [\n${entries.join(',\n')}\n];`;
+}
+
+function generateAllOutput() {
+  return [
+    '// === VOICES ===\n' + generateVoicesOutput(),
+    '\n\n// === WILDCARDS ===\n' + generateWildcardsOutput(),
+    '\n\n// === CODEX ===\n' + generateCodexOutput(),
+    '\n\n// === JAVID NAM ===\n' + generateJavidNamOutput(),
+    '\n\n// === DAILY BRIEFINGS ===\n' + generateDailyOutput()
+  ].join('');
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// ADD NEW ENTRY
+// ════════════════════════════════════════════════════════════════════════════
+
+function addNewEntry() {
+  switch (state.currentTab) {
+    case 'voices':
+      const newKey = 'new_voice_' + Date.now();
+      state.data.voices[newKey] = {
+        portrait: '',
+        character: { en: 'NEW VOICE', fa: '' },
+        location: { en: '', fa: '' },
+        transmission: { en: '', fa: '' },
+        quote: { en: '', fa: '' },
+        position: { x: 1400, y: 800 }
+      };
+      state.selectedIndex = newKey;
+      break;
+    case 'wildcards':
+      state.data.wildcards.push({
+        portrait: '',
+        character: { en: 'NEW', fa: '' },
+        name: { en: 'New Event', fa: '' },
+        quote: { en: '', fa: '' },
+        effect: { en: '', fa: '' }
+      });
+      state.selectedIndex = state.data.wildcards.length - 1;
+      break;
+    case 'javidnam':
+      state.data.javidnam.push({
+        id: 'jn-new-' + Date.now(),
+        era: '',
+        title: { en: 'NEW ENTRY', fa: '' },
+        born: '',
+        died: '',
+        age: null,
+        location: '',
+        charge: '',
+        biography: { en: '', fa: '' },
+        tags: [],
+        img: '',
+        label_data: ''
+      });
+      state.selectedIndex = state.data.javidnam.length - 1;
+      break;
+    case 'codex':
+      state.data.codex.push({
+        id: 'c-new-' + Date.now(),
+        tag: '',
+        title: { en: 'NEW ENTRY', fa: '' },
+        body: { en: '', fa: '' },
+        bullets: [],
+        img: '',
+        label_data: ''
+      });
+      state.selectedIndex = state.data.codex.length - 1;
+      break;
+    case 'daily':
+      const maxDay = Math.max(...state.data.daily.map(d => d.day), 0);
+      state.data.daily.push({
+        day: maxDay + 1,
+        theme: 'Day ' + (maxDay + 1) + ' — New',
+        brief: ''
+      });
+      state.selectedIndex = state.data.daily.length - 1;
+      break;
+  }
+  
+  markUnsaved();
+  renderEntryList();
+  renderEditPanel();
+  renderPreview();
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// MAP ELEMENTS RENDERING
+// ════════════════════════════════════════════════════════════════════════════
+
+const MAP_ELEMENT_ICONS = {
+  large_city: 'image/map_elements/map_element_large_city.png',
+  small_city: 'image/map_elements/map_element_small_city.png',
+  town: 'image/map_elements/map_element_town.png',
+  port: 'image/map_elements/map_element_port.png',
+  oil: 'image/map_elements/map_element_oil.png',
+  nuclear_site: 'image/map_elements/map_element_nuclear_site.png',
+  battleship: 'image/map_elements/map_element_battleship.png'
+};
+
+function renderMapElements(selectedVoiceKey = null) {
+  dom.mapElementsLayer.innerHTML = '';
+  
+  // Render city/port/nuclear markers from MAP_MARKERS
+  if (typeof MAP_MARKERS !== 'undefined') {
+    for (const marker of MAP_MARKERS) {
+      const el = document.createElement('div');
+      el.className = 'map-element-marker';
+      el.style.left = marker.position.x + 'px';
+      el.style.top = marker.position.y + 'px';
+      
+      const icon = MAP_ELEMENT_ICONS[marker.type] || MAP_ELEMENT_ICONS.town;
+      el.innerHTML = `
+        <img src="${icon}" class="map-element-icon">
+        <span class="map-element-label">${marker.name?.en || ''}</span>
+      `;
+      dom.mapElementsLayer.appendChild(el);
+    }
+  }
+  
+  // Render gravestone markers
+  if (typeof GRAVESTONE_MARKERS !== 'undefined') {
+    for (const gs of GRAVESTONE_MARKERS) {
+      const el = document.createElement('div');
+      el.className = 'map-gravestone-marker';
+      el.style.left = gs.position.x + 'px';
+      el.style.top = gs.position.y + 'px';
+      el.innerHTML = `<img src="image/map_elements/map_element_gravestone.png" class="map-gravestone-icon">`;
+      dom.mapElementsLayer.appendChild(el);
+    }
+  }
+  
+  // Render voice markers (small dots, highlighted when selected)
+  if (state.data.voices) {
+    for (const [key, voice] of Object.entries(state.data.voices)) {
+      if (!voice.position) continue;
+      
+      const isSelected = selectedVoiceKey === key;
+      const el = document.createElement('div');
+      el.className = 'map-voice-marker' + (isSelected ? ' selected' : '');
+      el.style.left = voice.position.x + 'px';
+      el.style.top = voice.position.y + 'px';
+      
+      if (isSelected) {
+        const hasPortrait = voice.portrait && voice.portrait.trim() !== '';
+        el.innerHTML = `
+          ${hasPortrait ? `<img src="${voice.portrait}" class="map-voice-portrait" onerror="this.style.display='none'">` : '<div class="map-voice-portrait" style="background:var(--bg);display:flex;align-items:center;justify-content:center;color:var(--dim);">?</div>'}
+          <div class="map-voice-bubble">
+            <div class="vb-character">${voice.character?.en || ''}</div>
+            <div class="vb-header">${voice.transmission?.en || ''}</div>
+            <div class="vb-quote">"${voice.quote?.en || ''}"</div>
+          </div>
+        `;
+      } else {
+        el.innerHTML = `<div class="map-voice-dot"></div>`;
+      }
+      
+      dom.mapElementsLayer.appendChild(el);
+    }
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// INITIALIZATION
+// ════════════════════════════════════════════════════════════════════════════
+
+function init() {
+  initData();
+  initTabs();
+  initSearch();
+  initMapControls();
+  renderMapElements();
+  
+  document.getElementById('btn-load').addEventListener('click', loadData);
+  document.getElementById('btn-save').addEventListener('click', (e) => saveData(e.shiftKey));
+  document.getElementById('btn-add').addEventListener('click', addNewEntry);
+  
+  // Keyboard shortcuts
+  // Cmd/Ctrl+S = save to remembered folder
+  // Cmd/Ctrl+Shift+S = pick new folder (Save As)
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault();
+      saveData(e.shiftKey); // Shift forces folder picker
+    }
+  });
+  
+  // Center map on Iran after viewport is ready
+  requestAnimationFrame(() => {
+    centerMapOn(1400, 800);
+  });
+  
+  renderEntryList();
+  updateMapTransform();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
