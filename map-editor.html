@@ -1075,7 +1075,10 @@ const state = {
   draggingMarker: null,
   markerDragOffset: { x: 0, y: 0 },
   dragStartPos: { x: 0, y: 0 },
-  wasDragging: false
+  wasDragging: false,
+  
+  // Original markers snapshot for diff calculation
+  originalMarkers: null
 };
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -2262,6 +2265,9 @@ function init() {
     });
   }
 
+  // Store original markers snapshot for diff calculation
+  state.originalMarkers = JSON.parse(JSON.stringify(state.placedMarkers));
+
   renderPlacedMarkers();
 }
 
@@ -2293,13 +2299,99 @@ function showExportNotification(message) {
   }, 3000);
 }
 
+// Generate a unique key for a marker for comparison purposes
+function markerKey(marker) {
+  return `${marker.assetType}:${marker.assetId}`;
+}
+
+// Check if a marker's position changed
+function positionChanged(current, original) {
+  return current.x !== original.x || current.y !== original.y;
+}
+
+// Check if marker data changed (beyond just position)
+function dataChanged(current, original) {
+  const currentData = JSON.stringify({ ...current.fullData, position: null });
+  const originalData = JSON.stringify({ ...original.fullData, position: null });
+  return currentData !== originalData;
+}
+
+// Calculate diff between current and original markers
+function calculateMarkerDiffs() {
+  const diff = {
+    elements: { added: [], moved: [], modified: [], removed: [] },
+    voices: { added: [], moved: [], modified: [], removed: [] },
+    flags: { added: [], moved: [], modified: [], removed: [] },
+    gravestones: { added: [], moved: [], modified: [], removed: [] }
+  };
+  
+  // Build lookup maps
+  const currentByKey = {};
+  const originalByKey = {};
+  
+  for (const m of state.placedMarkers) {
+    currentByKey[markerKey(m)] = m;
+  }
+  for (const m of state.originalMarkers) {
+    originalByKey[markerKey(m)] = m;
+  }
+  
+  // Map asset types to diff categories
+  const typeToCategory = {
+    'element': 'elements',
+    'voice': 'voices', 
+    'flag': 'flags',
+    'gravestone': 'gravestones'
+  };
+  
+  // Find added, moved, and modified
+  for (const key of Object.keys(currentByKey)) {
+    const current = currentByKey[key];
+    const category = typeToCategory[current.assetType];
+    
+    if (!(key in originalByKey)) {
+      diff[category].added.push(current.assetId);
+    } else {
+      const original = originalByKey[key];
+      if (positionChanged(current, original)) {
+        diff[category].moved.push({
+          id: current.assetId,
+          from: { x: original.x, y: original.y },
+          to: { x: current.x, y: current.y }
+        });
+      }
+      if (dataChanged(current, original)) {
+        diff[category].modified.push(current.assetId);
+      }
+    }
+  }
+  
+  // Find removed
+  for (const key of Object.keys(originalByKey)) {
+    const original = originalByKey[key];
+    const category = typeToCategory[original.assetType];
+    
+    if (!(key in currentByKey)) {
+      diff[category].removed.push(original.assetId);
+    }
+  }
+  
+  return diff;
+}
+
 function exportBundle() {
-  const bundle = {
-    _meta: {
-      exportedAt: new Date().toISOString(),
-      editor: 'map-editor',
-      version: 1
-    },
+  // Calculate diffs
+  const changes = calculateMarkerDiffs();
+  
+  // Count total changes
+  let totalChanges = 0;
+  for (const category of Object.values(changes)) {
+    totalChanges += category.added.length + category.moved.length + 
+                    category.modified.length + category.removed.length;
+  }
+  
+  // Build full data export
+  const full = {
     elements: {},
     voices: {},
     flags: {},
@@ -2314,15 +2406,26 @@ function exportBundle() {
     delete data.position.position;
     
     if (marker.assetType === 'element') {
-      bundle.elements[marker.assetId] = data;
+      full.elements[marker.assetId] = data;
     } else if (marker.assetType === 'voice') {
-      bundle.voices[marker.assetId] = data;
+      full.voices[marker.assetId] = data;
     } else if (marker.assetType === 'flag') {
-      bundle.flags[marker.assetId] = data;
+      full.flags[marker.assetId] = data;
     } else if (marker.assetType === 'gravestone') {
-      bundle.gravestones[marker.assetId] = data;
+      full.gravestones[marker.assetId] = data;
     }
   }
+  
+  const bundle = {
+    _meta: {
+      exportedAt: new Date().toISOString(),
+      editor: 'map-editor',
+      version: 2,
+      totalChanges: totalChanges
+    },
+    changes: changes,
+    full: full
+  };
   
   const json = JSON.stringify(bundle, null, 2);
   const blob = new Blob([json], { type: 'application/json' });
@@ -2337,7 +2440,7 @@ function exportBundle() {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
   
-  showExportNotification('Export downloaded! Email it to seeyouinfreeiran@gmail.com');
+  showExportNotification(`Export downloaded! ${totalChanges} change(s). Email to seeyouinfreeiran@gmail.com`);
 }
 
 document.getElementById('btn-export').addEventListener('click', exportBundle);

@@ -1069,7 +1069,10 @@ const state = {
     javidnam: [],
     codex: [],
     daily: []
-  }
+  },
+  
+  // Original data snapshot for diff calculation
+  originalData: null
 };
 
 // Initialize data from loaded scripts
@@ -1089,6 +1092,9 @@ function initData() {
   if (typeof DAILY_BRIEFINGS !== 'undefined') {
     state.data.daily = JSON.parse(JSON.stringify(DAILY_BRIEFINGS));
   }
+  
+  // Store original data snapshot for diff calculation
+  state.originalData = JSON.parse(JSON.stringify(state.data));
 }
 
 // DOM references
@@ -2300,18 +2306,98 @@ function showExportNotification(message) {
   }, 3000);
 }
 
+// Compare two values for equality (deep comparison via JSON)
+function valuesEqual(a, b) {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
+// Generate diff for object-based collections (like voices)
+function diffObjects(current, original) {
+  const diff = { added: [], modified: [], removed: [] };
+  const currentKeys = Object.keys(current);
+  const originalKeys = Object.keys(original);
+  
+  for (const key of currentKeys) {
+    if (!(key in original)) {
+      diff.added.push(key);
+    } else if (!valuesEqual(current[key], original[key])) {
+      diff.modified.push(key);
+    }
+  }
+  
+  for (const key of originalKeys) {
+    if (!(key in current)) {
+      diff.removed.push(key);
+    }
+  }
+  
+  return diff;
+}
+
+// Generate diff for array-based collections (like codex, javidnam, etc.)
+function diffArrays(current, original, idField = 'id') {
+  const diff = { added: [], modified: [], removed: [] };
+  
+  const currentById = {};
+  const originalById = {};
+  
+  for (const item of current) {
+    if (item[idField]) currentById[item[idField]] = item;
+  }
+  for (const item of original) {
+    if (item[idField]) originalById[item[idField]] = item;
+  }
+  
+  for (const id of Object.keys(currentById)) {
+    if (!(id in originalById)) {
+      diff.added.push(id);
+    } else if (!valuesEqual(currentById[id], originalById[id])) {
+      diff.modified.push(id);
+    }
+  }
+  
+  for (const id of Object.keys(originalById)) {
+    if (!(id in currentById)) {
+      diff.removed.push(id);
+    }
+  }
+  
+  return diff;
+}
+
 function exportBundle() {
+  // Clean wildcards data (remove apply function)
+  const cleanWildcards = state.data.wildcards.map(w => { const copy = {...w}; delete copy.apply; return copy; });
+  const cleanOriginalWildcards = state.originalData.wildcards.map(w => { const copy = {...w}; delete copy.apply; return copy; });
+  
+  // Calculate diffs for each data type
+  const changes = {
+    voices: diffObjects(state.data.voices, state.originalData.voices),
+    wildcards: diffArrays(cleanWildcards, cleanOriginalWildcards),
+    codex: diffArrays(state.data.codex, state.originalData.codex),
+    javidnam: diffArrays(state.data.javidnam, state.originalData.javidnam),
+    daily: diffArrays(state.data.daily, state.originalData.daily, 'day')
+  };
+  
+  // Count total changes
+  const totalChanges = Object.values(changes).reduce((sum, diff) => 
+    sum + diff.added.length + diff.modified.length + diff.removed.length, 0);
+  
   const bundle = {
     _meta: {
       exportedAt: new Date().toISOString(),
       editor: 'content-editor',
-      version: 1
+      version: 2,
+      totalChanges: totalChanges
     },
-    voices: state.data.voices,
-    wildcards: state.data.wildcards.map(w => { const copy = {...w}; delete copy.apply; return copy; }),
-    codex: state.data.codex,
-    javidnam: state.data.javidnam,
-    daily: state.data.daily
+    changes: changes,
+    full: {
+      voices: state.data.voices,
+      wildcards: cleanWildcards,
+      codex: state.data.codex,
+      javidnam: state.data.javidnam,
+      daily: state.data.daily
+    }
   };
   
   const json = JSON.stringify(bundle, null, 2);
@@ -2327,7 +2413,7 @@ function exportBundle() {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
   
-  showExportNotification('Export downloaded! Email it to seeyouinfreeiran@gmail.com');
+  showExportNotification(`Export downloaded! ${totalChanges} change(s). Email to seeyouinfreeiran@gmail.com`);
 }
 
 document.getElementById('btn-export').addEventListener('click', exportBundle);
