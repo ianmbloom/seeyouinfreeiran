@@ -474,17 +474,17 @@ img { image-rendering: pixelated; image-rendering: crisp-edges; }
 }
 
 .map-element-icon {
-  width: 96px;
-  height: 96px;
+  width: 48px;
+  height: 48px;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
 }
 
 .map-element-label {
-  font-size: 11px;
+  font-size: 6px;
   font-family: 'VT323', monospace;
   color: #fff;
-  text-shadow: 0 1px 3px rgba(0,0,0,.9), 0 0 6px rgba(0,0,0,.5);
+  text-shadow: 0 1px 2px rgba(0,0,0,.9), 0 0 3px rgba(0,0,0,.5);
   white-space: nowrap;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -498,21 +498,21 @@ img { image-rendering: pixelated; image-rendering: crisp-edges; }
 }
 
 .map-gravestone-icon {
-  width: 64px;
+  width: 36px;
   height: auto;
   opacity: 0.85;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
 }
 
-/* Voice markers on map - match game sizing (96px portraits) */
+/* Voice markers on map - match game sizing (48px portraits) */
 .map-voice-marker {
   position: absolute;
   transform: translate(-50%, -50%);
   pointer-events: none;
   z-index: 50;
-  width: 96px;
-  height: 96px;
+  width: 48px;
+  height: 48px;
 }
 
 .map-voice-marker.selected {
@@ -520,11 +520,11 @@ img { image-rendering: pixelated; image-rendering: crisp-edges; }
 }
 
 .map-voice-dot {
-  width: 16px;
-  height: 16px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: rgba(255,210,74,.6);
-  border: 2px solid rgba(255,210,74,.9);
+  border: 1px solid rgba(255,210,74,.9);
   box-shadow: 0 0 12px rgba(255,210,74,.5);
   position: absolute;
   top: 50%;
@@ -550,13 +550,13 @@ img { image-rendering: pixelated; image-rendering: crisp-edges; }
 /* Voice bubble - matches game styling */
 .map-voice-bubble {
   position: absolute;
-  left: 104px;
+  left: 52px;
   top: 50%;
   transform: translateY(-50%);
-  width: 280px;
-  padding: 12px 14px;
+  width: 140px;
+  padding: 6px 7px;
   background: rgba(6,8,12,.95);
-  border: 2px solid var(--gold);
+  border: 1px solid var(--gold);
   z-index: 10000;
 }
 
@@ -564,53 +564,53 @@ img { image-rendering: pixelated; image-rendering: crisp-edges; }
 .map-voice-bubble::before {
   content: '';
   position: absolute;
-  left: -12px;
+  left: -6px;
   top: 50%;
   transform: translateY(-50%);
-  border-top: 10px solid transparent;
-  border-bottom: 10px solid transparent;
-  border-right: 12px solid var(--gold);
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-right: 6px solid var(--gold);
 }
 .map-voice-bubble::after {
   content: '';
   position: absolute;
-  left: -8px;
+  left: -4px;
   top: 50%;
   transform: translateY(-50%);
-  border-top: 8px solid transparent;
-  border-bottom: 8px solid transparent;
-  border-right: 10px solid rgba(6,8,12,.95);
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  border-right: 5px solid rgba(6,8,12,.95);
 }
 
 .map-voice-bubble .vb-character {
   font-family: 'Press Start 2P', monospace;
-  font-size: 9px;
+  font-size: 5px;
   color: var(--dim);
   letter-spacing: .1em;
-  margin-bottom: 2px;
+  margin-bottom: 1px;
 }
 
 .map-voice-bubble .vb-header {
   font-family: 'Press Start 2P', monospace;
-  font-size: 8px;
+  font-size: 4px;
   color: var(--gold);
   letter-spacing: .15em;
-  margin-bottom: 6px;
-  text-shadow: 0 0 8px rgba(255,210,74,.4);
+  margin-bottom: 3px;
+  text-shadow: 0 0 4px rgba(255,210,74,.4);
 }
 
 .map-voice-bubble .vb-location {
   font-family: 'Press Start 2P', monospace;
-  font-size: 8px;
+  font-size: 4px;
   color: var(--gold);
   letter-spacing: .08em;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   opacity: 0.8;
 }
 
 .map-voice-bubble .vb-quote {
   font-family: 'VT323', monospace;
-  font-size: 16px;
+  font-size: 8px;
   color: var(--txt);
   line-height: 1.4;
   font-style: italic;
@@ -1058,7 +1058,7 @@ const state = {
   savedDirHandle: null,
   
   // Map pan/zoom - start centered on Iran at reasonable zoom
-  zoom: 0.35,
+  zoom: 0.7,
   panX: -350,  // Center horizontally (adjusted for typical viewport)
   panY: -200,  // Center vertically
   isPanning: false,
@@ -1874,7 +1874,7 @@ function initMapControls() {
     const mouseY = e.clientY - rect.top;
     
     const delta = e.deltaY > 0 ? 0.9 : 1.1;
-    const newZoom = Math.min(Math.max(state.zoom * delta, 0.1), 2);
+    const newZoom = Math.min(Math.max(state.zoom * delta, 0.25), 4);
     
     const mapX = (mouseX - state.panX) / state.zoom;
     const mapY = (mouseY - state.panY) / state.zoom;

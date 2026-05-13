@@ -415,7 +415,7 @@ img, .map-canvas {
 .placed-marker.selected::after {
   content: '';
   position: absolute;
-  inset: -8px;
+  inset: -4px;
   border: 3px solid var(--gold);
   border-radius: 8px;
   animation: pulse 1s ease-in-out infinite;
@@ -434,8 +434,8 @@ img, .map-canvas {
 
 /* Map element icons - matches game.html .map-marker-icon */
 .placed-marker.element img {
-  width: 96px;
-  height: 96px;
+  width: 48px;
+  height: 48px;
   object-fit: contain;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
@@ -469,20 +469,20 @@ img, .map-canvas {
 
 /* Flag markers - simplified representation for editor */
 .placed-marker.flag {
-  padding: 8px 12px;
+  padding: 4px 6px;
   background: rgba(6,8,12,.8);
-  border: 2px solid var(--border);
+  border: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 1px;
 }
 
 .placed-marker.flag.active {
   opacity: 1;
   border-color: var(--gold);
   background: rgba(6,8,12,.95);
-  box-shadow: 0 0 12px rgba(255,210,74,.3);
+  box-shadow: 0 0 6px rgba(255,210,74,.3);
 }
 
 .placed-marker.flag img {
@@ -490,13 +490,13 @@ img, .map-canvas {
 }
 
 .placed-marker.flag .flag-icon {
-  font-size: 20px;
+  font-size: 10px;
   line-height: 1;
 }
 
 .placed-marker.flag .flag-name {
   font-family: var(--vt);
-  font-size: 9px;
+  font-size: 5px;
   color: var(--dim);
   text-align: center;
   line-height: 1.2;
@@ -504,8 +504,8 @@ img, .map-canvas {
 
 /* Gravestone markers - matches game.html .gravestone-icon */
 .placed-marker.gravestone img {
-  width: 72px;
-  height: 72px;
+  width: 36px;
+  height: 36px;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
   transition: filter 0.2s ease;
@@ -521,10 +521,10 @@ img, .map-canvas {
   left: 50%;
   transform: translateX(-50%);
   white-space: nowrap;
-  font-size: 12px;
+  font-size: 6px;
   color: var(--txt);
   background: rgba(0,0,0,.9);
-  padding: 4px 8px;
+  padding: 2px 4px;
   border-radius: 4px;
   margin-bottom: 4px;
   pointer-events: none;
@@ -541,8 +541,8 @@ img, .map-canvas {
 /* Voice labels always visible since markers are small */
 .placed-marker.voice .marker-label {
   opacity: 0.8;
-  font-size: 10px;
-  padding: 2px 6px;
+  font-size: 5px;
+  padding: 1px 3px;
 }
 
 .placed-marker.voice:hover .marker-label {
@@ -1068,7 +1068,7 @@ const state = {
   visibleLayers: new Set(['element', 'voice', 'flag', 'gravestone']),
   
   // Map view state
-  zoom: 0.5,
+  zoom: 1.0,
   pan: { x: -400, y: -200 },
   isDragging: false,
   dragStart: { x: 0, y: 0 },
@@ -1660,7 +1660,7 @@ dom.mapViewport.addEventListener('wheel', (e) => {
   
   const oldZoom = state.zoom;
   const zoomDelta = e.deltaY > 0 ? 0.9 : 1.1;
-  state.zoom = Math.max(0.2, Math.min(3, state.zoom * zoomDelta));
+  state.zoom = Math.max(0.25, Math.min(4, state.zoom * zoomDelta));
   
   // Zoom toward mouse position
   const zoomRatio = state.zoom / oldZoom;

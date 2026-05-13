@@ -1091,10 +1091,10 @@ body::before {
 }
 .flag {
   position: absolute;
-  display: flex; flex-direction: column; align-items: center; gap: 2px;
-  padding: 8px 12px;
-  border: 2px solid var(--bdr);
-  font-family: var(--px); font-size: 9px;
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+  padding: 4px 6px;
+  border: 1px solid var(--bdr);
+  font-family: var(--px); font-size: 5px;
   color: var(--dim); background: rgba(6,8,12,.8);
   opacity: 0;
   pointer-events: none;
@@ -1103,23 +1103,19 @@ body::before {
   /* z-index set dynamically based on Y position */
 }
 .flag:hover {
-  z-index: 9000 !important;
+  z-index: 50000 !important;
 }
 .flag.focused {
-  z-index: 9001 !important;
+  z-index: 50001 !important;
   transition: opacity .3s, border-color .3s, color .3s, box-shadow .3s;
-  z-index: 20;
-}
-.flag:hover {
-  z-index: 150;
 }
 .flag.active {
   opacity: 1; border-color: var(--gold); color: var(--gold);
   background: rgba(6,8,12,.95);
-  box-shadow: 0 0 12px rgba(255,210,74,.3);
+  box-shadow: 0 0 6px rgba(255,210,74,.3);
   pointer-events: auto;
 }
-.flag .icon { font-size: 20px; line-height: 1; }
+.flag .icon { font-size: 10px; line-height: 1; }
 .flag .flag-label { text-align: center; line-height: 1.2; }
 
 /* Flag flash animations for state changes */
@@ -1201,46 +1197,46 @@ body::before {
   bottom: 100%;
   left: 50%;
   transform: translateX(-50%);
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   background: rgba(6,8,12,.98);
-  border: 2px solid var(--gold);
-  border-radius: 6px;
-  padding: 12px;
-  width: 220px;
-  z-index: 10000;
+  border: 1px solid var(--gold);
+  border-radius: 3px;
+  padding: 6px;
+  width: 110px;
+  z-index: 99999;
   opacity: 0;
   pointer-events: none;
   transition: opacity .2s;
-  box-shadow: 0 6px 24px rgba(0,0,0,.8);
+  box-shadow: 0 3px 12px rgba(0,0,0,.8);
 }
 .flag:hover .flag-tooltip {
   opacity: 1;
 }
 .flag-tooltip .ft-title {
   font-family: var(--px);
-  font-size: 10px;
+  font-size: 5px;
   color: var(--gold);
   text-align: center;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   letter-spacing: .1em;
 }
 .flag-tooltip .ft-desc {
   font-family: var(--vt);
-  font-size: 16px;
+  font-size: 8px;
   color: var(--txt);
   line-height: 1.4;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
 }
 .flag-tooltip .ft-effects {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding-top: 8px;
+  gap: 2px;
+  padding-top: 4px;
   border-top: 1px dashed var(--bdr);
 }
 .flag-tooltip .ft-effect {
   font-family: var(--px);
-  font-size: 9px;
+  font-size: 5px;
 }
 .flag-tooltip .ft-effect.trump { color: var(--grn); }
 .flag-tooltip .ft-effect.irgc { color: var(--red); }
@@ -1252,7 +1248,7 @@ body::before {
   bottom: auto;
   top: 100%;
   margin-bottom: 0;
-  margin-top: 8px;
+  margin-top: 4px;
 }
 
 /* Flag positions are now set via JavaScript with absolute pixel coords on the 1400x800 map canvas */
@@ -1269,18 +1265,18 @@ body::before {
 
 .voice-marker {
   position: absolute;
-  width: 96px; height: 96px;
+  width: 72px; height: 72px;
   pointer-events: auto;
   cursor: pointer;
   transform: translate(-50%, -50%);
   /* z-index set dynamically based on Y position */
 }
 .voice-marker:hover {
-  z-index: 9000 !important;
+  z-index: 50000 !important;
 }
 .voice-marker.open,
 .voice-marker.pinned {
-  z-index: 9001 !important;
+  z-index: 50001 !important;
 }
 
 .voice-marker .portrait-img {
@@ -1306,17 +1302,17 @@ body::before {
 /* Voice bubble - talk bubble tooltip */
 .voice-bubble {
   position: absolute;
-  left: 104px;
+  left: 78px;
   top: 50%;
   transform: translateY(-50%);
-  width: 280px;
-  padding: 12px 14px;
+  width: 140px;
+  padding: 6px 7px;
   background: rgba(6,8,12,.95);
-  border: 2px solid var(--gold);
+  border: 1px solid var(--gold);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s ease;
-  z-index: 10000;
+  z-index: 99999;
 }
 
 /* Show bubble on hover OR when pinned */
@@ -1330,84 +1326,84 @@ body::before {
 .voice-bubble::before {
   content: '';
   position: absolute;
-  left: -12px;
+  left: -6px;
   top: 50%;
   transform: translateY(-50%);
-  border-top: 10px solid transparent;
-  border-bottom: 10px solid transparent;
-  border-right: 12px solid var(--gold);
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-right: 6px solid var(--gold);
 }
 .voice-bubble::after {
   content: '';
   position: absolute;
-  left: -8px;
+  left: -4px;
   top: 50%;
   transform: translateY(-50%);
-  border-top: 8px solid transparent;
-  border-bottom: 8px solid transparent;
-  border-right: 10px solid rgba(6,8,12,.95);
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  border-right: 5px solid rgba(6,8,12,.95);
 }
 
 /* Bubble positioned on left for markers near right edge */
 .voice-marker.bubble-left .voice-bubble {
   left: auto;
-  right: 104px;
+  right: 78px;
 }
 .voice-marker.bubble-left .voice-bubble::before {
   left: auto;
-  right: -12px;
+  right: -6px;
   border-right: none;
-  border-left: 12px solid var(--gold);
+  border-left: 6px solid var(--gold);
 }
 .voice-marker.bubble-left .voice-bubble::after {
   left: auto;
-  right: -8px;
+  right: -4px;
   border-right: none;
-  border-left: 10px solid rgba(6,8,12,.95);
+  border-left: 5px solid rgba(6,8,12,.95);
 }
 
 .voice-bubble .vb-header {
   font-family: var(--px);
-  font-size: 8px;
+  font-size: 4px;
   color: var(--gold);
   letter-spacing: .15em;
-  margin-bottom: 6px;
-  text-shadow: 0 0 8px rgba(255,210,74,.4);
+  margin-bottom: 3px;
+  text-shadow: 0 0 4px rgba(255,210,74,.4);
 }
 
 .voice-bubble .vb-character {
   font-family: var(--px);
-  font-size: 9px;
+  font-size: 5px;
   color: var(--dim);
   letter-spacing: .1em;
-  margin-bottom: 2px;
+  margin-bottom: 1px;
 }
 
 .voice-bubble .vb-location {
   font-family: var(--px);
-  font-size: 8px;
+  font-size: 4px;
   color: var(--gold);
   letter-spacing: .08em;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   opacity: 0.8;
 }
 
 .voice-bubble .vb-quote {
   font-family: var(--vt);
-  font-size: 16px;
+  font-size: 8px;
   color: var(--txt);
   line-height: 1.4;
   font-style: italic;
 }
 .voice-bubble .vb-quote.typing {
-  border-right: 2px solid var(--txt);
+  border-right: 1px solid var(--txt);
   animation: typeCursor 0.7s steps(2) infinite;
 }
 
 /* Farsi support for voice bubbles */
 #game.lang-fa .voice-bubble .vb-quote {
   font-family: var(--fa);
-  font-size: 18px;
+  font-size: 9px;
   line-height: 1.6;
   direction: rtl;
 }
@@ -1430,16 +1426,16 @@ body::before {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 1px;
   /* z-index set dynamically based on Y position */
 }
 .map-marker:hover {
-  z-index: 9000 !important;
+  z-index: 50000 !important;
 }
 
 .map-marker-icon {
-  width: 96px;
-  height: 96px;
+  width: 48px;
+  height: 48px;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
   transition: filter 0.2s ease;
@@ -1454,19 +1450,19 @@ body::before {
   bottom: 100%;
   left: 50%;
   transform: translateX(-50%);
-  margin-bottom: 4px;
-  padding: 4px 8px;
+  margin-bottom: 2px;
+  padding: 2px 4px;
   background: rgba(6,8,12,.9);
   border: 1px solid rgba(250,255,247,.3);
   font-family: var(--px);
-  font-size: 8px;
+  font-size: 4px;
   color: var(--txt);
   letter-spacing: .1em;
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s ease;
-  z-index: 10000;
+  z-index: 99999;
 }
 
 .map-marker:hover .map-marker-tooltip {
@@ -1481,7 +1477,7 @@ body::before {
 /* Farsi support for map markers */
 #game.lang-fa .map-marker-tooltip {
   font-family: var(--fa);
-  font-size: 10px;
+  font-size: 5px;
   direction: rtl;
 }
 
@@ -1506,19 +1502,19 @@ body::before {
   /* z-index set dynamically based on Y position */
 }
 .gravestone-marker:hover {
-  z-index: 9000 !important;
+  z-index: 100000 !important;
 }
 
 .gravestone-icon {
-  width: 72px;
-  height: 72px;
+  width: 36px;
+  height: 36px;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
   transition: filter 0.2s ease;
 }
 
 .gravestone-marker:hover .gravestone-icon {
-  filter: drop-shadow(0 0 6px rgba(250,255,247,.5));
+  filter: drop-shadow(0 0 3px rgba(250,255,247,.5));
 }
 
 .gravestone-tooltip {
@@ -1526,12 +1522,12 @@ body::before {
   bottom: 100%;
   left: 50%;
   transform: translateX(-50%);
-  margin-bottom: 6px;
-  padding: 6px 10px;
+  margin-bottom: 3px;
+  padding: 3px 5px;
   background: rgba(6,8,12,.95);
   border: 1px solid rgba(250,255,247,.4);
   font-family: var(--px);
-  font-size: 9px;
+  font-size: 5px;
   color: var(--txt);
   letter-spacing: .08em;
   white-space: nowrap;
@@ -1539,7 +1535,7 @@ body::before {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s ease;
-  z-index: 10000;
+  z-index: 100001;
 }
 
 .gravestone-marker:hover .gravestone-tooltip {
@@ -1548,12 +1544,12 @@ body::before {
 
 .gravestone-tooltip .gs-name {
   display: block;
-  margin-bottom: 2px;
+  margin-bottom: 1px;
 }
 
 .gravestone-tooltip .gs-hint {
   display: block;
-  font-size: 7px;
+  font-size: 4px;
   color: rgba(250,255,247,.5);
   letter-spacing: .05em;
 }
@@ -1561,7 +1557,7 @@ body::before {
 /* Farsi support for gravestone tooltips */
 #game.lang-fa .gravestone-tooltip {
   font-family: var(--fa);
-  font-size: 11px;
+  font-size: 6px;
   direction: rtl;
 }
 
@@ -4065,7 +4061,8 @@ function createGameMusicEngine() {
   const themes = {
     title:{rootMidi:57, progression:[0,5,3,7], bass:[0,0,5,5,3,3,7,7], harmony:[[0,7],[5,10],[3,10],[7,12]], tension:[1,6,10], counter:[7,5,3,0,7,5,10,7]},
     march:{rootMidi:59, progression:[0,3,5,3], bass:[0,0,3,3,5,5,3,3], harmony:[[0,7],[3,10],[5,12],[3,10]], tension:[1,8,10], counter:[7,5,3,0,5,7,10,7]},
-    resolve:{rootMidi:55, progression:[0,3,8,7], bass:[0,0,3,3,8,8,7,7], harmony:[[0,7],[3,10],[8,15],[7,14]], tension:[1,6,10], counter:[10,8,7,3,10,7,3,0]}
+    resolve:{rootMidi:55, progression:[0,3,8,7], bass:[0,0,3,3,8,8,7,7], harmony:[[0,7],[3,10],[8,15],[7,14]], tension:[1,6,10], counter:[10,8,7,3,10,7,3,0]},
+    lament:{rootMidi:52, progression:[0,3,5,3], bass:[0,0,3,3,5,5,3,3], harmony:[[0,3],[3,7],[5,8],[3,7]], tension:[1,4,8], counter:[3,0,7,5,3,0,5,3]}
   };
   const variations = {
     base:{seq:[0,0,3,7,0,3,5,7], lengths:[1,1,1,1,1,1,1,1], shift:0},
@@ -4090,7 +4087,8 @@ function createGameMusicEngine() {
     danger:{theme:'march', variation:'sync', voice:'pulse', leadOct:12, counterOct:0, arpOct:12, tempo:118, brightness:2400, layers:{counter:false, arp:true, drone:true, pulse:true, tension:true, doubleLead:true}, mix:{lead:0.72,bass:0.48,harmony:0.22,counter:0.0,arp:0.22,drone:0.12,pulse:0.18}},
     boss:{theme:'resolve', variation:'rise', voice:'square', leadOct:12, counterOct:12, arpOct:24, tempo:126, brightness:2600, layers:{counter:true, arp:true, drone:true, pulse:true, tension:true, doubleLead:true}, mix:{lead:0.74,bass:0.5,harmony:0.32,counter:0.24,arp:0.24,drone:0.12,pulse:0.2}},
     pause:{theme:'title', variation:'shadow', voice:'soft', leadOct:0, counterOct:12, arpOct:12, tempo:82, brightness:1500, layers:{counter:true, arp:true, drone:true, pulse:false, tension:false, doubleLead:false}, mix:{lead:0.48,bass:0.28,harmony:0.2,counter:0.14,arp:0.12,drone:0.18,pulse:0.0}},
-    victory:{theme:'title', variation:'answer', voice:'hybrid', leadOct:0, counterOct:12, arpOct:12, tempo:96, brightness:1800, layers:{counter:true, arp:true, drone:true, pulse:false, tension:false, doubleLead:false}, mix:{lead:0.68,bass:0.38,harmony:0.28,counter:0.22,arp:0.2,drone:0.14,pulse:0.0}}
+    victory:{theme:'title', variation:'answer', voice:'hybrid', leadOct:0, counterOct:12, arpOct:12, tempo:96, brightness:1800, layers:{counter:true, arp:true, drone:true, pulse:false, tension:false, doubleLead:false}, mix:{lead:0.68,bass:0.38,harmony:0.28,counter:0.22,arp:0.2,drone:0.14,pulse:0.0}},
+    memorial:{theme:'lament', variation:'shadow', voice:'soft', leadOct:-12, counterOct:0, arpOct:0, tempo:66, brightness:1200, layers:{counter:true, arp:false, drone:true, pulse:false, tension:false, doubleLead:false}, mix:{lead:0.38,bass:0.22,harmony:0.18,counter:0.12,arp:0.0,drone:0.22,pulse:0.0}}
   };
 
   const state = { current:{...presets.menu}, ctx:null, master:null, analyser:null, filter:null, buses:{}, running:false, started:false, timers:{main:null,arp:null,drone:null,pulse:null,mod:null}, step:0, hybridWave:null, reedWave:null };
@@ -4332,6 +4330,16 @@ function createChiptuneSFX(audioCtx, destNode) {
     typewriterTick() {
       // Morse code beep - short sharp sine tone at half volume
       playTone(800 + Math.random() * 50, 0.06, 'sine', 0.04, 0, 0.005, 0.03);
+    },
+    
+    memorialNav() {
+      // Somber, reverent tone for Javid Nam memorial navigation
+      // Low minor chord with gentle attack and long decay
+      playTone(220, 0.5, 'sine', 0.04, 0, 0.08, 0.3);      // A3 - root
+      playTone(262, 0.45, 'triangle', 0.025, 0, 0.1, 0.28); // C4 - minor third
+      setTimeout(() => {
+        playTone(330, 0.35, 'sine', 0.03, 0, 0.06, 0.2);   // E4 - fifth (fades in)
+      }, 80);
     }
   };
 }
@@ -5310,7 +5318,7 @@ function showMemorialDetail(index) {
   const entry = JAVID_NAM_DATA[index];
   const detail = document.getElementById('memorial-detail');
   
-  audioManager.playSFX('cardSelect');
+  audioManager.playSFX('memorialNav');
   
   // Update back button text based on whether we came from a gravestone
   const backBtn = document.getElementById('btn-memorial-detail-back');
@@ -5391,11 +5399,12 @@ function showMemorialDetail(index) {
 
 // Hide memorial detail, return to grid
 function hideMemorialDetail() {
-  audioManager.playSFX('click');
+  audioManager.playSFX('memorialNav');
   
   // If we came from a gravestone, go back to the game without showing grid
   if (cameFromGravestone) {
     cameFromGravestone = false;
+    audioManager.restoreMusicState();
     // Switch screens first while detail is still covering the grid
     showScreen(memorialReturnScreen, true);
     // Then hide the detail after screen transition starts
@@ -5410,13 +5419,16 @@ function hideMemorialDetail() {
 // Show the memorial screen
 function showMemorial(returnTo) {
   memorialReturnScreen = returnTo || 'screen-select';
+  audioManager.saveMusicState();
+  audioManager.applyMusicState('memorial');
   renderMemorialGrid();
   showScreen('screen-memorial', true);
 }
 
 // Return from memorial to previous screen
 function hideMemorial() {
-  audioManager.playSFX('click');
+  audioManager.playSFX('memorialNav');
+  audioManager.restoreMusicState();
   showScreen(memorialReturnScreen, true);
 }
 
@@ -5670,9 +5682,9 @@ const mapController = {
     
     console.log('[MapController] init - viewport:', this.viewportWidth, 'x', this.viewportHeight);
     
-    // Start zoomed in
-    this.zoom = 1.4;
-    this.targetZoom = 1.0;
+    // Start zoomed out to show all of Iran (dramatic zoom-in happens after)
+    this.zoom = 0.8;
+    this.targetZoom = 2.0;
     
     // Center the map initially (at zoom level)
     this.centerMap();
@@ -5683,11 +5695,13 @@ const mapController = {
   
   centerMap() {
     // Center the larger canvas within the viewport, accounting for zoom
+    // Offset north (negative Y) to show Iran properly rather than Strait of Hormuz
     const effectiveWidth = MAP_CANVAS_WIDTH * this.zoom;
     const effectiveHeight = MAP_CANVAS_HEIGHT * this.zoom;
     const centerX = (effectiveWidth - this.viewportWidth) / 2;
     const centerY = (effectiveHeight - this.viewportHeight) / 2;
-    this.position = { x: -centerX, y: -centerY };
+    const northOffset = 150 * this.zoom;  // Shift view north
+    this.position = { x: -centerX, y: -centerY + northOffset };
     this.applyTransform();
     console.log('[MapController] centerMap at zoom', this.zoom, ':', this.position.x, this.position.y);
   },
@@ -5830,6 +5844,40 @@ const mapController = {
     await this.pause(duration);
   },
   
+  // Zoom to target level while centering on a specific map point
+  async zoomToPoint(targetX, targetY, targetZoom, duration = 800) {
+    this.zoom = targetZoom;
+    
+    // Scale target coordinates by new zoom
+    const scaledTargetX = targetX * this.zoom;
+    const scaledTargetY = targetY * this.zoom;
+    
+    // Get actual header height to calculate visual center
+    const header = document.querySelector('.board-header');
+    const headerHeight = header ? header.offsetHeight : 0;
+    const visualCenterY = headerHeight + (this.viewportHeight - headerHeight) / 2 + 70;
+    
+    // Calculate position to center the target
+    const newX = -(scaledTargetX - this.viewportWidth / 2);
+    const newY = -(scaledTargetY - visualCenterY);
+    
+    // Bound to canvas limits
+    const effectiveWidth = MAP_CANVAS_WIDTH * this.zoom;
+    const effectiveHeight = MAP_CANVAS_HEIGHT * this.zoom;
+    const maxX = 0;
+    const minX = -(effectiveWidth - this.viewportWidth);
+    const maxY = 0;
+    const minY = -(effectiveHeight - this.viewportHeight);
+    
+    this.position.x = Math.min(maxX, Math.max(minX, newX));
+    this.position.y = Math.min(maxY, Math.max(minY, newY));
+    
+    console.log('[MapController] zoomToPoint:', targetX, targetY, 'zoom:', targetZoom, '-> translate:', this.position.x, this.position.y);
+    
+    this.applyTransform(true, duration, 'cubic-bezier(0.25, 0.1, 0.25, 1)');
+    await this.pause(duration);
+  },
+  
   // Pan to center a specific point on the map (accounting for zoom)
   panTo(targetX, targetY, duration = 400) {
     return new Promise((resolve) => {
@@ -5934,10 +5982,10 @@ const mapController = {
     
     // If starting zoomed in, zoom out first for dramatic effect
     if (startZoomedIn && this.zoom > 1.0) {
-      console.log('[MapController] Zooming out from', this.zoom, 'to 1.0');
-      await this.zoomTo(1.0, 1400);
+      console.log('[MapController] Zooming out from', this.zoom, 'to 2.0');
+      await this.zoomTo(2.0, 1400);
       if (this.sweepAborted) {
-        this.zoom = 1.0;
+        this.zoom = 2.0;
         this.centerMap();
       }
     }
@@ -5983,7 +6031,7 @@ const mapController = {
   
   // Set zoom level for next sweep (called before story screens)
   setZoomedIn() {
-    this.zoom = 1.4;
+    this.zoom = 2.0;
     this.centerMap();
   },
   
@@ -6012,19 +6060,11 @@ const mapController = {
   mouseOverMap: false,
   patrolIndex: 0,
   
-  // Get list of all points of interest (active voices + active flags)
+  // Get list of all points of interest (flags first, then voices)
   getPatrolTargets() {
     const targets = [];
     
-    // Add active voice markers
-    for (const voiceKey of game.activeVoices) {
-      const data = VOICE_MESSAGES[voiceKey];
-      if (data && data.position) {
-        targets.push({ type: 'voice', key: voiceKey, position: data.position });
-      }
-    }
-    
-    // Add active flags
+    // Add active flags first (status updates take priority)
     for (const flagKey in FLAG_DATA) {
       if (game.flags[flagKey]) {
         const data = FLAG_DATA[flagKey];
@@ -6034,30 +6074,36 @@ const mapController = {
       }
     }
     
+    // Add active voice markers
+    for (const voiceKey of game.activeVoices) {
+      const data = VOICE_MESSAGES[voiceKey];
+      if (data && data.position) {
+        targets.push({ type: 'voice', key: voiceKey, position: data.position });
+      }
+    }
+    
     return targets;
   },
   
   // Start the continuous patrol loop
-  async startPatrol() {
+  async startPatrol(startIndex = 0) {
     if (this.patrolActive) return;
     
     const targets = this.getPatrolTargets();
     if (targets.length === 0) return;
     
-    console.log('[MapController] Starting patrol with', targets.length, 'targets');
+    console.log('[MapController] Starting patrol with', targets.length, 'targets, starting at index', startIndex);
     this.patrolActive = true;
     this.patrolAborted = false;
-    this.patrolIndex = 0;
+    this.patrolIndex = startIndex % targets.length;
     
     // Check if we should start paused based on current state
     this.patrolPaused = this.mouseOverMap || this.hasFocusedElement();
     
-    // Zoom out for patrol view
-    if (this.zoom > 1.0) {
-      await this.zoomTo(1.0, 1200);
+    // Ensure we're at default zoom level
+    if (this.zoom !== 2.0) {
+      await this.zoomTo(2.0, 1200);
     }
-    
-    let isFirstIteration = true;
     
     while (this.patrolActive && !this.patrolAborted) {
       // Wait while paused
@@ -6074,18 +6120,14 @@ const mapController = {
       
       if (this.patrolAborted) break;
       
-      // Skip hold on first iteration (zoom out already provided dwell time)
-      if (!isFirstIteration) {
-        // Hold for 5 seconds (checking pause/abort periodically)
-        for (let i = 0; i < 50 && !this.patrolAborted; i++) {
-          while (this.patrolPaused && !this.patrolAborted) {
-            await this.pause(100);
-          }
-          if (this.patrolAborted) break;
+      // Hold for 5 seconds (checking pause/abort periodically)
+      for (let i = 0; i < 50 && !this.patrolAborted; i++) {
+        while (this.patrolPaused && !this.patrolAborted) {
           await this.pause(100);
         }
+        if (this.patrolAborted) break;
+        await this.pause(100);
       }
-      isFirstIteration = false;
       
       if (this.patrolAborted) break;
       
@@ -7082,7 +7124,7 @@ function renderGravestoneMarkers() {
     // Click handler to show memorial detail
     el.addEventListener('click', (e) => {
       e.stopPropagation();
-      audioManager.playSFX('cardSelect');
+      // Sound will play when showMemorialDetail is called
       cameFromGravestone = true;  // Mark that we came from a gravestone
       showMemorial('screen-game');
       // Small delay to let the memorial screen render before showing detail
@@ -7653,7 +7695,7 @@ function startGame() {
   hideCharacterQuotes();
   game.selectedCard = null;
   
-  // Initialize map controller (starts zoomed in at 1.4x)
+  // Initialize map controller
   mapController.init();
   
   // Setup click-away handler for voice bubbles
@@ -7666,8 +7708,27 @@ function startGame() {
   setPhase('select');
   renderRosters();
   
-  // Run map sweep in background, then start patrol loop
+  // Dramatic zoom from full Iran view at game start, then patrol
   setTimeout(async () => {
+    // Get first patrol target for the dramatic zoom-in
+    const targets = mapController.getPatrolTargets();
+    const firstTarget = targets.length > 0 ? targets[0] : null;
+    
+    if (firstTarget) {
+      console.log('[startGame] Dramatic zoom-in to:', firstTarget.type, firstTarget.key, 'at', firstTarget.position.x, firstTarget.position.y);
+      console.log('[startGame] All targets:', targets.map(t => t.type + ':' + t.key));
+      
+      // Brief pause to let the user see the full map of Iran
+      await mapController.pause(2000);
+      
+      // Zoom directly to the first target - one smooth motion
+      await mapController.zoomToPoint(firstTarget.position.x, firstTarget.position.y, 2.0, 5000);
+      
+      // Brief pause at first target before patrol begins
+      await mapController.pause(2000);
+    }
+    
+    // Now do the day sweep for any active flags
     const activeFlags = [];
     for (const key in game.flags) {
       if (key === 'airstrikeUsed') continue;
@@ -7677,14 +7738,13 @@ function startGame() {
     }
     
     if (activeFlags.length > 0) {
-      await mapController.startDaySweep(activeFlags, true);
-    } else {
-      await mapController.zoomTo(1.0, 1400);
+      await mapController.startDaySweep(activeFlags, false);
     }
     
-    // Start continuous patrol loop after sweep
-    mapController.startPatrol();
-  }, 800);
+    // Start continuous patrol loop - skip to index 1 since dramatic zoom already showed index 0
+    const startIndex = targets.length > 1 ? 1 : 0;
+    mapController.startPatrol(startIndex);
+  }, 500);
 }
 
 function commitCard() {
@@ -7885,9 +7945,9 @@ function finishNextDay(board, afterInterlude = false) {
   setTimeout(async () => {
     const changedFlags = mapController.getChangedFlags(game.flags);
     if (changedFlags.length > 0) {
-      await mapController.startDaySweep(changedFlags, mapController.zoom > 1.0);
-    } else if (mapController.zoom > 1.0) {
-      await mapController.zoomTo(1.0, 1400);
+      await mapController.startDaySweep(changedFlags, mapController.zoom > 2.0);
+    } else if (mapController.zoom !== 2.0) {
+      await mapController.zoomTo(2.0, 1400);
     }
     
     // Start continuous patrol loop after sweep
@@ -8316,17 +8376,17 @@ document.getElementById('btn-memorial-next').addEventListener('click', () => {
 });
 
 document.getElementById('btn-memorial-select').addEventListener('click', () => {
-  audioManager.playSFX('click');
+  audioManager.playSFX('memorialNav');
   showMemorial('screen-select');
 });
 
 document.getElementById('btn-memorial-ending').addEventListener('click', () => {
-  audioManager.playSFX('click');
+  audioManager.playSFX('memorialNav');
   showMemorial('screen-ending');
 });
 
 document.getElementById('btn-memorial-game').addEventListener('click', () => {
-  audioManager.playSFX('click');
+  audioManager.playSFX('memorialNav');
   showMemorial('screen-game');
 });
 </script>
