@@ -271,7 +271,7 @@ body::before {
   align-items: center; justify-content: center; gap: 24px;
 }
 #screen-title h1 {
-  font-family: var(--px); font-size: 42px; letter-spacing: .2em;
+  font-family: var(--px); font-size: 32px; letter-spacing: .2em;
   color: var(--grn); text-shadow: 0 0 40px rgba(82,255,143,.5);
 }
 #screen-title .subtitle {
@@ -1620,6 +1620,10 @@ body::before {
   image-rendering: pixelated;
   image-rendering: crisp-edges;
   filter: brightness(0.9) contrast(0.85);
+}
+/* Farsi map background when language is Persian */
+.lang-fa .map-bg {
+  background-image: url('image/map_background/satellitemap_farsi.png');
 }
 
 /* Coordinate markers on map */
@@ -5683,7 +5687,7 @@ const mapController = {
     console.log('[MapController] init - viewport:', this.viewportWidth, 'x', this.viewportHeight);
     
     // Start zoomed out to show all of Iran (dramatic zoom-in happens after)
-    this.zoom = 0.8;
+    this.zoom = 0.6;
     this.targetZoom = 2.0;
     
     // Center the map initially (at zoom level)
@@ -5700,7 +5704,7 @@ const mapController = {
     const effectiveHeight = MAP_CANVAS_HEIGHT * this.zoom;
     const centerX = (effectiveWidth - this.viewportWidth) / 2;
     const centerY = (effectiveHeight - this.viewportHeight) / 2;
-    const northOffset = 150 * this.zoom;  // Shift view north
+    const northOffset = 400 * this.zoom;  // Shift view north
     this.position = { x: -centerX, y: -centerY + northOffset };
     this.applyTransform();
     console.log('[MapController] centerMap at zoom', this.zoom, ':', this.position.x, this.position.y);
