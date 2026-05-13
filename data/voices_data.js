@@ -378,11 +378,11 @@ const VOICE_MESSAGES = {
           "fa": "بیمارستان اهواز"
       },
       "transmission": {
-          "en": "USB DRIVE SMUGGLED TO TURKEY",
-          "fa": "فلش قاچاق شده به ترکیه"
+          "en": "TELEGRAM MESSAGE",
+          "fa": ""
       },
       "quote": {
-          "en": "I patch up protesters and plainclothes alike. But the bandages I wrap around security forces are tighter, less gentle. I keep an encrypted folder of X-rays and bullet trajectories. One day someone will use them as evidence.",
+          "en": "In January a flood of young people wounded by gunshots came into our hospital. I keep an encrypted folder of X-rays and bullet trajectories. One day someone will use them as evidence.",
           "fa": "معترضان و لباس‌شخصی‌ها را یکسان پانسمان می‌کنم. اما باندهایی که دور نیروهای امنیتی می‌پیچم سفت‌تر و کمتر ملایم‌اند. یک پوشه رمزنگاری شده از عکس‌های اشعه ایکس و مسیر گلوله‌ها دارم. روزی کسی از آن‌ها به عنوان مدرک استفاده خواهد کرد."
       },
       "position": {
