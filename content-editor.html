@@ -845,6 +845,127 @@ img { image-rendering: pixelated; image-rendering: crisp-edges; }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--gold);
 }
+
+/* Collaboration Modal */
+.collab-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,.85);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.collab-modal-overlay.visible {
+  display: flex;
+}
+
+.collab-modal {
+  background: var(--panel);
+  border: 2px solid var(--gold);
+  border-radius: 8px;
+  max-width: 520px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.collab-modal h2 {
+  color: var(--gold);
+  font-size: 18px;
+  margin-bottom: 16px;
+  font-weight: normal;
+}
+
+.collab-modal h3 {
+  color: var(--grn);
+  font-size: 14px;
+  margin: 16px 0 8px;
+  font-weight: normal;
+}
+
+.collab-modal p, .collab-modal li {
+  color: var(--txt);
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+
+.collab-modal ol {
+  padding-left: 20px;
+  margin-bottom: 16px;
+}
+
+.collab-modal .email-link {
+  color: var(--gold);
+  text-decoration: underline;
+}
+
+.collab-modal .close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  color: var(--dim);
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.collab-modal .close-btn:hover {
+  color: var(--txt);
+}
+
+.collab-modal-footer {
+  margin-top: 20px;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.collab-modal-footer button {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-family: var(--vt);
+  font-size: 14px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+}
+
+.collab-modal-footer .btn-primary {
+  background: rgba(255,210,74,.2);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.collab-modal-footer .btn-secondary {
+  background: transparent;
+  color: var(--dim);
+}
+
+.export-notification {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 12px 20px;
+  background: rgba(82,255,143,.2);
+  border: 1px solid var(--grn);
+  border-radius: 6px;
+  color: var(--grn);
+  font-family: var(--vt);
+  font-size: 14px;
+  transform: translateY(100px);
+  opacity: 0;
+  transition: all 0.3s ease;
+  z-index: 999;
+}
+
+.export-notification.visible {
+  transform: translateY(0);
+  opacity: 1;
+}
 </style>
 </head>
 <body>
@@ -868,6 +989,8 @@ img { image-rendering: pixelated; image-rendering: crisp-edges; }
       <button class="action-btn" id="btn-load">LOAD</button>
       <button class="action-btn primary" id="btn-save">SAVE</button>
       <button class="action-btn" id="btn-add">+ NEW</button>
+      <button class="action-btn" id="btn-export" title="Export changes for collaboration">EXPORT</button>
+      <button class="action-btn" id="btn-help" title="How to collaborate">?</button>
     </div>
 
     <div class="search-box">
@@ -2148,6 +2271,103 @@ function init() {
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
+// ════════════════════════════════════════════════════════════════════════════
+// COLLABORATION: EXPORT & HELP
+// ════════════════════════════════════════════════════════════════════════════
+
+function showCollabModal() {
+  document.getElementById('collab-modal-overlay').classList.add('visible');
+}
+
+function hideCollabModal() {
+  document.getElementById('collab-modal-overlay').classList.remove('visible');
+}
+
+function showExportNotification(message) {
+  const existing = document.querySelector('.export-notification');
+  if (existing) existing.remove();
+  
+  const notif = document.createElement('div');
+  notif.className = 'export-notification';
+  notif.textContent = message;
+  document.body.appendChild(notif);
+  
+  requestAnimationFrame(() => notif.classList.add('visible'));
+  setTimeout(() => {
+    notif.classList.remove('visible');
+    setTimeout(() => notif.remove(), 300);
+  }, 3000);
+}
+
+function exportBundle() {
+  const bundle = {
+    _meta: {
+      exportedAt: new Date().toISOString(),
+      editor: 'content-editor',
+      version: 1
+    },
+    voices: state.data.voices,
+    wildcards: state.data.wildcards.map(w => { const copy = {...w}; delete copy.apply; return copy; }),
+    codex: state.data.codex,
+    javidnam: state.data.javidnam,
+    daily: state.data.daily
+  };
+  
+  const json = JSON.stringify(bundle, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  
+  const timestamp = new Date().toISOString().slice(0,10);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `content-export-${timestamp}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  
+  showExportNotification('Export downloaded! Email it to seeyouinfreeiran@gmail.com');
+}
+
+document.getElementById('btn-export').addEventListener('click', exportBundle);
+document.getElementById('btn-help').addEventListener('click', showCollabModal);
+document.getElementById('collab-modal-overlay').addEventListener('click', (e) => {
+  if (e.target.id === 'collab-modal-overlay') hideCollabModal();
+});
+document.getElementById('collab-close-btn').addEventListener('click', hideCollabModal);
 </script>
+
+<!-- Collaboration Help Modal -->
+<div class="collab-modal-overlay" id="collab-modal-overlay">
+  <div class="collab-modal">
+    <h2>HOW TO COLLABORATE</h2>
+    
+    <p>This editor runs in your browser. Your changes are saved locally until you export them.</p>
+    
+    <h3>TO SUBMIT YOUR EDITS:</h3>
+    <ol>
+      <li>Make your edits using the editor</li>
+      <li>Click <strong>EXPORT</strong> to download your changes as a single file</li>
+      <li>Email the file to <a href="mailto:seeyouinfreeiran@gmail.com" class="email-link">seeyouinfreeiran@gmail.com</a></li>
+    </ol>
+    
+    <h3>SAVING LOCALLY (OPTIONAL):</h3>
+    <p>If you have the project files on your computer, use <strong>LOAD</strong> to open the data folder, then <strong>SAVE</strong> to write changes directly.</p>
+    
+    <h3>TIPS:</h3>
+    <ol>
+      <li>Use Ctrl/Cmd+S as a shortcut to save</li>
+      <li>The UNSAVED indicator shows when you have pending changes</li>
+      <li>Include a note in your email describing what you changed</li>
+    </ol>
+    
+    <div class="collab-modal-footer">
+      <button class="btn-secondary" id="collab-close-btn">CLOSE</button>
+      <button class="btn-primary" onclick="exportBundle(); hideCollabModal();">EXPORT NOW</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
