@@ -300,6 +300,50 @@ body::before {
 }
 .content-warning strong {
   color: var(--red);
+  animation: blinkWarning 1.2s steps(2) infinite;
+}
+@keyframes blinkWarning {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.title-toggles {
+  display: flex;
+  gap: 16px;
+  margin-top: 20px;
+}
+.btn-title-toggle {
+  font-family: var(--px);
+  font-size: 14px;
+  letter-spacing: .15em;
+  padding: 12px 24px;
+  background: rgba(82,255,143,.1);
+  border: 2px solid rgba(82,255,143,.4);
+  color: var(--grn);
+  cursor: pointer;
+  transition: all .2s;
+}
+.btn-title-toggle:hover {
+  background: rgba(82,255,143,.2);
+  border-color: var(--grn);
+  box-shadow: 0 0 20px rgba(82,255,143,.3);
+}
+.btn-title-toggle.active {
+  background: rgba(82,255,143,.25);
+  border-color: var(--grn);
+  color: var(--grn);
+}
+.btn-title-toggle .btn-fa {
+  font-family: var(--fa);
+  display: none;
+}
+.btn-title-toggle .btn-en {
+  display: inline;
+}
+#game.lang-fa .btn-title-toggle .btn-fa {
+  display: inline;
+}
+#game.lang-fa .btn-title-toggle .btn-en {
+  display: none;
   text-transform: uppercase;
   letter-spacing: .05em;
   display: inline-block;
@@ -3680,6 +3724,16 @@ body::before {
       <span id="title-warning"></span><br>
       <strong id="title-warning-strong"></strong>
     </div>
+    <div class="title-toggles">
+      <button class="btn-title-toggle" id="btn-music-enable">
+        <span class="btn-en">♪ ENABLE MUSIC</span>
+        <span class="btn-fa">♪ فعال کردن موسیقی</span>
+      </button>
+      <button class="btn-title-toggle" id="btn-lang-farsi">
+        <span class="btn-en">فارسی FARSI</span>
+        <span class="btn-fa">ENGLISH انگلیسی</span>
+      </button>
+    </div>
     <button class="btn blink-prompt" id="btn-start"></button>
   </div>
 
@@ -4499,10 +4553,19 @@ const audioManager = {
     // Update global audio toggles
     const musicGlobal = document.getElementById('audio-toggle-music-global');
     const sfxGlobal = document.getElementById('audio-toggle-sfx-global');
+    const musicEnableBtn = document.getElementById('btn-music-enable');
     
     if (musicGlobal) {
       musicGlobal.classList.toggle('active', this.musicEnabled);
       musicGlobal.classList.toggle('off', !this.musicEnabled);
+    }
+    if (musicEnableBtn) {
+      musicEnableBtn.classList.toggle('active', this.musicEnabled);
+      if (this.musicEnabled) {
+        musicEnableBtn.innerHTML = '<span class="btn-en">♪ MUSIC ON</span><span class="btn-fa">♪ موسیقی روشن</span>';
+      } else {
+        musicEnableBtn.innerHTML = '<span class="btn-en">♪ ENABLE MUSIC</span><span class="btn-fa">♪ فعال کردن موسیقی</span>';
+      }
     }
     if (sfxGlobal) {
       sfxGlobal.classList.toggle('active', this.sfxEnabled);
@@ -8212,6 +8275,27 @@ document.querySelectorAll('.lang-btn').forEach(btn => {
     document.querySelectorAll('.lang-btn').forEach(b => {
       b.classList.toggle('active', b.dataset.lang === lang);
     });
+  });
+});
+
+// Music toggle button on title screen
+document.getElementById('btn-music-enable').addEventListener('click', async () => {
+  if (!audioManager.initialized) await audioManager.init();
+  const newState = !audioManager.musicEnabled;
+  audioManager.setMusic(newState);
+  audioManager.playSFX('click');
+  if (newState) {
+    audioManager.applyMusicState('menu');
+  }
+});
+
+// Farsi toggle button on title screen
+document.getElementById('btn-lang-farsi').addEventListener('click', () => {
+  const newLang = currentLang === 'en' ? 'fa' : 'en';
+  setLanguage(newLang);
+  audioManager.playSFX('click');
+  document.querySelectorAll('.lang-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.lang === newLang);
   });
 });
 
