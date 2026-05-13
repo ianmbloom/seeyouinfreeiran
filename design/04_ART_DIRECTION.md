@@ -479,7 +479,7 @@ Opening cinematic sequence.
 | 1 | `bg_centcom.png` | CENTCOM Situation Room | 3am | Cold blue CRT light. Multiple monitors. Single yellow desk lamp. Deep navy dominant. |
 | 2 | `bg_tehran_bunker.png` | Tehran Bunker | Windowless night | Red work-lights. Harsh shadows. Concrete. Paranoid. Claustrophobic. |
 | 3 | `bg_persian_gulf_map.png` | Situation Map | 3am palette | Strategic map of Persian Gulf. Ship positions. Strike markers. War-room aesthetic. |
-| 4 | `bg_title.png` | Title Screen | Dawn | Lion & Sun rising over Tehran skyline silhouette. Gold rays. "CROUCHING LION" title space. |
+| 4 | `bg_title.png` | Title Screen | Dawn | Lion & Sun rising over Tehran skyline silhouette. Gold rays. "SEE YOU IN FREE IRAN" title space. |
 | 5 | `bg_pass_device.png` | Hot-Seat Pass | Solid night | Deep navy `#06080c` with centered Lion & Sun icon in gold. "PASS DEVICE" text space. |
 
 ---

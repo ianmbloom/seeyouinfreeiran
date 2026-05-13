@@ -58,7 +58,7 @@ All screens are **1280 × 720 px**. Coordinates given as (x, y) from top-left.
 │                                                                                │
 │                      ╔══════════════════════════════════╗                      │
 │                      ║    O P E R A T I O N :           ║                      │
-│                      ║    CROUCHING LION                ║                      │
+│                      ║    SEE YOU IN FREE IRAN                ║                      │
 │                      ╚══════════════════════════════════╝                      │
 │                           Press Start 2P, 24px                                 │
 │                              (center, y=340)                                   │
