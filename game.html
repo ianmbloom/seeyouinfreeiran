@@ -250,7 +250,7 @@ body::before {
 .game-scale-wrapper {
   position: fixed;
   inset: 0;
-  overflow: hidden;
+  overflow: visible;
   background: var(--bg);
 }
 
@@ -260,7 +260,7 @@ body::before {
   position: absolute;
   top: 50%; left: 50%;
   background: var(--bg);
-  overflow: hidden;
+  overflow: visible;
   display: flex; flex-direction: column;
   transform-origin: center center;
 }
@@ -1132,7 +1132,7 @@ body::before {
   position: relative;
   display: flex; flex-direction: column;
   background: rgba(6,8,12,.4);
-  overflow: hidden;
+  overflow: visible; /* Map clipping handled by .map-area */
 }
 
 /* Status flags on the map canvas */
@@ -1457,10 +1457,15 @@ body::before {
   position: absolute;
   top: 0;
   left: 0;
-  right: 0;
 }
-.voice-bubble .vb-quote-visible.typing {
-  border-right: 1px solid var(--txt);
+.voice-bubble .vb-quote-visible.typing::after {
+  content: '';
+  display: inline-block;
+  width: 1px;
+  height: 1em;
+  background: var(--txt);
+  margin-left: 1px;
+  vertical-align: text-bottom;
   animation: typeCursor 0.7s steps(2) infinite;
 }
 
@@ -1472,7 +1477,13 @@ body::before {
   direction: rtl;
 }
 #game.lang-fa .voice-bubble .vb-quote-visible {
+  left: auto;
+  right: 0;
   text-align: right;
+}
+#game.lang-fa .voice-bubble .vb-quote-visible.typing::after {
+  margin-left: 0;
+  margin-right: 1px;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -4041,6 +4052,11 @@ body::before {
             <button class="btn btn-inline" id="btn-next-day"></button>
           </div>
         </div>
+        
+        <!-- Action bar - now inside board column -->
+        <div class="action-bar">
+          <button class="btn" id="btn-action" disabled></button>
+        </div>
       </div>
 
       <!-- IRGC side: meters + roster -->
@@ -4094,11 +4110,6 @@ body::before {
         <div class="select-instruction" id="instr-irgc"><span class="btn-en">YOUR CARDS</span><span class="btn-fa">کارت‌های شما</span></div>
         <div class="roster-panel irgc" id="roster-irgc"></div>
       </div>
-    </div>
-
-    <!-- Action bar -->
-    <div class="action-bar">
-      <button class="btn" id="btn-action" disabled></button>
     </div>
   </div>
 
