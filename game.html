@@ -3238,6 +3238,15 @@ body::before {
 #game.lang-fa .memorial-mini .btn-en {
   display: none;
 }
+/* Position header buttons on left in Farsi mode */
+#game.lang-fa .briefing-mini {
+  right: auto;
+  left: 105px;
+}
+#game.lang-fa .memorial-mini {
+  right: auto;
+  left: 12px;
+}
 
 /* ════════════════════════════════════════════════════════════════════════════
    STORY SCREENS - CIA President's Daily Brief Style
@@ -3416,28 +3425,28 @@ body::before {
   display: none;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 14px;
-  padding: 40px 30px 60px;
+  justify-content: flex-start;
+  gap: 8px;
+  padding: 10px 0 12px;
   text-align: center;
   width: 100%;
   height: 100%;
-  overflow-y: auto;
+  overflow: hidden;
 }
 .story-cinematic.active {
   display: flex;
 }
 .story-img-wrap {
-  flex: 0 0 auto;
-  width: min(70vw, 720px);
-  height: calc(min(70vw, 720px) * 9 / 16);
-  border: 1px solid var(--bdr);
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 0;
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   overflow: hidden;
-  background: rgba(82,255,143,.03);
+  background: transparent;
 }
 .story-img-wrap::before {
   content: attr(data-label);
@@ -3455,8 +3464,8 @@ body::before {
 }
 .story-img-wrap img {
   position: relative;
-  width: 100%;
-  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
   object-fit: contain;
   image-rendering: pixelated;
   z-index: 1;
@@ -3472,12 +3481,14 @@ body::before {
 }
 .story-cap {
   font-family: var(--vt);
-  font-size: clamp(20px, 2vw, 26px);
+  font-size: clamp(27px, 3vw, 36px);
   color: var(--grn);
-  max-width: 780px;
+  max-width: 1000px;
+  padding: 0 24px;
   line-height: 1.3;
   text-shadow: 0 0 18px rgba(82,255,143,.4);
   transition: opacity .35s ease;
+  flex-shrink: 0;
 }
 .story-cap.fade {
   opacity: 0;
@@ -3485,9 +3496,9 @@ body::before {
 /* Farsi styling for story caption */
 #game.lang-fa .story-cap {
   font-family: var(--fa);
-  font-size: clamp(22px, 2.2vw, 30px);
+  font-size: clamp(33px, 3.3vw, 45px);
   direction: rtl;
-  line-height: 1.6;
+  line-height: 1.5;
 }
 .story-fa {
   /* No longer used - keeping for backwards compatibility */
@@ -3499,7 +3510,8 @@ body::before {
   transform: none;
   display: flex;
   gap: 8px;
-  margin-top: 6px;
+  margin-top: 2px;
+  flex-shrink: 0;
 }
 .story-cinematic .story-dot {
   width: 9px;
@@ -3513,31 +3525,33 @@ body::before {
   transform: scale(1.35);
 }
 .story-cinematic .btn {
-  margin-top: 10px;
+  margin-top: 4px;
+  flex-shrink: 0;
 }
 .story-skip {
   position: absolute;
-  top: 14px;
-  left: 14px;
+  top: 12px;
+  right: 16px;
   z-index: 60;
   font-family: var(--px);
-  font-size: 10px;
-  background: rgba(0,0,0,.4);
-  color: rgba(180,255,210,.7);
-  border: 1px solid rgba(180,255,210,.4);
-  padding: 8px 12px;
+  font-size: 9px;
+  background: rgba(0,0,0,.5);
+  color: rgba(180,255,210,.5);
+  border: 1px solid rgba(180,255,210,.25);
+  padding: 6px 10px;
   cursor: pointer;
   transition: all .2s ease;
+  letter-spacing: .08em;
 }
 .story-skip:hover {
   color: var(--grn);
   border-color: var(--grn);
-  background: rgba(0,0,0,.6);
+  background: rgba(0,0,0,.7);
 }
 /* RTL positioning for skip button */
 #game.lang-fa .story-skip {
-  left: auto;
-  right: 14px;
+  right: auto;
+  left: 16px;
 }
 
 /* PDB Mode visibility toggle */
@@ -3835,8 +3849,8 @@ body::before {
         <div class="codex-detail-nav">
           <button class="codex-detail-back" id="btn-codex-detail-back"><span class="btn-en">◀ BACK TO GRID</span><span class="btn-fa">◀ بازگشت</span></button>
           <span class="codex-nav-counter" id="codex-nav-counter"></span>
-          <button class="codex-nav-btn prev" id="btn-codex-prev">◀ PREV</button>
-          <button class="codex-nav-btn next" id="btn-codex-next">NEXT ▶</button>
+          <button class="codex-nav-btn prev" id="btn-codex-prev"><span class="btn-en">◀ PREV</span><span class="btn-fa">◀ قبلی</span></button>
+          <button class="codex-nav-btn next" id="btn-codex-next"><span class="btn-en">NEXT ▶</span><span class="btn-fa">بعدی ▶</span></button>
         </div>
         <div class="codex-detail-img" id="codex-detail-img"></div>
         <div class="codex-detail-title" id="codex-detail-title"></div>
@@ -3872,8 +3886,8 @@ body::before {
         <div class="memorial-detail-nav">
           <button class="memorial-detail-back" id="btn-memorial-detail-back"><span class="btn-en">◀ BACK TO GRID</span><span class="btn-fa">◀ بازگشت</span></button>
           <span class="memorial-nav-counter" id="memorial-nav-counter"></span>
-          <button class="memorial-nav-btn prev" id="btn-memorial-prev">◀ PREV</button>
-          <button class="memorial-nav-btn next" id="btn-memorial-next">NEXT ▶</button>
+          <button class="memorial-nav-btn prev" id="btn-memorial-prev"><span class="btn-en">◀ PREV</span><span class="btn-fa">◀ قبلی</span></button>
+          <button class="memorial-nav-btn next" id="btn-memorial-next"><span class="btn-en">NEXT ▶</span><span class="btn-fa">بعدی ▶</span></button>
         </div>
         <div class="memorial-detail-portrait" id="memorial-detail-portrait"></div>
         <div class="memorial-detail-title" id="memorial-detail-title"></div>
@@ -3942,7 +3956,7 @@ body::before {
             </div>
           </div>
         </div>
-        <div class="select-instruction" id="instr-trump">YOUR CARDS</div>
+        <div class="select-instruction" id="instr-trump"><span class="btn-en">YOUR CARDS</span><span class="btn-fa">کارت‌های شما</span></div>
         <div class="roster-panel trump" id="roster-trump"></div>
       </div>
 
@@ -3984,7 +3998,7 @@ body::before {
           
           <!-- UI elements stay fixed (outside drift wrapper) -->
           <!-- Tracking indicator for intel sweep -->
-          <div class="tracking-indicator" id="tracking-indicator">▶ TRACKING</div>
+          <div class="tracking-indicator" id="tracking-indicator"><span class="btn-en">▶ TRACKING</span><span class="btn-fa">▶ ردیابی</span></div>
           
           <!-- Board header with date and story - stays fixed above map -->
           <div class="board-header">
@@ -4015,7 +4029,7 @@ body::before {
 
           <!-- Wildcard -->
           <div class="wildcard" id="wildcard">
-            <div class="wc-title">WILDCARD</div>
+            <div class="wc-title"><span class="btn-en">WILDCARD</span><span class="btn-fa">کارت وحشی</span></div>
             <div class="wc-content">
               <div class="wc-portrait" id="wc-portrait"><img id="wc-portrait-img" src="" alt=""></div>
               <div class="wc-message">
@@ -4077,7 +4091,7 @@ body::before {
             </div>
           </div>
         </div>
-        <div class="select-instruction" id="instr-irgc">YOUR CARDS</div>
+        <div class="select-instruction" id="instr-irgc"><span class="btn-en">YOUR CARDS</span><span class="btn-fa">کارت‌های شما</span></div>
         <div class="roster-panel irgc" id="roster-irgc"></div>
       </div>
     </div>
@@ -4134,6 +4148,7 @@ body::before {
 <script src="data/codex_data.js"></script>
 <script src="data/javid_nam_data.js"></script>
 <script src="data/daily_briefings_data.js"></script>
+<script src="data/ui_strings_data.js"></script>
 
 <script>
 // ════════════════════════════════════════════════════════════════════════════
@@ -4677,108 +4692,7 @@ function t(obj) {
   return obj[currentLang] || obj.en || '';
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// UI STRINGS - All button labels, headers, tooltips
-// ────────────────────────────────────────────────────────────────────────────
-
-const UI = {
-  // Title screen
-  title: { en: 'SEE YOU IN FREE IRAN', fa: 'شیر نهفته' },
-  subtitle: { en: 'Strategy Game of the Iranian Revolution', fa: 'بازی استراتژیک انقلاب ایران' },
-  contentWarning: { en: 'This game depicts the atrocities of war and oppression.', fa: 'این بازی فجایع جنگ و سرکوب را به تصویر می‌کشد.' },
-  notSuitable: { en: 'Not suitable for children.', fa: 'مناسب کودکان نیست.' },
-  begin: { en: '▶ BEGIN', fa: '▶ شروع' },
-  
-  // Story screens
-  skip: { en: '▶ SKIP', fa: '▶ رد کردن' },
-  continue: { en: '▶ CONTINUE', fa: '▶ ادامه' },
-  continueRight: { en: 'CONTINUE ▶', fa: 'ادامه ▶' },
-  tracking: { en: '▶ TRACKING', fa: '▶ ردیابی' },
-  selectYourSide: { en: '▶ SELECT YOUR SIDE', fa: '▶ طرف خود را انتخاب کنید' },
-  
-  // PDB screen
-  classification: { en: 'TOP SECRET // SI // NOFORN', fa: 'فوق سری // اطلاعات حساس' },
-  pdbTitle: { en: "PRESIDENT'S DAILY BRIEF", fa: 'خلاصه روزانه رئیس جمهور' },
-  eyesOnly: { en: 'EYES ONLY', fa: 'فقط برای مشاهده' },
-  
-  // Select screen
-  chooseSide: { en: 'CHOOSE YOUR SIDE', fa: 'طرف خود را انتخاب کنید' },
-  trumpName: { en: 'TRUMP', fa: 'ترامپ' },
-  trumpDesc: { en: 'The madman strategy. Airstrikes, sanctions, and calculated chaos. Break the regime before they recover from the Strike.', fa: 'استراتژی دیوانه‌وار. حملات هوایی، تحریم‌ها و هرج‌ومرج حساب‌شده.' },
-  irgcName: { en: 'IRGC', fa: 'سپاه' },
-  irgcDesc: { en: "Vahidi's command. Propaganda, proxies, and desperate measures. The Supreme Leader is dead — survive at any cost.", fa: 'فرماندهی وحیدی. تبلیغات، نیروهای نیابتی و اقدامات ناامیدانه.' },
-  
-  // Game screen labels
-  yourCards: { en: 'YOUR CARDS', fa: 'کارت‌های شما' },
-  situationUpdate: { en: 'SITUATION UPDATE', fa: 'به‌روزرسانی وضعیت' },
-  vs: { en: 'VS', fa: 'در مقابل' },
-  nextDay: { en: 'NEXT DAY', fa: 'روز بعد' },
-  
-  // Meters - Trump
-  leverage: { en: 'LEVERAGE', fa: 'اهرم فشار' },
-  leverageDesc: { en: "America's strategic position and ability to pressure the regime.", fa: 'موقعیت استراتژیک آمریکا و توانایی فشار بر رژیم.' },
-  leverageUp: { en: '↑ Airstrikes, sanctions, chaos', fa: '↑ حملات هوایی، تحریم، هرج‌ومرج' },
-  leverageDown: { en: '↓ Failed ops, overreach', fa: '↓ عملیات شکست‌خورده' },
-  leverageWin: { en: 'IF ZERO: IRGC wins — leverage lost', fa: 'اگر صفر: سپاه برنده — اهرم از دست رفت' },
-  
-  politicalCap: { en: 'POLITICAL CAP', fa: 'سرمایه سیاسی' },
-  politicalCapFull: { en: 'POLITICAL CAPITAL', fa: 'سرمایه سیاسی' },
-  politicalCapDesc: { en: 'Domestic support and congressional backing for military action.', fa: 'حمایت داخلی و پشتیبانی کنگره برای اقدام نظامی.' },
-  politicalCapUp: { en: '↑ Diplomacy, allied support', fa: '↑ دیپلماسی، حمایت متحدان' },
-  politicalCapDown: { en: '↓ Aggressive actions, casualties', fa: '↓ اقدامات تهاجمی، تلفات' },
-  politicalCapWin: { en: 'IF ZERO: IRGC wins — Congress pulls out', fa: 'اگر صفر: سپاه برنده — کنگره کنار می‌کشد' },
-  
-  allies: { en: 'ALLIES', fa: 'متحدان' },
-  alliesFull: { en: 'ALLIED SUPPORT', fa: 'حمایت متحدان' },
-  alliesDesc: { en: 'Coalition strength — Israel, Gulf states, and NATO backing.', fa: 'قدرت ائتلاف — اسرائیل، کشورهای خلیج و ناتو.' },
-  alliesUp: { en: '↑ Diplomacy, shared ops', fa: '↑ دیپلماسی، عملیات مشترک' },
-  alliesDown: { en: '↓ Unilateral action, PMF', fa: '↓ اقدام یک‌جانبه' },
-  alliesWin: { en: 'IF ZERO: IRGC wins — coalition fractures', fa: 'اگر صفر: سپاه برنده — ائتلاف فرو می‌پاشد' },
-  
-  // Meters - IRGC
-  regimeGrip: { en: 'REGIME GRIP', fa: 'کنترل رژیم' },
-  regimeGripDesc: { en: "The regime's control over the population and security forces.", fa: 'کنترل رژیم بر مردم و نیروهای امنیتی.' },
-  regimeGripUp: { en: '↑ Rallies, militias, crackdowns', fa: '↑ تجمعات، شبه‌نظامیان، سرکوب' },
-  regimeGripDown: { en: '↓ Protests, defections, strikes', fa: '↓ اعتراضات، انشعاب، اعتصاب' },
-  regimeGripWin: { en: 'IF ZERO: TRUMP wins — the lion rises', fa: 'اگر صفر: ترامپ برنده — شیر برمی‌خیزد' },
-  
-  warChest: { en: 'WAR CHEST', fa: 'خزانه جنگی' },
-  warChestDesc: { en: 'Regime finances — oil revenue, frozen assets, smuggling networks.', fa: 'مالیه رژیم — درآمد نفت، دارایی‌های منجمد، شبکه‌های قاچاق.' },
-  warChestUp: { en: '↑ Oil sales, allies', fa: '↑ فروش نفت، متحدان' },
-  warChestDown: { en: '↓ Sanctions, blockade, strikes', fa: '↓ تحریم، محاصره، اعتصاب' },
-  warChestWin: { en: 'IF ZERO: TRUMP wins — economic ruin', fa: 'اگر صفر: ترامپ برنده — ویرانی اقتصادی' },
-  
-  proxies: { en: 'PROXIES', fa: 'نیروهای نیابتی' },
-  proxiesFull: { en: 'PROXY NETWORK', fa: 'شبکه نیابتی' },
-  proxiesDesc: { en: "Iran's regional militias — Hezbollah, Houthis, PMF, Fatemiyoun.", fa: 'شبه‌نظامیان منطقه‌ای — حزب‌الله، حوثی‌ها، حشد، فاطمیون.' },
-  proxiesUp: { en: '↑ Attacks, militia imports', fa: '↑ حملات، واردات شبه‌نظامی' },
-  proxiesDown: { en: '↓ Airstrikes, carrier group', fa: '↓ حملات هوایی، ناوگان' },
-  proxiesWin: { en: 'IF ZERO: TRUMP wins — axis severed', fa: 'اگر صفر: ترامپ برنده — محور قطع شد' },
-  
-  // Ending screen
-  gameOver: { en: 'GAME OVER', fa: 'پایان بازی' },
-  playAgain: { en: '▶ PLAY AGAIN', fa: '▶ بازی مجدد' },
-  trumpWins: { en: 'TRUMP WINS', fa: 'ترامپ برنده شد' },
-  irgcWins: { en: 'IRGC WINS', fa: 'سپاه برنده شد' },
-  stalemateLabel: { en: 'STALEMATE', fa: 'بن‌بست' },
-  
-  // Day label
-  day: { en: 'DAY', fa: 'روز' },
-  
-  // Card roster labels
-  selectCard: { en: 'SELECT A CARD', fa: 'کارت انتخاب کنید' },
-  enemyOptions: { en: 'ENEMY OPTIONS', fa: 'گزینه‌های دشمن' },
-  
-  // Bar abbreviations for tooltips/effects
-  levAbbr: { en: 'LEVR', fa: 'اهرم' },
-  polAbbr: { en: 'POL', fa: 'سیاسی' },
-  allAbbr: { en: 'ALLY', fa: 'متحد' },
-  gripAbbr: { en: 'GRIP', fa: 'کنترل' },
-  chestAbbr: { en: 'CHEST', fa: 'خزانه' },
-  proxyAbbr: { en: 'PROXY', fa: 'نیابت' },
-  resolution: { en: 'RESOLUTION', fa: 'نتیجه' },
-  cooldownDays: { en: 'd', fa: 'ر' },
-};
+// UI object is now loaded from data/ui_strings_data.js
 
 // ────────────────────────────────────────────────────────────────────────────
 // INTRO STORY - Cinematic panels shown at game start
@@ -4823,8 +4737,8 @@ const INTRO_STORY = [
   {
     type: 'story',
     img: 'image/story/06-the-release.png',
-    en: 'We are no longer waiting.',
-    fa: 'دیگر منتظر نیستیم.',
+    en: 'We were no longer waiting to be saved. We were forcing the world to react to us.',
+    fa: 'دیگر منتظر نجات نبودیم. جهان را وادار کردیم به ما واکنش نشان دهد.',
     label: '[ STORY 06 — THE RELEASE — NO LONGER WAITING ]'
   }
 ];
@@ -5382,10 +5296,10 @@ function renderMemorialGrid() {
     if (entry.died) {
       dates.innerHTML = entry.died;
       if (entry.age) {
-        dates.innerHTML += `<span class="age">Age ${entry.age}</span>`;
+        dates.innerHTML += `<span class="age">${t(UI.age)} ${entry.age}</span>`;
       }
     } else {
-      dates.innerHTML = '<span style="color:var(--grn)">IMPRISONED</span>';
+      dates.innerHTML = `<span style="color:var(--grn)">${t(UI.imprisoned)}</span>`;
     }
     
     body.appendChild(titleEn);
@@ -5444,21 +5358,21 @@ function showMemorialDetail(index) {
   const datesEl = document.getElementById('memorial-detail-dates');
   let datesHTML = '';
   if (entry.born) {
-    datesHTML += `<div class="memorial-dates-line"><span class="label">BORN:</span>${entry.born}</div>`;
+    datesHTML += `<div class="memorial-dates-line"><span class="label">${t(UI.born)}</span>${entry.born}</div>`;
   }
   if (entry.died) {
     datesHTML += `<div class="memorial-dates-line"><span class="label">DIED:</span>${entry.died}`;
     if (entry.age) {
-      datesHTML += ` <span class="age">(Age ${entry.age})</span>`;
+      datesHTML += ` <span class="age">(${t(UI.age)} ${entry.age})</span>`;
     }
     datesHTML += '</div>';
   } else if (entry.age === null) {
-    datesHTML += `<div class="memorial-dates-line" style="color:var(--grn)">CURRENTLY IMPRISONED</div>`;
+    datesHTML += `<div class="memorial-dates-line" style="color:var(--grn)">${t(UI.currentlyImprisoned)}</div>`;
   }
   datesEl.innerHTML = datesHTML;
   
   // Populate location and charge
-  document.getElementById('memorial-detail-location').textContent = entry.location ? `Location: ${entry.location}` : '';
+  document.getElementById('memorial-detail-location').textContent = entry.location ? `${t(UI.location)} ${entry.location}` : '';
   document.getElementById('memorial-detail-charge').textContent = entry.charge ? `"${entry.charge}"` : '';
   
   // Populate biography
@@ -5714,10 +5628,10 @@ function getGameDate(dayNumber) {
 function getStoryUpdate(dayNumber) {
   const briefing = DAILY_BRIEFINGS.find(b => b.day === dayNumber);
   if (briefing) {
-    return briefing.brief;
+    return t(briefing.brief);
   }
   // Fallback to last briefing if day exceeds array
-  return DAILY_BRIEFINGS[DAILY_BRIEFINGS.length - 1].brief;
+  return t(DAILY_BRIEFINGS[DAILY_BRIEFINGS.length - 1].brief);
 }
 
 function getDailyBriefing(dayNumber) {
@@ -6719,8 +6633,8 @@ function showStoryPage() {
     }
   } else {
     // Render PDB dossier mode - use t() for bilingual content
-    document.getElementById('story-date').textContent = `DATE: ${t(page.date)}`;
-    document.getElementById('story-headline').textContent = `SUBJECT: ${t(page.headline)}`;
+    document.getElementById('story-date').textContent = `${t(UI.pdbDate)} ${t(page.date)}`;
+    document.getElementById('story-headline').textContent = `${t(UI.pdbSubject)} ${t(page.headline)}`;
     
     // Display text immediately (no typewriter on centered/dossier text)
     const textEl = document.getElementById('story-text');
@@ -6729,7 +6643,7 @@ function showStoryPage() {
     // Update page counter
     const pageNum = storyState.currentPage + 1;
     const totalPages = storyState.pages.length;
-    document.getElementById('pdb-page').textContent = `PAGE ${pageNum} OF ${totalPages}`;
+    document.getElementById('pdb-page').textContent = `${t(UI.pdbPage)} ${pageNum} ${t(UI.pdbOf)} ${totalPages}`;
     
     // Handle quote/intel source
     const quoteContainer = document.getElementById('story-quote');
@@ -6738,7 +6652,7 @@ function showStoryPage() {
       document.getElementById('story-quote-text').textContent = `"${t(page.quote)}"`;
       // Format speaker as intel source
       const speaker = t(page.speaker) ? t(page.speaker).replace('— ', '') : '';
-      document.getElementById('story-speaker').textContent = speaker ? `SOURCE: ${speaker.toUpperCase()}` : '';
+      document.getElementById('story-speaker').textContent = speaker ? `${t(UI.pdbSource)} ${speaker.toUpperCase()}` : '';
     } else {
       quoteContainer.style.display = 'none';
     }
@@ -7444,17 +7358,17 @@ function showConsequences(trumpCard, irgcCard) {
     .map(bar => ({ barId: bar, barName: barNames[bar], val: flagTotals[bar] }));
 
   // Build HTML with data attributes for animation
-  let html = '<div class="column trump"><div class="column-label">TRUMP</div>';
+  let html = `<div class="column trump"><div class="column-label">${t(UI.trumpName)}</div>`;
   trumpEffects.forEach(e => {
     html += `<div class="effect ${e.val > 0 ? 'positive' : 'negative'}" data-bar="${e.barId}" data-delta="${e.val}">${e.barName} ${e.val > 0 ? '+' : ''}${e.val}</div>`;
   });
   if (trumpEffects.length === 0) html += '<div class="effect revealed">—</div>';
   html += '</div>';
   
-  html += '<div class="column irgc"><div class="column-label">IRGC</div>';
+  html += `<div class="column irgc"><div class="column-label">${t(UI.irgcName)}</div>`;
   irgcEffects.forEach(e => {
     if (e.blocked && e.val === 0) {
-      html += `<div class="effect blocked" data-bar="${e.barId}" data-delta="0">${e.barName} BLOCKED</div>`;
+      html += `<div class="effect blocked" data-bar="${e.barId}" data-delta="0">${e.barName} ${t(UI.blocked)}</div>`;
     } else {
       html += `<div class="effect ${e.val > 0 ? 'positive' : 'negative'}" data-bar="${e.barId}" data-delta="${e.val}">${e.barName} ${e.val > 0 ? '+' : ''}${e.val}</div>`;
     }
@@ -7465,19 +7379,19 @@ function showConsequences(trumpCard, irgcCard) {
   // Add ongoing flag effects section if any are active
   if (trumpFlagEffects.length > 0 || irgcFlagEffects.length > 0) {
     html += '<div class="flag-effects-row">';
-    html += '<div class="flag-effects-label">ONGOING</div>';
+    html += `<div class="flag-effects-label">${t(UI.ongoing)}</div>`;
     html += '<div class="flag-effects-cols">';
     
     html += '<div class="column trump">';
     trumpFlagEffects.forEach(e => {
-      html += `<div class="effect flag-effect ${e.val > 0 ? 'positive' : 'negative'}" data-bar="${e.barId}">${e.barName} ${e.val > 0 ? '+' : ''}${e.val}/turn</div>`;
+      html += `<div class="effect flag-effect ${e.val > 0 ? 'positive' : 'negative'}" data-bar="${e.barId}">${e.barName} ${e.val > 0 ? '+' : ''}${e.val}${t(UI.perTurn)}</div>`;
     });
     if (trumpFlagEffects.length === 0) html += '<div class="effect flag-effect revealed">—</div>';
     html += '</div>';
     
     html += '<div class="column irgc">';
     irgcFlagEffects.forEach(e => {
-      html += `<div class="effect flag-effect ${e.val > 0 ? 'positive' : 'negative'}" data-bar="${e.barId}">${e.barName} ${e.val > 0 ? '+' : ''}${e.val}/turn</div>`;
+      html += `<div class="effect flag-effect ${e.val > 0 ? 'positive' : 'negative'}" data-bar="${e.barId}">${e.barName} ${e.val > 0 ? '+' : ''}${e.val}${t(UI.perTurn)}</div>`;
     });
     if (irgcFlagEffects.length === 0) html += '<div class="effect flag-effect revealed">—</div>';
     html += '</div>';
