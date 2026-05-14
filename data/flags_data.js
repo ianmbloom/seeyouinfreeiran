@@ -82,6 +82,6 @@ const FLAG_DATA = {
       { side: 'irgc', text: { en: 'GRIP -4/turn', fa: 'کنترل -۴/نوبت' } }
     ],
     perTurn: { grip: -4 },
-    position: { x: 1694, y: 855 }
+    position: { x: 1725, y: 1073 }
   }
 };

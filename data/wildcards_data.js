@@ -17,7 +17,10 @@ const WILDCARDS = [
           "en": "GRIP -5, LEV +3",
           "fa": "کنترل -۵، اهرم +۳"
       },
-      "effects": { grip: -5, lev: +3 }
+      "effects": {
+          "grip": -5,
+          "lev": 3
+      }
   },
   {
       "portrait": "image/portrait/outsider/bibi.png",
@@ -37,7 +40,10 @@ const WILDCARDS = [
           "en": "CHEST -8, GRIP -4",
           "fa": "خزانه -۸، کنترل -۴"
       },
-      "effects": { chest: -8, grip: -4 }
+      "effects": {
+          "chest": -8,
+          "grip": -4
+      }
   },
   {
       "portrait": "image/portrait/anonymous_characters2/anon_oil_worker.png",
@@ -57,7 +63,10 @@ const WILDCARDS = [
           "en": "CHEST -10, GRIP -3",
           "fa": "خزانه -۱۰، کنترل -۳"
       },
-      "effects": { chest: -10, grip: -3 }
+      "effects": {
+          "chest": -10,
+          "grip": -3
+      }
   },
   {
       "portrait": "image/portrait/anonymous_characters2/anon_young_podcaster.png",
@@ -77,7 +86,9 @@ const WILDCARDS = [
           "en": "GRIP -4",
           "fa": "کنترل -۴"
       },
-      "effects": { grip: -4 }
+      "effects": {
+          "grip": -4
+      }
   },
   {
       "portrait": "image/portrait/anonymous_characters2/anon_former_basij.png",
@@ -97,7 +108,10 @@ const WILDCARDS = [
           "en": "GRIP -5, LEV +3",
           "fa": "کنترل -۵، اهرم +۳"
       },
-      "effects": { grip: -5, lev: +3 }
+      "effects": {
+          "grip": -5,
+          "lev": 3
+      }
   },
   {
       "portrait": "image/portrait/outsider/putin.png",
@@ -117,7 +131,10 @@ const WILDCARDS = [
           "en": "GRIP +4, ALLY -4",
           "fa": "کنترل +۴، متحدان -۴"
       },
-      "effects": { grip: +4, all: -4 }
+      "effects": {
+          "grip": 4,
+          "all": -4
+      }
   },
   {
       "portrait": "image/portrait/outsider/xi.png",
@@ -137,7 +154,10 @@ const WILDCARDS = [
           "en": "CHEST +3, ALLY -2",
           "fa": "خزانه +۳، متحدان -۲"
       },
-      "effects": { chest: +3, all: -2 }
+      "effects": {
+          "chest": 3,
+          "all": -2
+      }
   },
   {
       "portrait": "image/portrait/iranian_people/diaspora.png",
@@ -157,7 +177,9 @@ const WILDCARDS = [
           "en": "GRIP -15",
           "fa": "کنترل -۱۵"
       },
-      "effects": { grip: -15 }
+      "effects": {
+          "grip": -15
+      }
   },
   {
       "portrait": "image/portrait/outsider/rubio.png",
@@ -177,7 +199,10 @@ const WILDCARDS = [
           "en": "POL +5, GRIP -3",
           "fa": "سیاسی +۵"
       },
-      "effects": { pol: +5, grip: -3 }
+      "effects": {
+          "pol": 5,
+          "grip": -3
+      }
   },
   {
       "portrait": "image/portrait/outsider/macron.png",
@@ -197,7 +222,9 @@ const WILDCARDS = [
           "en": "ALLY -3",
           "fa": "متحدان -۳"
       },
-      "effects": { all: -3 }
+      "effects": {
+          "all": -3
+      }
   },
   {
       "portrait": "image/portrait/outsider/starmer.png",
@@ -210,14 +237,17 @@ const WILDCARDS = [
           "fa": "حمایت بریتانیا از فشار حداکثری"
       },
       "quote": {
-          "en": "Britain stands with the Iranian people.",
-          "fa": "بریتانیا در کنار مردم ایران می‌ایستد."
+          "en": "Britain will marshal our capabilities and make the strait accessible and safe... after the fighting has stopped.",
+          "fa": "بریتانیا با توانایی‌های خود را جمع می‌کند و تنگه هرمز در دسترس و امن می‌شود... بعد از خارج شدن جنگ."
       },
       "effect": {
           "en": "ALLY +4, POL +2",
           "fa": "متحدان +۴، سیاسی +۲"
       },
-      "effects": { all: +4, pol: +2 }
+      "effects": {
+          "all": 4,
+          "pol": 2
+      }
   },
   {
       "portrait": "image/portrait/outsider/zelensky.png",
@@ -237,7 +267,10 @@ const WILDCARDS = [
           "en": "ALLY +3, PROXY -2",
           "fa": "متحدان +۳، نیابتی -۲"
       },
-      "effects": { all: +3, proxy: -2 }
+      "effects": {
+          "all": 3,
+          "proxy": -2
+      }
   },
   {
       "portrait": "image/portrait/outsider/opec.png",
@@ -257,6 +290,8 @@ const WILDCARDS = [
           "en": "CHEST -5",
           "fa": "خزانه -۵"
       },
-      "effects": { chest: -5 }
+      "effects": {
+          "chest": -5
+      }
   }
 ];
