@@ -75,7 +75,7 @@ body::before {
 
 /* CRT scan wave with displacement - brightness + warp moving together */
 .crt-scanband {
-  position: fixed;
+  position: absolute;
   left: -50px;
   right: -50px;
   height: 5px;
@@ -121,7 +121,7 @@ body::before {
 
 /* Secondary subtle wave for more authentic CRT feel */
 .crt-wave {
-  position: fixed;
+  position: absolute;
   left: 0;
   right: 0;
   height: 120px;
@@ -154,7 +154,7 @@ body::before {
 
 /* Random noise overlay - slower */
 .noise-overlay {
-  position: fixed; inset: 0; pointer-events: none; z-index: 198;
+  position: absolute; inset: 0; pointer-events: none; z-index: 198;
   opacity: 0.03;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
   animation: noise 1.5s steps(5) infinite;
@@ -177,7 +177,7 @@ body::before {
 
 /* Screen wipe transition */
 .screen-wipe {
-  position: fixed; inset: 0; z-index: 250;
+  position: absolute; inset: 0; z-index: 250;
   background: var(--bg);
   transform: translateY(-100%);
   pointer-events: none;
@@ -246,15 +246,23 @@ body::before {
   border-radius: 0 !important;
 }
 
+/* Responsive scaling wrapper - scales game to fit any viewport */
+.game-scale-wrapper {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: var(--bg);
+}
+
 /* Game container */
 #game {
   width: 1280px; height: 720px;
-  margin: auto; position: absolute;
+  position: absolute;
   top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
   background: var(--bg);
-  overflow: visible;
+  overflow: hidden;
   display: flex; flex-direction: column;
+  transform-origin: center center;
 }
 
 /* ════════════════════════════════════════════════════════════════════════════
@@ -3721,13 +3729,14 @@ body::before {
      - Minimize hardcoded text here (move to CONTENT section)
      ════════════════════════════════════════════════════════════════════════════ -->
 
-<!-- Retro effect overlays -->
-<div class="noise-overlay"></div>
-<div class="crt-scanband"></div>
-<div class="crt-wave"></div>
-<div class="screen-wipe" id="screen-wipe"></div>
-
+<div class="game-scale-wrapper">
 <div id="game">
+  <!-- Retro effect overlays (inside #game so they scale with the game) -->
+  <div class="noise-overlay"></div>
+  <div class="crt-scanband"></div>
+  <div class="crt-wave"></div>
+  <div class="screen-wipe" id="screen-wipe"></div>
+  
   <div class="tracking-wrapper">
   <!-- TITLE SCREEN -->
   <div id="screen-title" class="screen active">
@@ -4094,8 +4103,9 @@ body::before {
   </div><!-- end tracking-wrapper -->
   
 </div>
+</div><!-- end game-scale-wrapper -->
 
-<!-- Global language and audio toggles - OUTSIDE #game so fixed positioning works -->
+<!-- Global language and audio toggles - OUTSIDE wrapper so fixed positioning works -->
 <div class="lang-toggle-global centered" id="lang-toggle">
   <div class="volume-controls">
     <div class="volume-group">
@@ -5070,7 +5080,7 @@ const TRUMP_CARDS = [
 
 const IRGC_CARDS = [
   { id: 'harass', 
-    name: { en: 'HARASS STRAIT', fa: 'آزار تنگه' }, 
+    name: { en: 'HARASS', fa: 'آزار تنگه' }, 
     gate: { bar: 'proxy', min: 10 },
     art: 'image/card/irgc_harass.png',
     artPosition: '70%',
@@ -5082,7 +5092,7 @@ const IRGC_CARDS = [
     voice: { en: "We do not retreat from our waters.", fa: "ما از آب‌های خود عقب‌نشینی نمی‌کنیم." }
   },
   { id: 'attack', 
-    name: { en: 'ATTACK NEIGHBORS', fa: 'حمله به همسایگان' }, 
+    name: { en: 'ATTACK', fa: 'حمله به همسایگان' }, 
     gate: { bar: 'proxy', min: 20 },
     art: 'image/card/irgc_attack_neighbors.png',
     artPosition: '45%',
@@ -5106,7 +5116,7 @@ const IRGC_CARDS = [
     voice: { en: "The traitors paid the price at first light.", fa: "خائنان با اولین نور صبح تاوان دادند." }
   },
   { id: 'capture', 
-    name: { en: 'CAPTURE AIRMEN', fa: 'اسیر کردن خلبان' }, 
+    name: { en: 'CAPTURE', fa: 'اسیر کردن خلبان' }, 
     gate: { bar: 'proxy', min: 25 },
     art: 'image/card/irgc_capture.png',
     artPosition: '55%',
@@ -5130,12 +5140,12 @@ const IRGC_CARDS = [
     voice: { en: "Glorious advance of the Sepah.", fa: "پیشروی پرافتخار سپاه." }
   },
   { id: 'freehijab', 
-    name: { en: 'FREE HIJAB', fa: 'آزادی حجاب' }, 
+    name: { en: 'REVISIONISM', fa: 'آزادی حجاب' }, 
     gate: null,
     art: 'image/card/irgc_freehijab.png',
     artPosition: '25%',
     desc: { 
-      en: 'Relax mandatory hijab enforcement to reduce public anger. A desperate concession from the regime that sparked the Woman Life Freedom movement.',
+      en: 'Pretend mandatory social rules like hijab enforcement were always optional to reduce public anger. A desperate concession from the regime, inadvertently validating decades of resistance.',
       fa: 'کاهش اجبار حجاب برای کم کردن خشم عمومی. امتیاز ناامیدانه رژیم که جنبش زن زندگی آزادی را برانگیخت.'
     },
     effects: { lev: -2, pol: -3, all: -2, grip: +5, chest: -1, proxy: +1 },
@@ -8495,6 +8505,31 @@ document.getElementById('btn-memorial-game').addEventListener('click', () => {
   audioManager.playSFX('memorialNav');
   showMemorial('screen-game');
 });
+
+// ────────────────────────────────────────────────────────────────────────────
+// RESPONSIVE SCALING - Scale game to fit any viewport
+// ────────────────────────────────────────────────────────────────────────────
+
+function resizeGame() {
+  const game = document.getElementById('game');
+  if (!game) return;
+  
+  const baseWidth = 1280;
+  const baseHeight = 720;
+  
+  const scaleX = window.innerWidth / baseWidth;
+  const scaleY = window.innerHeight / baseHeight;
+  const scale = Math.min(scaleX, scaleY);
+  
+  game.style.transform = `translate(-50%, -50%) scale(${scale})`;
+}
+
+window.addEventListener('resize', resizeGame);
+window.addEventListener('orientationchange', () => {
+  setTimeout(resizeGame, 100);
+});
+
+resizeGame();
 </script>
 
 </body>
