@@ -278,6 +278,17 @@ body::before {
 #screen-title {
   align-items: center; justify-content: center; gap: 24px;
 }
+.title-logo {
+  width: 280px;
+  height: auto;
+  margin-bottom: 8px;
+  filter: drop-shadow(0 0 20px rgba(82,255,143,.4)) drop-shadow(0 0 40px rgba(255,210,74,.3));
+  animation: logoPulse 3s ease-in-out infinite;
+}
+@keyframes logoPulse {
+  0%, 100% { filter: drop-shadow(0 0 20px rgba(82,255,143,.4)) drop-shadow(0 0 40px rgba(255,210,74,.3)); }
+  50% { filter: drop-shadow(0 0 30px rgba(82,255,143,.6)) drop-shadow(0 0 50px rgba(255,210,74,.5)); }
+}
 #screen-title h1 {
   font-family: var(--px); font-size: 32px; letter-spacing: .2em;
   color: var(--grn); text-shadow: 0 0 40px rgba(82,255,143,.5);
@@ -285,8 +296,18 @@ body::before {
 #screen-title .subtitle {
   font-family: var(--vt); font-size: 36px; color: var(--gold);
 }
-#screen-title .subtitle-fa {
-  font-family: var(--fa); font-size: 30px; color: var(--gold); direction: rtl;
+#screen-title .subtitle .btn-fa {
+  font-family: var(--fa); font-size: 30px; direction: rtl;
+  display: none;
+}
+#screen-title .subtitle .btn-en {
+  display: inline;
+}
+#game.lang-fa #screen-title .subtitle .btn-fa {
+  display: inline;
+}
+#game.lang-fa #screen-title .subtitle .btn-en {
+  display: none;
 }
 .content-warning {
   font-family: var(--vt);
@@ -353,10 +374,6 @@ body::before {
 }
 #game.lang-fa .btn-title-toggle .btn-en {
   display: none;
-  text-transform: uppercase;
-  letter-spacing: .05em;
-  display: inline-block;
-  animation: warningTextPulse 1.2s ease-in-out infinite;
 }
 @keyframes warningTextPulse {
   0%, 100% { 
@@ -486,8 +503,8 @@ body::before {
   opacity: 0.6;
 }
 
-/* Hide global toggles on title screen (use the prominent ones instead) */
-#screen-title.active ~ .lang-toggle-global .audio-toggles-global {
+/* Hide audio toggles on title screen (use the prominent ones instead) */
+.lang-toggle-global.centered .audio-toggles-global {
   display: none;
 }
 
@@ -545,9 +562,70 @@ body::before {
   background: var(--gold);
 }
 
-/* Hide volume on title screen */
-#screen-title.active ~ .lang-toggle-global .volume-controls {
+/* Hide volume controls on title screen */
+.lang-toggle-global.centered .volume-controls {
   display: none;
+}
+
+/* Hide the entire global toggle bar on title screen */
+.lang-toggle-global.centered {
+  display: none;
+}
+
+/* Contact link - always visible bottom left */
+.contact-box {
+  position: fixed;
+  bottom: 8px;
+  left: 8px;
+  z-index: 150;
+  font-family: var(--vt);
+  font-size: 14px;
+  color: var(--dim);
+  background: rgba(6,8,12,0.9);
+  padding: 4px 10px;
+  border: 1px solid var(--bdr);
+  border-radius: 3px;
+  opacity: 0.6;
+  transition: opacity .2s;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.contact-box:hover {
+  opacity: 1;
+}
+.contact-box .email {
+  color: var(--dim);
+  transition: color .2s;
+}
+.contact-box:hover .email {
+  color: var(--grn);
+}
+.contact-box .copy-icon {
+  font-size: 12px;
+  opacity: 0.6;
+}
+.contact-box.copied .email {
+  color: var(--grn);
+}
+.contact-box.copied::after {
+  content: 'COPIED!';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--grn);
+  color: var(--bg);
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 2px;
+  margin-bottom: 4px;
+  animation: fadeOut 1.5s forwards;
+}
+@keyframes fadeOut {
+  0%, 70% { opacity: 1; }
+  100% { opacity: 0; }
 }
 
 /* ════════════════════════════════════════════════════════════════════════════
@@ -3657,14 +3735,6 @@ body::before {
   unicode-bidi: embed;
 }
 
-/* Hide English subtitle, show Farsi as main */
-#game.lang-fa #title-subtitle {
-  display: none;
-}
-#game.lang-fa #title-subtitle-fa {
-  font-size: 36px;
-}
-
 /* Warning icon position */
 #game.lang-fa .content-warning .warning-icon {
   margin-right: 0;
@@ -3786,25 +3856,28 @@ body::before {
   <div class="tracking-wrapper">
   <!-- TITLE SCREEN -->
   <div id="screen-title" class="screen active">
+    <img src="image/logo/lion_and_sun.png" alt="Lion and Sun" class="title-logo">
     <h1 id="title-main" class="glow-green"></h1>
-    <div id="title-subtitle" class="subtitle glow-gold"></div>
-    <div id="title-subtitle-fa" class="subtitle-fa glow-gold"></div>
+    <div class="subtitle glow-gold">
+      <span class="btn-en" id="title-subtitle"></span>
+      <span class="btn-fa" id="title-subtitle-fa"></span>
+    </div>
     <div class="content-warning">
       <span class="warning-icon">⚠</span>
       <span id="title-warning"></span><br>
       <strong id="title-warning-strong"></strong>
     </div>
+    <button class="btn blink-prompt" id="btn-start"></button>
     <div class="title-toggles">
       <button class="btn-title-toggle" id="btn-music-enable">
         <span class="btn-en">♪ ENABLE MUSIC</span>
         <span class="btn-fa">♪ فعال کردن موسیقی</span>
       </button>
       <button class="btn-title-toggle" id="btn-lang-farsi">
-        <span class="btn-en">فارسی FARSI</span>
-        <span class="btn-fa">ENGLISH انگلیسی</span>
+        <span class="btn-en">به فارسی</span>
+        <span class="btn-fa">SPEAK ENGLISH</span>
       </button>
     </div>
-    <button class="btn blink-prompt" id="btn-start"></button>
   </div>
 
   <!-- STORY SCREEN (Intro and Interludes) - Dual Mode -->
@@ -4169,6 +4242,12 @@ body::before {
   </div>
   <button class="lang-btn active" data-lang="en">EN</button>
   <button class="lang-btn" data-lang="fa">فا</button>
+</div>
+
+<!-- Contact box - click to copy email -->
+<div class="contact-box" id="contact-box" onclick="copyEmail()">
+  <span class="copy-icon">✉</span>
+  <span class="email">seeyouinfreeiran@gmail.com</span>
 </div>
 
 <!-- External data files (editable via map-editor.html and content-editor.html) -->
@@ -8451,6 +8530,30 @@ document.getElementById('btn-memorial-game').addEventListener('click', () => {
   audioManager.playSFX('memorialNav');
   showMemorial('screen-game');
 });
+
+// ────────────────────────────────────────────────────────────────────────────
+// COPY EMAIL TO CLIPBOARD
+// ────────────────────────────────────────────────────────────────────────────
+
+function copyEmail() {
+  const email = 'seeyouinfreeiran@gmail.com';
+  const box = document.getElementById('contact-box');
+  
+  navigator.clipboard.writeText(email).then(() => {
+    box.classList.add('copied');
+    setTimeout(() => box.classList.remove('copied'), 1500);
+  }).catch(() => {
+    // Fallback for older browsers
+    const textarea = document.createElement('textarea');
+    textarea.value = email;
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textarea);
+    box.classList.add('copied');
+    setTimeout(() => box.classList.remove('copied'), 1500);
+  });
+}
 
 // ────────────────────────────────────────────────────────────────────────────
 // RESPONSIVE SCALING - Scale game to fit any viewport

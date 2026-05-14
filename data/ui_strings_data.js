@@ -7,7 +7,7 @@ const UI = {
   // Title screen
   title: { en: 'SEE YOU IN FREE IRAN', fa: 'شیر نهفته' },
   subtitle: { en: 'Strategy Game of the Iranian Revolution', fa: 'بازی استراتژیک انقلاب ایران' },
-  contentWarning: { en: 'This game depicts the atrocities of war and oppression.', fa: 'این بازی فجایع جنگ و سرکوب را به تصویر می‌کشد.' },
+  contentWarning: { en: 'This game depicts atrocities and oppression.', fa: 'این بازی فجایع جنگ و سرکوب را به تصویر می‌کشد.' },
   notSuitable: { en: 'Not suitable for children.', fa: 'مناسب کودکان نیست.' },
   begin: { en: '▶ BEGIN', fa: '▶ شروع' },
   
