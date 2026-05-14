@@ -1,0 +1,4 @@
+# Pretty URLs - serve HTML files without extension
+/game   /game.html   200
+/content-editor   /content-editor.html   200
+/map-editor   /map-editor.html   200
